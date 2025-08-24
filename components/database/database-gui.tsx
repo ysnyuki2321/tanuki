@@ -6,9 +6,11 @@ import { DatabaseConnections } from "./database-connections"
 import { TableBrowser } from "./table-browser"
 import { QueryEditor } from "./query-editor"
 import { TableDataViewer } from "./table-data-viewer"
+import { VisualQueryBuilder } from "./visual-query-builder"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { Database, Table, Code, Settings } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Database, Table, Code, Settings, Zap, LineChart } from "lucide-react"
 
 export function DatabaseGUI() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -89,17 +91,24 @@ export function DatabaseGUI() {
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <Database className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold">Database GUI</h2>
+        <h2 className="text-2xl font-bold">Advanced Database GUI</h2>
+        <Badge variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
+          <LineChart className="h-3 w-3 mr-1" />
+          Visual Query Builder
+        </Badge>
         {activeConnection && (
           <div className="ml-auto flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full" />
             <span className="text-sm text-muted-foreground">Connected to {activeConnection.name}</span>
+            <Badge variant="secondary" className="text-xs">
+              {activeConnection.type.toUpperCase()}
+            </Badge>
           </div>
         )}
       </div>
 
       <Tabs defaultValue="browser" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="connections" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             Connections
@@ -108,9 +117,16 @@ export function DatabaseGUI() {
             <Table className="w-4 h-4" />
             Tables
           </TabsTrigger>
+          <TabsTrigger value="visual-query" className="flex items-center gap-2">
+            <Zap className="w-4 h-4" />
+            Visual Query
+            <Badge variant="outline" className="ml-1 text-xs bg-green-100 text-green-700 border-green-300">
+              New
+            </Badge>
+          </TabsTrigger>
           <TabsTrigger value="query" className="flex items-center gap-2">
             <Code className="w-4 h-4" />
-            Query
+            SQL Editor
           </TabsTrigger>
           <TabsTrigger value="data" className="flex items-center gap-2" disabled={!selectedTable}>
             <Database className="w-4 h-4" />
@@ -129,6 +145,10 @@ export function DatabaseGUI() {
             onTableSelect={handleTableSelect}
             isConnected={!!activeConnection}
           />
+        </TabsContent>
+
+        <TabsContent value="visual-query">
+          <VisualQueryBuilder isConnected={!!activeConnection} />
         </TabsContent>
 
         <TabsContent value="query">
