@@ -24,7 +24,8 @@ interface FileListProps {
   onFileDelete: (fileId: string) => void
   onFileRename: (fileId: string, newName: string) => void
   onFileShare: (fileId: string) => void
-  onFileEdit?: (file: FileItem) => void // Added onFileEdit prop
+  onFileEdit?: (file: FileItem) => void
+  onZipPreview?: (file: FileItem) => void
 }
 
 export function FileList({
@@ -35,12 +36,13 @@ export function FileList({
   onFileDelete,
   onFileRename,
   onFileShare,
-  onFileEdit, // Added onFileEdit prop
+  onFileEdit,
+  onZipPreview,
 }: FileListProps) {
   const [editingFile, setEditingFile] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
 
-  const fileService = FileSystemService.getInstance()
+
 
   const handleRename = (file: FileItem) => {
     setEditingFile(file.id)
@@ -113,7 +115,7 @@ export function FileList({
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <Checkbox
                     checked={selectedFiles.includes(file.id)}
-                    onChange={(checked) => onFileSelect(file.id, checked)}
+                    onCheckedChange={(checked) => onFileSelect(file.id, checked as boolean)}
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="flex-1 min-w-0">
@@ -201,7 +203,7 @@ export function FileList({
                 <TableCell>
                   <Checkbox
                     checked={selectedFiles.includes(file.id)}
-                    onChange={(checked) => onFileSelect(file.id, checked)}
+                    onCheckedChange={(checked) => onFileSelect(file.id, checked as boolean)}
                     onClick={(e) => e.stopPropagation()}
                   />
                 </TableCell>
