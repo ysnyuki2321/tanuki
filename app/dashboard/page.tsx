@@ -136,7 +136,9 @@ export default function DashboardPage() {
           <Tabs defaultValue="files" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-3">
               <TabsTrigger value="files">File Manager</TabsTrigger>
-              <TabsTrigger value="storage">Storage Expansion</TabsTrigger>
+              {user?.role === "admin" && (
+                <TabsTrigger value="storage">Storage Expansion</TabsTrigger>
+              )}
               <TabsTrigger value="overview" className="hidden lg:block">Overview</TabsTrigger>
             </TabsList>
 
@@ -148,9 +150,11 @@ export default function DashboardPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="storage" className="space-y-6">
-              <SSHStorageExpansion />
-            </TabsContent>
+            {user?.role === "admin" ? (
+              <TabsContent value="storage" className="space-y-6">
+                <SSHStorageExpansion />
+              </TabsContent>
+            ) : null}
 
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

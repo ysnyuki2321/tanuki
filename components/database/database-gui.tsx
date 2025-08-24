@@ -8,7 +8,9 @@ import { QueryEditor } from "./query-editor"
 import { TableDataViewer } from "./table-data-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { Database, Table, Code, Settings } from "lucide-react"
+import { Database, Table, Code, Settings, DatabaseZap, Upload, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
 
 export function DatabaseGUI() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -74,6 +76,14 @@ export function DatabaseGUI() {
     setSelectedTable(tableName)
   }
 
+  const handleSQLiteQuickAction = async (action: "new" | "open" | "import") => {
+    if (!activeConnection) {
+      toast({ title: "Chưa có kết nối", description: "Hãy kết nối tới SQLite trước.", variant: "destructive" as any })
+      return
+    }
+    toast({ title: "SQLite", description: `Thao tác: ${action} (demo)` })
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -132,6 +142,23 @@ export function DatabaseGUI() {
         </TabsContent>
 
         <TabsContent value="browser">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <DatabaseZap className="w-4 h-4" />
+              SQLite Quick Actions
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => handleSQLiteQuickAction("new")}>
+                <Plus className="w-4 h-4 mr-1" /> New DB
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleSQLiteQuickAction("open")}>
+                <Database className="w-4 h-4 mr-1" /> Open DB
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleSQLiteQuickAction("import")}>
+                <Upload className="w-4 h-4 mr-1" /> Import .sql
+              </Button>
+            </div>
+          </div>
           <TableBrowser
             tables={tables}
             selectedTable={selectedTable}

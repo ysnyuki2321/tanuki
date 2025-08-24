@@ -10,6 +10,7 @@ import { Breadcrumb } from "./breadcrumb"
 import { CodeEditorModal } from "@/components/code-editor/code-editor-modal"
 import { ZipPreviewModal } from "@/components/zip-preview/zip-preview-modal"
 import { Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
 
 export function FileManager() {
@@ -23,6 +24,8 @@ export function FileManager() {
   const [editorFiles, setEditorFiles] = useState<FileItem[]>([])
   const [isZipPreviewOpen, setIsZipPreviewOpen] = useState(false)
   const [zipPreviewFile, setZipPreviewFile] = useState<FileItem | null>(null)
+  const [isMediaPreviewOpen, setIsMediaPreviewOpen] = useState(false)
+  const [mediaPreview, setMediaPreview] = useState<{ type: "video" | "audio" | "image"; src: string; name: string } | null>(null)
 
   const loadFiles = async (parentId?: string) => {
     setIsLoading(true)
@@ -53,7 +56,17 @@ export function FileManager() {
       setCurrentParentId(file.id)
       setSelectedFiles([])
     } else {
-      console.log("Opening file:", file.name)
+      const ext = file.name.split(".").pop()?.toLowerCase()
+      if (ext && ["mp4", "webm", "ogg"].includes(ext)) {
+        setMediaPreview({ type: "video", src: "/demo/video", name: file.name })
+        setIsMediaPreviewOpen(true)
+      } else if (ext && ["mp3", "wav", "ogg"].includes(ext)) {
+        setMediaPreview({ type: "audio", src: "/demo/audio", name: file.name })
+        setIsMediaPreviewOpen(true)
+      } else if (ext && ["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) {
+        setMediaPreview({ type: "image", src: "/placeholder.jpg", name: file.name })
+        setIsMediaPreviewOpen(true)
+      }
     }
   }
 
@@ -181,6 +194,29 @@ export function FileManager() {
       {zipPreviewFile && (
         <ZipPreviewModal isOpen={isZipPreviewOpen} onClose={() => setIsZipPreviewOpen(false)} file={zipPreviewFile} />
       )}
+
+      <Dialog open={isMediaPreviewOpen} onOpenChange={setIsMediaPreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="truncate">{mediaPreview?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {mediaPreview?.type === "video" && (
+              <div className="aspect-video bg-black/80 rounded-lg flex items-center justify-center text-white text-sm">
+                Demo Video Player (add your file to /public/demo/video to play)
+              </div>
+            )}
+            {mediaPreview?.type === "audio" && (
+              <div className="p-6 border rounded-lg">
+                Demo Music Player (add your file to /public/demo/audio to play)
+              </div>
+            )}
+            {mediaPreview?.type === "image" && (
+              <img src={mediaPreview.src} alt={mediaPreview.name} className="w-full h-auto rounded-lg" />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
