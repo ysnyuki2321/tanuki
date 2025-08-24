@@ -81,16 +81,22 @@ export function FileUploadZone({ onFilesUploaded }: FileUploadZoneProps) {
               <p className="text-base sm:text-lg font-medium">Drop files here to upload</p>
               <p className="text-xs sm:text-sm text-muted-foreground">or click to browse</p>
             </div>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileSelect}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              <Upload className="w-4 h-4 mr-2" />
-              Choose Files
-            </Button>
+            <div className="flex justify-center">
+              <label className="inline-flex items-center">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="sr-only"
+                />
+                <Button variant="outline" size="sm" asChild>
+                  <span>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose Files
+                  </span>
+                </Button>
+              </label>
+            </div>
           </div>
         )}
       </CardContent>
