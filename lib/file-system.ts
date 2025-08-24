@@ -159,8 +159,13 @@ export class FileSystemService {
     await new Promise((resolve) => setTimeout(resolve, 300))
 
     if (!parentId) {
-      // Return root level items
       return this.files.filter((file) => !file.parentId)
+    }
+
+    // Support resolving by folder id or absolute path
+    const isPath = parentId.startsWith("/")
+    if (isPath) {
+      return this.files.filter((file) => file.path.startsWith(parentId) && file.path.split("/").filter(Boolean).length === parentId.split("/").filter(Boolean).length + 1)
     }
 
     return this.files.filter((file) => file.parentId === parentId)
@@ -168,7 +173,10 @@ export class FileSystemService {
 
   static async getFile(id: string): Promise<FileItem | null> {
     await new Promise((resolve) => setTimeout(resolve, 100))
-    return this.files.find((file) => file.id === id) || null
+    // Accept id or path
+    const byId = this.files.find((file) => file.id === id)
+    if (byId) return byId || null
+    return this.files.find((file) => file.path === id) || null
   }
 
   static async uploadFile(file: File, parentId?: string): Promise<FileItem> {

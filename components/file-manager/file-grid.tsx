@@ -128,27 +128,29 @@ export function FileGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4">
       {files.map((file) => (
         <Card
           key={file.id}
-          className={`p-2 sm:p-4 cursor-pointer transition-all hover:shadow-md group ${
+          className={`relative p-3 sm:p-4 cursor-pointer transition-all hover:shadow-md group ${
             selectedFiles.includes(file.id) ? "ring-2 ring-primary" : ""
           }`}
-          onClick={() => onFileSelect(file.id, !selectedFiles.includes(file.id))}
+          onClick={() => {
+            onFileOpen(file)
+          }}
         >
           <div className="flex flex-col items-center space-y-2">
-            <div className="relative">
+            <div className="relative h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center">
               {getFileIcon(file)}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-3 -right-3 sm:top-0 sm:right-0 h-8 w-8 p-0 bg-background/90 backdrop-blur rounded-full shadow-sm opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MoreVertical className="h-3 w-3" />
+                    <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">

@@ -10,10 +10,13 @@ import { Breadcrumb } from "./breadcrumb"
 import { CodeEditorModal } from "@/components/code-editor/code-editor-modal"
 import { ZipPreviewModal } from "@/components/zip-preview/zip-preview-modal"
 import { Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { toast } from "@/components/ui/use-toast"
 
 export function FileManager() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [currentParentId, setCurrentParentId] = useState<string | undefined>(undefined)
+  const [currentPath, setCurrentPath] = useState<string>("/")
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(true)
@@ -22,11 +25,13 @@ export function FileManager() {
   const [editorFiles, setEditorFiles] = useState<FileItem[]>([])
   const [isZipPreviewOpen, setIsZipPreviewOpen] = useState(false)
   const [zipPreviewFile, setZipPreviewFile] = useState<FileItem | null>(null)
+  const [isMediaPreviewOpen, setIsMediaPreviewOpen] = useState(false)
+  const [mediaPreview, setMediaPreview] = useState<{ type: "video" | "audio" | "image"; src: string; name: string } | null>(null)
 
   const loadFiles = async (parentId?: string) => {
     setIsLoading(true)
     try {
-      const fileList = await FileSystemService.getFiles(parentId)
+      const fileList = await FileSystemService.getFiles(parentId ?? currentPath)
       setFiles(fileList)
     } catch (error) {
       console.error("Failed to load files:", error)
@@ -37,7 +42,7 @@ export function FileManager() {
 
   useEffect(() => {
     loadFiles(currentParentId)
-  }, [currentParentId])
+  }, [currentParentId, currentPath])
 
   const handleFileSelect = (fileId: string, isSelected: boolean) => {
     if (isSelected) {
@@ -50,15 +55,38 @@ export function FileManager() {
   const handleFileOpen = (file: FileItem) => {
     if (file.type === "folder") {
       setCurrentParentId(file.id)
+      setCurrentPath(file.path)
       setSelectedFiles([])
     } else {
-      console.log("Opening file:", file.name)
+      const ext = file.name.split(".").pop()?.toLowerCase()
+      const isCode = (e?: string) => !!e && [
+        "js","jsx","ts","tsx","py","java","cpp","c","cs","php","rb","go","rs","html","css","scss","json","xml","yaml","yml","md","sql","sh","txt"
+      ].includes(e)
+
+      if (ext && ["mp4", "webm", "ogg"].includes(ext)) {
+        setMediaPreview({ type: "video", src: "/demo/video", name: file.name })
+        setIsMediaPreviewOpen(true)
+      } else if (ext && ["mp3", "wav", "ogg"].includes(ext)) {
+        setMediaPreview({ type: "audio", src: "/demo/audio", name: file.name })
+        setIsMediaPreviewOpen(true)
+      } else if (ext && ["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) {
+        setMediaPreview({ type: "image", src: "/placeholder.jpg", name: file.name })
+        setIsMediaPreviewOpen(true)
+      } else if (ext === "zip" || ext === "rar" || ext === "7z") {
+        handleZipPreview(file)
+      } else if (isCode(ext)) {
+        handleFileEdit(file)
+      } else {
+        // Mặc định mở trong editor dạng text
+        handleFileEdit(file)
+      }
     }
   }
 
   const handleFileEdit = (file: FileItem) => {
-    setEditorFiles([file])
-    setIsEditorOpen(true)
+    // Direct to full editor page for better experience
+    const url = `/editor?file=${encodeURIComponent(file.id)}`
+    window.location.href = url
   }
 
   const handleZipPreview = (file: FileItem) => {
@@ -102,18 +130,14 @@ export function FileManager() {
       const shareUrl = `${window.location.origin}/share/${shareId}`
       navigator.clipboard.writeText(shareUrl)
       // Show success message
-      console.log(`[v0] File shared! URL copied to clipboard: ${shareUrl}`)
+      toast({ title: "Link copied", description: "Share URL has been copied to clipboard." })
       loadFiles(currentParentId)
     } catch (error) {
-      console.error("Failed to share file:", error)
+      toast({ title: "Failed to share file", description: String(error), variant: "destructive" as any })
     }
   }
 
-  const getCurrentPath = () => {
-    if (!currentParentId) return "/"
-    const currentFolder = files.find((f) => f.id === currentParentId)
-    return currentFolder?.path || "/"
-  }
+  const getCurrentPath = () => currentPath
 
   const filteredFiles = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
@@ -132,6 +156,10 @@ export function FileManager() {
         onPathChange={(path) => {
           if (path === "/") {
             setCurrentParentId(undefined)
+            setCurrentPath("/")
+          } else {
+            setCurrentParentId(undefined)
+            setCurrentPath(path)
           }
         }}
       />
@@ -180,6 +208,29 @@ export function FileManager() {
       {zipPreviewFile && (
         <ZipPreviewModal isOpen={isZipPreviewOpen} onClose={() => setIsZipPreviewOpen(false)} file={zipPreviewFile} />
       )}
+
+      <Dialog open={isMediaPreviewOpen} onOpenChange={setIsMediaPreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="truncate">{mediaPreview?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {mediaPreview?.type === "video" && (
+              <div className="aspect-video bg-black/80 rounded-lg flex items-center justify-center text-white text-sm">
+                Demo Video Player (add your file to /public/demo/video to play)
+              </div>
+            )}
+            {mediaPreview?.type === "audio" && (
+              <div className="p-6 border rounded-lg">
+                Demo Music Player (add your file to /public/demo/audio to play)
+              </div>
+            )}
+            {mediaPreview?.type === "image" && (
+              <img src={mediaPreview.src} alt={mediaPreview.name} className="w-full h-auto rounded-lg" />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

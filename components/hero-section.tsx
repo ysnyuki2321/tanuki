@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { TanukiLogo } from "./tanuki-logo"
 import { ArrowRight, Code, Database, Share, Zap } from "lucide-react"
+import Link from "next/link"
 
 export function HeroSection() {
   return (
@@ -50,12 +51,14 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Button size="lg" className="gradient-primary text-white hover:opacity-90 transition-opacity w-full sm:w-auto">
-              Try Demo
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button asChild size="lg" className="gradient-primary text-white hover:opacity-90 transition-opacity w-full sm:w-auto">
+              <Link href="#demo">
+                Try Demo
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-2 bg-transparent w-full sm:w-auto">
-              Learn More
+            <Button asChild size="lg" variant="outline" className="border-2 bg-transparent w-full sm:w-auto">
+              <Link href="#features">Learn More</Link>
             </Button>
           </div>
         </div>

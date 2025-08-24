@@ -130,27 +130,32 @@ export default function DashboardPage() {
         <main className="container mx-auto px-4 py-6 sm:py-8">
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your files, expand storage, and organize your digital workspace</p>
+            <p className="text-muted-foreground">Storage, code, database, and organization for developers and teams</p>
           </div>
 
           <Tabs defaultValue="files" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-3">
-              <TabsTrigger value="files">File Manager</TabsTrigger>
-              <TabsTrigger value="storage">Storage Expansion</TabsTrigger>
-              <TabsTrigger value="overview" className="hidden lg:block">Overview</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-4">
+              <TabsTrigger value="files">Files</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              {user?.role === "admin" && (
+                <TabsTrigger value="storage">Storage (Admin)</TabsTrigger>
+              )}
+              <TabsTrigger value="quota">Quota</TabsTrigger>
             </TabsList>
 
             <TabsContent value="files" className="space-y-6">
               <div>
                 <h2 className="text-xl font-semibold mb-4">File Manager</h2>
-                <p className="text-muted-foreground mb-6">Manage your files, edit code, and organize your digital workspace</p>
+                <p className="text-muted-foreground mb-6">Manage files, open code editor, preview media, and share</p>
                 <FileManager />
               </div>
             </TabsContent>
 
-            <TabsContent value="storage" className="space-y-6">
-              <SSHStorageExpansion />
-            </TabsContent>
+            {user?.role === "admin" ? (
+              <TabsContent value="storage" className="space-y-6">
+                <SSHStorageExpansion />
+              </TabsContent>
+            ) : null}
 
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -165,6 +170,17 @@ export default function DashboardPage() {
                 <div className="p-6 border rounded-lg">
                   <h3 className="font-semibold mb-2">System Health</h3>
                   <p className="text-muted-foreground">Monitor your storage nodes status</p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="quota" className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-6 border rounded-lg">
+                  <h3 className="font-semibold mb-2">Your Storage</h3>
+                  <p className="text-muted-foreground">Assigned: 2 GB per user by default</p>
+                  <p className="text-muted-foreground">Usage: shows actual usage when connected</p>
+                  <p className="text-muted-foreground">If no nodes available, disk is null</p>
                 </div>
               </div>
             </TabsContent>

@@ -1,4 +1,4 @@
-// Mock authentication service - replace with real implementation later
+// Auth service - will be replaced with Supabase in production
 export interface User {
   id: string
   email: string
@@ -43,28 +43,23 @@ export class AuthService {
   }
 
   async signIn(email: string, password: string): Promise<{ user: User | null; error: string | null }> {
-    // Mock authentication - replace with real API call
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
-
-    const user = mockUsers.find((u) => u.email === email)
-
-    if (!user || password !== "demo123") {
-      return { user: null, error: "Invalid email or password" }
+    // Production: integrate Supabase email/password sign-in here.
+    // Temporary: allow configured admin user login for bootstrap
+    if (email === "admin@tanuki.dev" && password === "Yuki@2321") {
+      const adminUser: User = { id: "1", email, name: "Admin User", role: "admin", avatar: "/admin-avatar.png" }
+      this.currentUser = adminUser
+      if (typeof window !== "undefined") {
+        localStorage.setItem("tanuki_user", JSON.stringify(adminUser))
+      }
+      return { user: adminUser, error: null }
     }
 
-    this.currentUser = user
-    localStorage.setItem("tanuki_user", JSON.stringify(user))
-    return { user, error: null }
+    return { user: null, error: "Invalid email or password" }
   }
 
   async signUp(email: string, password: string, name: string): Promise<{ user: User | null; error: string | null }> {
-    // Mock registration - replace with real API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    if (mockUsers.find((u) => u.email === email)) {
-      return { user: null, error: "Email already exists" }
-    }
-
+    // Production: Supabase sign-up with optional email confirmation (admin toggled)
+    // Bootstrap: create local user session immediately
     const newUser: User = {
       id: Date.now().toString(),
       email,
@@ -72,10 +67,10 @@ export class AuthService {
       role: "user",
       avatar: "/abstract-user-avatar.png",
     }
-
-    mockUsers.push(newUser)
     this.currentUser = newUser
-    localStorage.setItem("tanuki_user", JSON.stringify(newUser))
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tanuki_user", JSON.stringify(newUser))
+    }
     return { user: newUser, error: null }
   }
 
