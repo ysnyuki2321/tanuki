@@ -15,99 +15,99 @@ export function ZipArchiveInfo({ archive }: ZipArchiveInfoProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <File className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Files</CardTitle>
+              <File className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <CardTitle className="text-sm sm:text-base">Files</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{archive.fileCount}</div>
-            <p className="text-sm text-muted-foreground">Total files</p>
+            <div className="text-xl sm:text-2xl font-bold">{archive.fileCount}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Total files</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Folder className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Folders</CardTitle>
+              <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <CardTitle className="text-sm sm:text-base">Folders</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{directoryCount}</div>
-            <p className="text-sm text-muted-foreground">Total folders</p>
+            <div className="text-xl sm:text-2xl font-bold">{directoryCount}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Total folders</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Archive className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Original Size</CardTitle>
+              <Archive className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <CardTitle className="text-sm sm:text-base">Original Size</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{(archive.totalSize / 1024 / 1024).toFixed(1)}MB</div>
-            <p className="text-sm text-muted-foreground">Uncompressed</p>
+            <div className="text-xl sm:text-2xl font-bold">{(archive.totalSize / 1024 / 1024).toFixed(1)}MB</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Uncompressed</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Gauge className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Compression</CardTitle>
+              <Gauge className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <CardTitle className="text-sm sm:text-base">Compression</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{compressionRatio.toFixed(1)}%</div>
-            <p className="text-sm text-muted-foreground">Space saved</p>
+            <div className="text-xl sm:text-2xl font-bold">{compressionRatio.toFixed(1)}%</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Space saved</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Archive Details</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Archive Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Archive Name:</span>
-                <span className="text-sm font-medium">{archive.name}</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Archive Name:</span>
+                <span className="text-xs sm:text-sm font-medium truncate ml-2">{archive.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Total Entries:</span>
-                <span className="text-sm font-medium">{archive.entries.length}</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Total Entries:</span>
+                <span className="text-xs sm:text-sm font-medium">{archive.entries.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Compressed Size:</span>
-                <span className="text-sm font-medium">{(archive.compressedSize / 1024 / 1024).toFixed(2)} MB</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Compressed Size:</span>
+                <span className="text-xs sm:text-sm font-medium">{(archive.compressedSize / 1024 / 1024).toFixed(2)} MB</span>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Uncompressed Size:</span>
-                <span className="text-sm font-medium">{(archive.totalSize / 1024 / 1024).toFixed(2)} MB</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Uncompressed Size:</span>
+                <span className="text-xs sm:text-sm font-medium">{(archive.totalSize / 1024 / 1024).toFixed(2)} MB</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Compression Ratio:</span>
-                <Badge variant="secondary">{compressionRatio.toFixed(1)}%</Badge>
+                <span className="text-xs sm:text-sm text-muted-foreground">Compression Ratio:</span>
+                <Badge variant="secondary" className="text-xs">{compressionRatio.toFixed(1)}%</Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Format:</span>
-                <Badge variant="outline">ZIP</Badge>
+                <span className="text-xs sm:text-sm text-muted-foreground">Format:</span>
+                <Badge variant="outline" className="text-xs">ZIP</Badge>
               </div>
             </div>
           </div>
 
           <div className="pt-4 border-t">
-            <h4 className="text-sm font-medium mb-2">File Types</h4>
+            <h4 className="text-xs sm:text-sm font-medium mb-2">File Types</h4>
             <div className="flex flex-wrap gap-2">
               {Array.from(
                 new Set(

@@ -117,28 +117,28 @@ export function CodeEditor({ initialFiles = [], onClose, isFullscreen = false, o
     <div className={`${isFullscreen ? "fixed inset-0 z-50 bg-background" : ""}`}>
       <Card className={`${isFullscreen ? "h-full rounded-none border-0" : "h-[600px]"}`}>
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold">Code Editor</h3>
+              <h3 className="font-semibold text-base sm:text-lg">Code Editor</h3>
               {activeFile && (
-                <Badge variant="outline" className="flex items-center gap-1">
+                <Badge variant="outline" className="flex items-center gap-1 text-xs">
                   <span>{editorService.getLanguageIcon(activeFile.language)}</span>
-                  {activeFile.language}
+                  <span className="hidden sm:inline">{activeFile.language}</span>
                 </Badge>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              <Button variant="ghost" size="sm" onClick={() => setTheme(theme === "light" ? "dark" : "light")} className="h-8 w-8 p-0">
                 {theme === "light" ? "🌙" : "☀️"}
               </Button>
 
               {activeFile && (
                 <>
-                  <Button variant="ghost" size="sm" onClick={handleFormatCode}>
+                  <Button variant="ghost" size="sm" onClick={handleFormatCode} className="h-8 w-8 p-0" title="Format Code">
                     <RotateCcw className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleDownloadFile}>
+                  <Button variant="ghost" size="sm" onClick={handleDownloadFile} className="h-8 w-8 p-0" title="Download">
                     <Download className="w-4 h-4" />
                   </Button>
                   <Button
@@ -146,6 +146,8 @@ export function CodeEditor({ initialFiles = [], onClose, isFullscreen = false, o
                     size="sm"
                     onClick={() => handleSaveFile(activeFile.id)}
                     disabled={!activeFile.isDirty}
+                    className="h-8 w-8 p-0"
+                    title="Save"
                   >
                     <Save className="w-4 h-4" />
                   </Button>
@@ -153,13 +155,13 @@ export function CodeEditor({ initialFiles = [], onClose, isFullscreen = false, o
               )}
 
               {onToggleFullscreen && (
-                <Button variant="ghost" size="sm" onClick={onToggleFullscreen}>
+                <Button variant="ghost" size="sm" onClick={onToggleFullscreen} className="h-8 w-8 p-0" title="Toggle Fullscreen">
                   {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </Button>
               )}
 
               {onClose && (
-                <Button variant="ghost" size="sm" onClick={onClose}>
+                <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0" title="Close">
                   <X className="w-4 h-4" />
                 </Button>
               )}
@@ -169,18 +171,18 @@ export function CodeEditor({ initialFiles = [], onClose, isFullscreen = false, o
 
         <CardContent className="p-0 flex-1">
           <Tabs value={activeFileId || ""} onValueChange={setActiveFileId} className="h-full flex flex-col">
-            <TabsList className="w-full justify-start rounded-none border-b bg-muted/30">
+            <TabsList className="w-full justify-start rounded-none border-b bg-muted/30 overflow-x-auto">
               {openFiles.map((file) => (
-                <TabsTrigger key={file.id} value={file.id} className="relative group data-[state=active]:bg-background">
-                  <span className="flex items-center gap-2">
-                    <span>{editorService.getLanguageIcon(file.language)}</span>
-                    {file.name}
-                    {file.isDirty && <span className="w-2 h-2 bg-primary rounded-full" />}
+                <TabsTrigger key={file.id} value={file.id} className="relative group data-[state=active]:bg-background flex-shrink-0">
+                  <span className="flex items-center gap-1 sm:gap-2">
+                    <span className="text-sm sm:text-base">{editorService.getLanguageIcon(file.language)}</span>
+                    <span className="truncate max-w-20 sm:max-w-32">{file.name}</span>
+                    {file.isDirty && <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-2 h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
+                    className="ml-1 sm:ml-2 h-4 w-4 p-0 opacity-0 group-hover:opacity-100 flex-shrink-0"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleCloseFile(file.id)

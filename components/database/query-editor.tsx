@@ -81,27 +81,31 @@ export function QueryEditor({ isConnected }: QueryEditorProps) {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">SQL Query Editor</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleFormatQuery}>
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Format
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <CardTitle className="text-base sm:text-lg">SQL Query Editor</CardTitle>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={handleFormatQuery} className="text-xs">
+                <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Format</span>
+                <span className="sm:hidden">Format</span>
               </Button>
-              <Button variant="outline" size="sm">
-                <Save className="w-4 h-4 mr-2" />
-                Save
+              <Button variant="outline" size="sm" className="text-xs">
+                <Save className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Save</span>
+                <span className="sm:hidden">Save</span>
               </Button>
-              <Button onClick={handleExecuteQuery} disabled={isExecuting} className="gradient-primary text-white">
+              <Button onClick={handleExecuteQuery} disabled={isExecuting} className="gradient-primary text-white text-xs">
                 {isExecuting ? (
                   <>
-                    <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Executing...
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="hidden sm:inline">Executing...</span>
+                    <span className="sm:hidden">Running...</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Execute
+                    <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Execute</span>
+                    <span className="sm:hidden">Run</span>
                   </>
                 )}
               </Button>
@@ -113,16 +117,16 @@ export function QueryEditor({ isConnected }: QueryEditorProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Enter your SQL query here..."
-            className="min-h-32 font-mono text-sm"
+            className="min-h-24 sm:min-h-32 font-mono text-xs sm:text-sm"
             spellCheck={false}
           />
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Sample Queries</CardTitle>
+            <CardTitle className="text-sm sm:text-base">Sample Queries</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {sampleQueries.map((sampleQuery, index) => (
@@ -142,15 +146,15 @@ export function QueryEditor({ isConnected }: QueryEditorProps) {
         {result && (
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Query Result</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="flex items-center gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <CardTitle className="text-sm sm:text-base">Query Result</CardTitle>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className="flex items-center gap-1 text-xs">
                     <Clock className="w-3 h-3" />
                     {result.executionTime}ms
                   </Badge>
                   {result.affectedRows !== undefined && (
-                    <Badge variant="secondary">{result.affectedRows} rows affected</Badge>
+                    <Badge variant="secondary" className="text-xs">{result.affectedRows} rows affected</Badge>
                   )}
                 </div>
               </div>
@@ -159,10 +163,10 @@ export function QueryEditor({ isConnected }: QueryEditorProps) {
               {result.error ? (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{result.error}</AlertDescription>
+                  <AlertDescription className="text-sm">{result.error}</AlertDescription>
                 </Alert>
               ) : result.rows.length > 0 ? (
-                <div className="border rounded-lg overflow-auto max-h-64">
+                <div className="border rounded-lg overflow-auto max-h-48 sm:max-h-64">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -178,7 +182,9 @@ export function QueryEditor({ isConnected }: QueryEditorProps) {
                         <TableRow key={index}>
                           {result.columns.map((column) => (
                             <TableCell key={column} className="font-mono text-xs">
-                              {row[column]?.toString() || "NULL"}
+                              <span className="truncate block max-w-20 sm:max-w-32" title={row[column]?.toString() || "NULL"}>
+                                {row[column]?.toString() || "NULL"}
+                              </span>
                             </TableCell>
                           ))}
                         </TableRow>
@@ -187,7 +193,7 @@ export function QueryEditor({ isConnected }: QueryEditorProps) {
                   </Table>
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">Query executed successfully. No results to display.</p>
+                <p className="text-muted-foreground text-xs sm:text-sm">Query executed successfully. No results to display.</p>
               )}
             </CardContent>
           </Card>

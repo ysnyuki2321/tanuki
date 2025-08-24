@@ -78,30 +78,46 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <nav className="flex flex-col gap-4">
-              <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">
+          <div className="md:hidden py-4 border-t animate-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col gap-3">
+              <a 
+                href="#features" 
+                className="text-sm font-medium hover:text-primary transition-colors px-4 py-2 rounded-lg hover:bg-muted/50"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Features
               </a>
-              <a href="#demo" className="text-sm font-medium hover:text-primary transition-colors">
+              <a 
+                href="#demo" 
+                className="text-sm font-medium hover:text-primary transition-colors px-4 py-2 rounded-lg hover:bg-muted/50"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Demo
               </a>
-              <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">
+              <a 
+                href="#pricing" 
+                className="text-sm font-medium hover:text-primary transition-colors px-4 py-2 rounded-lg hover:bg-muted/50"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Pricing
               </a>
-              <a href="#docs" className="text-sm font-medium hover:text-primary transition-colors">
+              <a 
+                href="#docs" 
+                className="text-sm font-medium hover:text-primary transition-colors px-4 py-2 rounded-lg hover:bg-muted/50"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Docs
               </a>
               <div className="flex flex-col gap-2 pt-4 border-t">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/dashboard">
+                    <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                       <Button size="sm" className="gradient-primary text-white w-full">
                         Dashboard
                       </Button>
                     </Link>
                     {user?.role === "admin" && (
-                      <Link href="/admin">
+                      <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
                         <Button variant="outline" size="sm" className="w-full bg-transparent">
                           <Shield className="h-4 w-4 mr-2" />
                           Admin Panel
@@ -111,12 +127,12 @@ export function Header() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login">
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="ghost" size="sm" className="w-full">
                         Sign In
                       </Button>
                     </Link>
-                    <Link href="/register">
+                    <Link href="/register" onClick={() => setIsMenuOpen(false)}>
                       <Button size="sm" className="gradient-primary text-white w-full">
                         Get Started
                       </Button>

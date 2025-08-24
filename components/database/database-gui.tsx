@@ -87,34 +87,43 @@ export function DatabaseGUI() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Database className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold">Database GUI</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+        <div className="flex items-center gap-2">
+          <Database className="w-6 h-6 text-primary" />
+          <h2 className="text-xl sm:text-2xl font-bold">Database GUI</h2>
+        </div>
         {activeConnection && (
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:ml-auto">
             <div className="w-2 h-2 bg-green-500 rounded-full" />
-            <span className="text-sm text-muted-foreground">Connected to {activeConnection.name}</span>
+            <span className="text-sm text-muted-foreground">
+              <span className="hidden sm:inline">Connected to </span>
+              {activeConnection.name}
+            </span>
           </div>
         )}
       </div>
 
       <Tabs defaultValue="browser" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="connections" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Connections
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
+          <TabsTrigger value="connections" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Connections</span>
+            <span className="sm:hidden">Conn</span>
           </TabsTrigger>
-          <TabsTrigger value="browser" className="flex items-center gap-2">
-            <Table className="w-4 h-4" />
-            Tables
+          <TabsTrigger value="browser" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Table className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Tables</span>
+            <span className="sm:hidden">Tables</span>
           </TabsTrigger>
-          <TabsTrigger value="query" className="flex items-center gap-2">
-            <Code className="w-4 h-4" />
-            Query
+          <TabsTrigger value="query" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Code className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Query</span>
+            <span className="sm:hidden">Query</span>
           </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center gap-2" disabled={!selectedTable}>
-            <Database className="w-4 h-4" />
-            Data
+          <TabsTrigger value="data" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm" disabled={!selectedTable}>
+            <Database className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Data</span>
+            <span className="sm:hidden">Data</span>
           </TabsTrigger>
         </TabsList>
 

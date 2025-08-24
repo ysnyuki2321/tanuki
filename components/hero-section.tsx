@@ -29,32 +29,32 @@ export function HeroSection() {
           </p>
 
           {/* Feature Pills */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-full border">
-              <Code className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Code Editor</span>
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+            <div className="flex items-center gap-2 bg-card px-3 py-2 rounded-full border text-xs sm:text-sm">
+              <Code className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+              <span className="font-medium">Code Editor</span>
             </div>
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-full border">
-              <Database className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Database GUI</span>
+            <div className="flex items-center gap-2 bg-card px-3 py-2 rounded-full border text-xs sm:text-sm">
+              <Database className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+              <span className="font-medium">Database GUI</span>
             </div>
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-full border">
-              <Share className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">File Sharing</span>
+            <div className="flex items-center gap-2 bg-card px-3 py-2 rounded-full border text-xs sm:text-sm">
+              <Share className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+              <span className="font-medium">File Sharing</span>
             </div>
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-full border">
-              <Zap className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">SSH Integration</span>
+            <div className="flex items-center gap-2 bg-card px-3 py-2 rounded-full border text-xs sm:text-sm">
+              <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+              <span className="font-medium">Storage Expansion</span>
             </div>
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gradient-primary text-white hover:opacity-90 transition-opacity">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button size="lg" className="gradient-primary text-white hover:opacity-90 transition-opacity w-full sm:w-auto">
               Try Demo
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="border-2 bg-transparent">
+            <Button size="lg" variant="outline" className="border-2 bg-transparent w-full sm:w-auto">
               Learn More
             </Button>
           </div>

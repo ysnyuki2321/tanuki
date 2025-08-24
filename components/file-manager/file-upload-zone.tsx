@@ -61,25 +61,25 @@ export function FileUploadZone({ onFilesUploaded }: FileUploadZoneProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <CardContent className="p-8 text-center">
+      <CardContent className="p-4 sm:p-6 lg:p-8 text-center">
         {uploadingFiles.length > 0 ? (
           <div className="space-y-2">
-            <Upload className="w-8 h-8 mx-auto text-primary animate-bounce" />
+            <Upload className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-primary animate-bounce" />
             <p className="text-sm font-medium">Uploading {uploadingFiles.length} file(s)...</p>
-            <div className="space-y-1">
+            <div className="space-y-1 max-h-32 overflow-y-auto">
               {uploadingFiles.map((file, index) => (
-                <div key={index} className="text-xs text-muted-foreground">
+                <div key={index} className="text-xs text-muted-foreground truncate px-2">
                   {file.name}
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
+          <div className="space-y-3 sm:space-y-4">
+            <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-muted-foreground" />
             <div>
-              <p className="text-lg font-medium">Drop files here to upload</p>
-              <p className="text-sm text-muted-foreground">or click to browse</p>
+              <p className="text-base sm:text-lg font-medium">Drop files here to upload</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">or click to browse</p>
             </div>
             <input
               type="file"
@@ -87,7 +87,7 @@ export function FileUploadZone({ onFilesUploaded }: FileUploadZoneProps) {
               onChange={handleFileSelect}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-            <Button variant="outline">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               <Upload className="w-4 h-4 mr-2" />
               Choose Files
             </Button>

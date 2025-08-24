@@ -48,12 +48,12 @@ export function DemoSection() {
           </Card>
 
           {/* Demo Features */}
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <Card className="text-center">
               <CardContent className="pt-6">
                 <FileCode className="w-8 h-8 mx-auto mb-3 text-primary" />
-                <h3 className="font-semibold mb-2">Live Code Editing</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold mb-2 text-base sm:text-lg">Live Code Editing</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Edit JavaScript, Python, and more with real-time syntax highlighting
                 </p>
               </CardContent>
@@ -62,18 +62,20 @@ export function DemoSection() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <Folder className="w-8 h-8 mx-auto mb-3 text-primary" />
-                <h3 className="font-semibold mb-2">File Management</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold mb-2 text-base sm:text-lg">File Management</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Drag & drop, zip preview, and intelligent file organization
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center">
+            <Card className="text-center sm:col-span-2 lg:col-span-1">
               <CardContent className="pt-6">
                 <Settings className="w-8 h-8 mx-auto mb-3 text-primary" />
-                <h3 className="font-semibold mb-2">Admin Tools</h3>
-                <p className="text-sm text-muted-foreground">SSH integration, user management, and system monitoring</p>
+                <h3 className="font-semibold mb-2 text-base sm:text-lg">Storage Expansion</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  SSH integration to mount remote nodes and expand storage dynamically
+                </p>
               </CardContent>
             </Card>
           </div>
