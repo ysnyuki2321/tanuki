@@ -47,7 +47,7 @@ export function FeaturesSection() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Professional tools that solve real problems in web storage and file management
+            Enterprise-grade tools for developers and teams to store, edit, and share
           </p>
         </div>
 
