@@ -2,14 +2,16 @@
 
 import { Button } from "@/components/ui/button"
 import { TanukiLogo } from "./tanuki-logo"
-import { Menu, X, Shield } from "lucide-react"
+import { Menu, X, Shield, Sun, Moon } from "lucide-react"
 import { useState } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
+import { useTheme } from "next-themes"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated, user } = useAuth()
+  const { theme, setTheme } = useTheme()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
@@ -38,6 +40,14 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             {isAuthenticated ? (
               <>
                 <Link href="/dashboard">
@@ -109,6 +119,26 @@ export function Header() {
                 Docs
               </a>
               <div className="flex flex-col gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full bg-transparent"
+                  onClick={() => {
+                    setTheme(theme === "dark" ? "light" : "dark")
+                    setIsMenuOpen(false)
+                  }}
+                  aria-label="Toggle theme"
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="h-4 w-4 mr-2" /> Light Mode
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-4 w-4 mr-2" /> Dark Mode
+                    </>
+                  )}
+                </Button>
                 {isAuthenticated ? (
                   <>
                     <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>

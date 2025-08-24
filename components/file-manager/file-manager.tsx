@@ -10,6 +10,7 @@ import { Breadcrumb } from "./breadcrumb"
 import { CodeEditorModal } from "@/components/code-editor/code-editor-modal"
 import { ZipPreviewModal } from "@/components/zip-preview/zip-preview-modal"
 import { Loader2 } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 export function FileManager() {
   const [files, setFiles] = useState<FileItem[]>([])
@@ -102,10 +103,10 @@ export function FileManager() {
       const shareUrl = `${window.location.origin}/share/${shareId}`
       navigator.clipboard.writeText(shareUrl)
       // Show success message
-      console.log(`[v0] File shared! URL copied to clipboard: ${shareUrl}`)
+      toast({ title: "Link copied", description: "Share URL has been copied to clipboard." })
       loadFiles(currentParentId)
     } catch (error) {
-      console.error("Failed to share file:", error)
+      toast({ title: "Failed to share file", description: String(error), variant: "destructive" as any })
     }
   }
 

@@ -4,14 +4,18 @@ import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturesSection } from "@/components/features-section"
 import { DemoSection } from "@/components/demo-section"
+import { PricingSection } from "@/components/pricing-section"
+import { DocsSection } from "@/components/docs-section"
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen pt-16">
       <Header />
       <HeroSection />
       <FeaturesSection />
       <DemoSection />
+      <PricingSection />
+      <DocsSection />
     </main>
   )
 }
