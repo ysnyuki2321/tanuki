@@ -12,13 +12,11 @@ export default function EditorPage() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const fileService = FileSystemService.getInstance()
-
   useEffect(() => {
     const loadFile = async () => {
       if (fileId) {
         try {
-          const file = await fileService.getFile(fileId)
+          const file = await FileSystemService.getFile(fileId)
           if (file) setFiles([file])
         } catch (error) {
           console.error("Failed to load file:", error)

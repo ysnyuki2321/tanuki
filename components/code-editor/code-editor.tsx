@@ -24,7 +24,6 @@ export function CodeEditor({ initialFiles = [], onClose, isFullscreen = false, o
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const editorService = CodeEditorService.getInstance()
-  const fileService = FileSystemService.getInstance()
 
   useEffect(() => {
     // Load initial files
@@ -32,7 +31,7 @@ export function CodeEditor({ initialFiles = [], onClose, isFullscreen = false, o
       const editorFiles: EditorFile[] = initialFiles.map((file) => ({
         id: file.id,
         name: file.name,
-        content: file.content || "",
+        content: "", // FileItem doesn't have content property, so we start with empty content
         language: editorService.detectLanguage(file.name),
         isDirty: false,
         path: file.path,
