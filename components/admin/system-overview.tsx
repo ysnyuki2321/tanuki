@@ -23,16 +23,16 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
   const totalNodes = stats.serverNodes.length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-600">+{stats.activeUsers}</span> active now
             </p>
@@ -41,11 +41,11 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Storage Usage</CardTitle>
             <HardDrive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatBytes(stats.usedStorage)}</div>
+            <div className="text-xl sm:text-2xl font-bold">{formatBytes(stats.usedStorage)}</div>
             <p className="text-xs text-muted-foreground">
               of {formatBytes(stats.totalStorage)} ({storageUsagePercent.toFixed(1)}%)
             </p>
@@ -55,11 +55,11 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Files</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Files</CardTitle>
             <Files className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFiles.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.totalFiles.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-blue-600">{stats.totalShares}</span> shared files
             </p>
@@ -68,11 +68,11 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Server Nodes</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Server Nodes</CardTitle>
             <Server className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {onlineNodes}/{totalNodes}
             </div>
             <p className="text-xs text-muted-foreground">nodes online</p>
@@ -81,15 +81,15 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
       </div>
 
       {/* Server Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Server Nodes Status</CardTitle>
-            <CardDescription>Real-time status of all server nodes</CardDescription>
+            <CardTitle className="text-base sm:text-lg">Server Nodes Status</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Real-time status of all server nodes</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             {stats.serverNodes.map((node) => (
-              <div key={node.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={node.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2 sm:gap-0">
                 <div className="flex items-center space-x-3">
                   <div
                     className={`w-3 h-3 rounded-full ${
@@ -101,19 +101,20 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
                     }`}
                   />
                   <div>
-                    <p className="font-medium">{node.name}</p>
-                    <p className="text-sm text-muted-foreground">{node.host}</p>
+                    <p className="font-medium text-sm sm:text-base">{node.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{node.host}</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <Badge
                     variant={
                       node.status === "online" ? "default" : node.status === "offline" ? "destructive" : "secondary"
                     }
+                    className="text-xs"
                   >
                     {node.status}
                   </Badge>
-                  <p className="text-sm text-muted-foreground mt-1">{node.diskUsage}% disk used</p>
+                  <p className="text-xs text-muted-foreground mt-1">{node.diskUsage}% disk used</p>
                 </div>
               </div>
             ))}
@@ -122,12 +123,12 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>System Health</CardTitle>
-            <CardDescription>Overall system performance metrics</CardDescription>
+            <CardTitle className="text-base sm:text-lg">System Health</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Overall system performance metrics</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>Average CPU Usage</span>
                 <span>32%</span>
               </div>
@@ -135,7 +136,7 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>Average Memory Usage</span>
                 <span>58%</span>
               </div>
@@ -143,7 +144,7 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs sm:text-sm">
                 <span>Network I/O</span>
                 <span>24%</span>
               </div>
@@ -151,7 +152,7 @@ export function SystemOverview({ stats }: SystemOverviewProps) {
             </div>
 
             <div className="pt-4 border-t">
-              <div className="flex items-center space-x-2 text-sm text-green-600">
+              <div className="flex items-center space-x-2 text-xs sm:text-sm text-green-600">
                 <CheckCircle className="h-4 w-4" />
                 <span>All systems operational</span>
               </div>

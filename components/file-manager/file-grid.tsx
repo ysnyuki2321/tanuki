@@ -128,11 +128,11 @@ export function FileGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-3 sm:gap-4">
       {files.map((file) => (
         <Card
           key={file.id}
-          className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+          className={`p-2 sm:p-4 cursor-pointer transition-all hover:shadow-md group ${
             selectedFiles.includes(file.id) ? "ring-2 ring-primary" : ""
           }`}
           onClick={() => onFileSelect(file.id, !selectedFiles.includes(file.id))}
@@ -145,13 +145,13 @@ export function FileGrid({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreVertical className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem onClick={() => onFileOpen(file)}>
                     <Eye className="h-4 w-4 mr-2" />
                     Open
@@ -201,19 +201,25 @@ export function FileGrid({
                       setEditingName("")
                     }
                   }}
-                  className="text-xs h-6"
+                  className="text-xs h-6 w-full"
                   autoFocus
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <p className="text-xs font-medium truncate" title={file.name}>
+                <p className="text-xs font-medium truncate px-1" title={file.name}>
                   {file.name}
                 </p>
               )}
 
-              {file.type !== "folder" && <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>}
+              {file.type !== "folder" && (
+                <p className="text-xs text-muted-foreground hidden sm:block">
+                  {formatFileSize(file.size)}
+                </p>
+              )}
 
-              <p className="text-xs text-muted-foreground">{new Date(file.modifiedAt).toLocaleDateString()}</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">
+                {new Date(file.modifiedAt).toLocaleDateString()}
+              </p>
             </div>
           </div>
         </Card>

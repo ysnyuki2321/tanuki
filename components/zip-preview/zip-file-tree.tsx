@@ -50,10 +50,10 @@ export function ZipFileTree({ tree, selectedFile, onFileSelect, archive }: ZipFi
     return (
       <div key={node.path}>
         <div
-          className={`flex items-center gap-2 py-1 px-2 rounded cursor-pointer hover:bg-muted/50 ${
+          className={`flex items-center gap-1 sm:gap-2 py-1 px-2 rounded cursor-pointer hover:bg-muted/50 ${
             isSelected ? "bg-primary/10 border border-primary/20" : ""
           }`}
-          style={{ paddingLeft: `${level * 20 + 8}px` }}
+          style={{ paddingLeft: `${Math.min(level * 16 + 8, 120)}px` }}
           onClick={() => {
             if (node.isDirectory) {
               toggleNode(node.path)
@@ -70,21 +70,22 @@ export function ZipFileTree({ tree, selectedFile, onFileSelect, archive }: ZipFi
 
           {(!node.isDirectory || !hasChildren) && <div className="w-4" />}
 
-          <span className="text-lg">{node.entry ? zipService.getFileIcon(node.entry) : "📁"}</span>
+          <span className="text-base sm:text-lg">{node.entry ? zipService.getFileIcon(node.entry) : "📁"}</span>
 
-          <span className="flex-1 text-sm font-medium truncate">{node.name}</span>
+          <span className="flex-1 text-xs sm:text-sm font-medium truncate">{node.name}</span>
 
           {!node.isDirectory && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{zipService.formatFileSize(node.size)}</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-xs text-muted-foreground hidden sm:block">{zipService.formatFileSize(node.size)}</span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                className="h-5 w-5 sm:h-6 sm:w-6 p-0 opacity-0 group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleExtractFile(node.path)
                 }}
+                title="Download file"
               >
                 <Download className="h-3 w-3" />
               </Button>
@@ -100,10 +101,10 @@ export function ZipFileTree({ tree, selectedFile, onFileSelect, archive }: ZipFi
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Archive Contents</CardTitle>
+        <CardTitle className="text-sm sm:text-base">Archive Contents</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="max-h-96 overflow-auto p-4 space-y-1 group">{tree.map((node) => renderNode(node))}</div>
+        <div className="max-h-64 sm:max-h-96 overflow-auto p-2 sm:p-4 space-y-1 group">{tree.map((node) => renderNode(node))}</div>
       </CardContent>
     </Card>
   )

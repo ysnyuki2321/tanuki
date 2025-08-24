@@ -7,9 +7,9 @@ interface TanukiLogoProps {
 
 export function TanukiLogo({ size = 40, className = "" }: TanukiLogoProps) {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2 sm:gap-3 ${className}`}>
       <Image src="/tanuki-logo.png" alt="Tanuki Logo" width={size} height={size} className="rounded-lg" />
-      <span className="text-2xl font-bold text-foreground">tanuki</span>
+      <span className="text-xl sm:text-2xl font-bold text-foreground">tanuki</span>
     </div>
   )
 }

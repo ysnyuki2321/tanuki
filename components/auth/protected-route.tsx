@@ -27,7 +27,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
       </div>
     )
   }

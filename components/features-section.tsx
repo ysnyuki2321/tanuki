@@ -28,9 +28,9 @@ const features = [
   },
   {
     icon: Terminal,
-    title: "SSH Integration",
+    title: "Storage Expansion via SSH",
     description:
-      "Connect to remote servers via SSH. Easily manage files across multiple VPS instances and expand storage dynamically.",
+      "Mount remote VPS nodes via SSH to expand your storage capacity. Seamlessly integrate additional disk space from multiple servers.",
   },
   {
     icon: Zap,
@@ -51,17 +51,17 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-base leading-relaxed">{feature.description}</CardDescription>
+                <CardDescription className="text-sm sm:text-base leading-relaxed">{feature.description}</CardDescription>
               </CardContent>
             </Card>
           ))}

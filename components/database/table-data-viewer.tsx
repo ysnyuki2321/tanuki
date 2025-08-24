@@ -68,19 +68,21 @@ export function TableDataViewer({ tableName }: TableDataViewerProps) {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">Table: {tableName}</CardTitle>
-              <Badge variant="outline">{data.total.toLocaleString()} total rows</Badge>
+              <CardTitle className="text-base sm:text-lg">Table: {tableName}</CardTitle>
+              <Badge variant="outline" className="text-xs">{data.total.toLocaleString()} total rows</Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Row
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" size="sm" className="text-xs">
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Row</span>
+                <span className="sm:hidden">Add</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={loadTableData}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
+              <Button variant="outline" size="sm" onClick={loadTableData} className="text-xs">
+                <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">Refresh</span>
               </Button>
             </div>
           </div>
@@ -88,17 +90,19 @@ export function TableDataViewer({ tableName }: TableDataViewerProps) {
         <CardContent>
           {data.rows.length > 0 ? (
             <div className="space-y-4">
-              <div className="border rounded-lg overflow-auto max-h-96">
+              <div className="border rounded-lg overflow-auto max-h-64 sm:max-h-96">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">#</TableHead>
+                      <TableHead className="w-8 sm:w-12 text-xs">#</TableHead>
                       {Object.keys(data.rows[0]).map((column) => (
                         <TableHead key={column} className="font-mono text-xs">
-                          {column}
+                          <span className="truncate block max-w-16 sm:max-w-32" title={column}>
+                            {column}
+                          </span>
                         </TableHead>
                       ))}
-                      <TableHead className="w-24">Actions</TableHead>
+                      <TableHead className="w-16 sm:w-24 text-xs">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -108,7 +112,7 @@ export function TableDataViewer({ tableName }: TableDataViewerProps) {
                           {(currentPage - 1) * pageSize + index + 1}
                         </TableCell>
                         {Object.entries(row).map(([column, value]) => (
-                          <TableCell key={column} className="font-mono text-xs max-w-48">
+                          <TableCell key={column} className="font-mono text-xs max-w-32 sm:max-w-48">
                             <div className="truncate" title={value?.toString()}>
                               {value === null || value === undefined ? (
                                 <span className="text-muted-foreground italic">NULL</span>
@@ -139,25 +143,25 @@ export function TableDataViewer({ tableName }: TableDataViewerProps) {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, data.total)} of{" "}
                     {data.total.toLocaleString()} rows
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                      <ChevronLeft className="w-4 h-4" />
-                      Previous
+                  <div className="flex items-center gap-2 justify-center sm:justify-end">
+                    <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1} className="text-xs">
+                      <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Previous</span>
                     </Button>
                     <div className="flex items-center gap-1">
-                      <span className="text-sm">Page</span>
-                      <Badge variant="outline">
+                      <span className="text-xs sm:text-sm">Page</span>
+                      <Badge variant="outline" className="text-xs">
                         {currentPage} of {totalPages}
                       </Badge>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage === totalPages}>
-                      Next
-                      <ChevronRight className="w-4 h-4" />
+                    <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage === totalPages} className="text-xs">
+                      <span className="hidden sm:inline">Next</span>
+                      <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                 </div>
@@ -165,7 +169,7 @@ export function TableDataViewer({ tableName }: TableDataViewerProps) {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No data found in this table</p>
+              <p className="text-muted-foreground text-sm sm:text-base">No data found in this table</p>
             </div>
           )}
         </CardContent>

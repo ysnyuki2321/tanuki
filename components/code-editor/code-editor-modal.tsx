@@ -31,7 +31,7 @@ export function CodeEditorModal({ isOpen, onClose, files }: CodeEditorModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[80vh] p-0">
+      <DialogContent className="max-w-6xl w-[95vw] h-[80vh] sm:h-[80vh] p-0">
         <CodeEditor
           initialFiles={files}
           onClose={onClose}

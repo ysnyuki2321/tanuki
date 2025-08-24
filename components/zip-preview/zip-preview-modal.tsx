@@ -58,36 +58,39 @@ export function ZipPreviewModal({ isOpen, onClose, fileName }: ZipPreviewModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl h-[80vh] p-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Archive className="w-5 h-5 text-primary" />
-            {fileName}
+      <DialogContent className="max-w-6xl w-[95vw] h-[80vh] sm:h-[80vh] p-0">
+        <DialogHeader className="p-4 sm:p-6 pb-0">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Archive className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <span className="truncate">{fileName}</span>
           </DialogTitle>
         </DialogHeader>
 
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-              <p>Analyzing zip archive...</p>
+              <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-primary mx-auto mb-4" />
+              <p className="text-sm sm:text-base">Analyzing zip archive...</p>
             </div>
           </div>
         ) : archive ? (
-          <div className="flex-1 p-6 pt-0">
+          <div className="flex-1 p-4 sm:p-6 pt-0">
             <Tabs defaultValue="tree" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="info" className="flex items-center gap-2">
-                  <Info className="w-4 h-4" />
-                  Archive Info
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="info" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                  <Info className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Archive Info</span>
+                  <span className="sm:hidden">Info</span>
                 </TabsTrigger>
-                <TabsTrigger value="tree" className="flex items-center gap-2">
-                  <FolderTree className="w-4 h-4" />
-                  File Tree
+                <TabsTrigger value="tree" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                  <FolderTree className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">File Tree</span>
+                  <span className="sm:hidden">Tree</span>
                 </TabsTrigger>
-                <TabsTrigger value="preview" className="flex items-center gap-2" disabled={!selectedFile}>
-                  <Eye className="w-4 h-4" />
-                  File Preview
+                <TabsTrigger value="preview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm" disabled={!selectedFile}>
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">File Preview</span>
+                  <span className="sm:hidden">Preview</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -109,7 +112,7 @@ export function ZipPreviewModal({ isOpen, onClose, fileName }: ZipPreviewModalPr
                   <ZipFilePreview filePath={selectedFile} archive={archive} />
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-muted-foreground">Select a file to preview</p>
+                    <p className="text-muted-foreground text-sm sm:text-base">Select a file to preview</p>
                   </div>
                 )}
               </TabsContent>
@@ -117,7 +120,7 @@ export function ZipPreviewModal({ isOpen, onClose, fileName }: ZipPreviewModalPr
           </div>
         ) : (
           <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Failed to load zip archive</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Failed to load zip archive</p>
           </div>
         )}
       </DialogContent>

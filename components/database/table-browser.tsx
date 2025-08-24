@@ -29,9 +29,9 @@ export function TableBrowser({ tables, selectedTable, onTableSelect, isConnected
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Database Tables</h3>
-        <Badge variant="outline">{tables.length} tables</Badge>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h3 className="text-base sm:text-lg font-semibold">Database Tables</h3>
+        <Badge variant="outline" className="w-fit">{tables.length} tables</Badge>
       </div>
 
       <div className="grid gap-4">
@@ -44,14 +44,14 @@ export function TableBrowser({ tables, selectedTable, onTableSelect, isConnected
             onClick={() => onTableSelect(table.name)}
           >
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Table className="w-5 h-5 text-primary" />
                   <CardTitle className="text-base">{table.name}</CardTitle>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{table.rowCount.toLocaleString()} rows</Badge>
-                  <Badge variant="outline">{table.size}</Badge>
+                  <Badge variant="secondary" className="text-xs">{table.rowCount.toLocaleString()} rows</Badge>
+                  <Badge variant="outline" className="text-xs">{table.size}</Badge>
                 </div>
               </div>
             </CardHeader>
@@ -59,31 +59,33 @@ export function TableBrowser({ tables, selectedTable, onTableSelect, isConnected
             <CardContent className="space-y-3">
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Columns ({table.columns.length})</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {table.columns.slice(0, 6).map((column) => (
-                    <div key={column.name} className="flex items-center gap-2 text-sm">
-                      <div className="flex items-center gap-1">
-                        {column.primaryKey && <Key className="w-3 h-3 text-yellow-500" />}
-                        {column.foreignKey && <Link className="w-3 h-3 text-blue-500" />}
-                        <span className="font-mono">{column.name}</span>
+                    <div key={column.name} className="flex items-center gap-2 text-xs sm:text-sm">
+                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                        {column.primaryKey && <Key className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
+                        {column.foreignKey && <Link className="w-3 h-3 text-blue-500 flex-shrink-0" />}
+                        <span className="font-mono truncate">{column.name}</span>
                       </div>
-                      <span className="text-muted-foreground text-xs">{column.type}</span>
+                      <span className="text-muted-foreground text-xs flex-shrink-0">{column.type}</span>
                     </div>
                   ))}
                   {table.columns.length > 6 && (
-                    <div className="text-sm text-muted-foreground">+{table.columns.length - 6} more columns</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">+{table.columns.length - 6} more columns</div>
                   )}
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2 border-t">
-                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Data
+              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
+                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()} className="text-xs">
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">View Data</span>
+                  <span className="sm:hidden">View</span>
                 </Button>
-                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Schema
+                <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()} className="text-xs">
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Edit Schema</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
               </div>
             </CardContent>

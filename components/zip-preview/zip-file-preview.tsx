@@ -60,8 +60,8 @@ export function ZipFilePreview({ filePath, archive }: ZipFilePreviewProps) {
       <Card className="h-full">
         <CardContent className="flex items-center justify-center h-full">
           <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">File not found</p>
+            <AlertCircle className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-sm sm:text-base">File not found</p>
           </div>
         </CardContent>
       </Card>
@@ -71,26 +71,27 @@ export function ZipFilePreview({ filePath, archive }: ZipFilePreviewProps) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">{zipService.getFileIcon(entry)}</span>
+            <span className="text-xl sm:text-2xl">{zipService.getFileIcon(entry)}</span>
             <div>
               <CardTitle className="text-base">{entry.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{entry.path}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">{entry.path}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline">{zipService.formatFileSize(entry.size)}</Badge>
-            <Button variant="outline" size="sm" onClick={handleExtractFile}>
-              <Download className="w-4 h-4 mr-2" />
-              Extract
+            <Badge variant="outline" className="text-xs">{zipService.formatFileSize(entry.size)}</Badge>
+            <Button variant="outline" size="sm" onClick={handleExtractFile} className="text-xs">
+              <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Extract</span>
+              <span className="sm:hidden">Extract</span>
             </Button>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="grid md:grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs sm:text-sm">
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Size:</span>
@@ -108,7 +109,7 @@ export function ZipFilePreview({ filePath, archive }: ZipFilePreviewProps) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Type:</span>
-              <span>{entry.mimeType || "Unknown"}</span>
+              <span className="truncate ml-2">{entry.mimeType || "Unknown"}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Modified:</span>
@@ -118,20 +119,20 @@ export function ZipFilePreview({ filePath, archive }: ZipFilePreviewProps) {
         </div>
 
         <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+          <h4 className="text-xs sm:text-sm font-medium mb-3 flex items-center gap-2">
             {isTextFile(entry.mimeType) ? (
               <>
-                <FileText className="w-4 h-4" />
+                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
                 File Content
               </>
             ) : isImageFile(entry.mimeType) ? (
               <>
-                <Image className="w-4 h-4" />
+                <Image className="w-3 h-3 sm:w-4 sm:h-4" />
                 Image Preview
               </>
             ) : (
               <>
-                <AlertCircle className="w-4 h-4" />
+                <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                 Preview Not Available
               </>
             )}
@@ -141,25 +142,25 @@ export function ZipFilePreview({ filePath, archive }: ZipFilePreviewProps) {
             <Textarea
               value={entry.content}
               readOnly
-              className="min-h-64 font-mono text-sm resize-none"
+              className="min-h-48 sm:min-h-64 font-mono text-xs sm:text-sm resize-none"
               placeholder="Loading file content..."
             />
           ) : isImageFile(entry.mimeType) ? (
             <div className="border rounded-lg p-4 bg-muted/30">
-              <div className="flex items-center justify-center h-48 text-muted-foreground">
+              <div className="flex items-center justify-center h-32 sm:h-48 text-muted-foreground">
                 <div className="text-center">
-                  <Image className="w-12 h-12 mx-auto mb-2" />
-                  <p>Image preview not available</p>
+                  <Image className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2" />
+                  <p className="text-xs sm:text-sm">Image preview not available</p>
                   <p className="text-xs">Extract file to view image</p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="border rounded-lg p-4 bg-muted/30">
-              <div className="flex items-center justify-center h-32 text-muted-foreground">
+              <div className="flex items-center justify-center h-24 sm:h-32 text-muted-foreground">
                 <div className="text-center">
-                  <AlertCircle className="w-8 h-8 mx-auto mb-2" />
-                  <p>Preview not available for this file type</p>
+                  <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                  <p className="text-xs sm:text-sm">Preview not available for this file type</p>
                   <p className="text-xs">Extract file to view content</p>
                 </div>
               </div>
