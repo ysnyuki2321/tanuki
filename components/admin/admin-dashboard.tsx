@@ -8,6 +8,7 @@ import { SystemOverview } from "./system-overview"
 import { UserManagement } from "./user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
+import { SSHManagement } from "./ssh-management"
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<SystemStats | null>(null)
@@ -66,10 +67,11 @@ export function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
+          <TabsTrigger value="ssh">SSH</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
 
@@ -83,6 +85,13 @@ export function AdminDashboard() {
 
         <TabsContent value="servers">
           <ServerNodes nodes={stats.serverNodes} />
+        </TabsContent>
+
+        <TabsContent value="ssh">
+          <SSHManagement
+            nodes={stats.serverNodes}
+            onNodesChange={(nodes) => setStats(prev => prev ? { ...prev, serverNodes: nodes } : null)}
+          />
         </TabsContent>
 
         <TabsContent value="storage">
