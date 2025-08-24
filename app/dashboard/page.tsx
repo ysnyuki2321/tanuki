@@ -1,7 +1,7 @@
 "use client"
 
 import { ProtectedRoute } from "@/components/auth/protected-route"
-import { FileManager } from "@/components/file-manager/file-manager"
+import { AdvancedFileManager } from "@/components/file-manager/advanced-file-manager"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { TanukiLogo } from "@/components/tanuki-logo"
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Manage your files, edit code, and organize your digital workspace</p>
           </div>
 
-          <FileManager />
+          <AdvancedFileManager />
         </main>
       </div>
     </ProtectedRoute>
