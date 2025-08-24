@@ -84,8 +84,9 @@ export function FileManager() {
   }
 
   const handleFileEdit = (file: FileItem) => {
-    setEditorFiles([file])
-    setIsEditorOpen(true)
+    // Direct to full editor page for better experience
+    const url = `/editor?file=${encodeURIComponent(file.id)}`
+    window.location.href = url
   }
 
   const handleZipPreview = (file: FileItem) => {

@@ -147,10 +147,10 @@ export function FileGrid({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute -top-2 -right-2 sm:top-0 sm:right-0 h-7 w-7 p-0 bg-background/80 backdrop-blur rounded-full shadow-sm opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-3 -right-3 sm:top-0 sm:right-0 h-8 w-8 p-0 bg-background/90 backdrop-blur rounded-full shadow-sm opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MoreVertical className="h-3 w-3" />
+                    <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">

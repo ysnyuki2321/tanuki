@@ -18,11 +18,8 @@ export default function EditorPage() {
     const loadFile = async () => {
       if (fileId) {
         try {
-          const allFiles = await fileService.getFiles("/")
-          const file = allFiles.find((f) => f.id === fileId)
-          if (file) {
-            setFiles([file])
-          }
+          const file = await fileService.getFile(fileId)
+          if (file) setFiles([file])
         } catch (error) {
           console.error("Failed to load file:", error)
         }
