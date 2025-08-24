@@ -147,7 +147,7 @@ export function FileGrid({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 sm:top-2 sm:right-2 h-6 w-6 p-0 bg-background/70 backdrop-blur rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreVertical className="h-3 w-3" />

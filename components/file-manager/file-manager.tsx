@@ -59,6 +59,10 @@ export function FileManager() {
       setSelectedFiles([])
     } else {
       const ext = file.name.split(".").pop()?.toLowerCase()
+      const isCode = (e?: string) => !!e && [
+        "js","jsx","ts","tsx","py","java","cpp","c","cs","php","rb","go","rs","html","css","scss","json","xml","yaml","yml","md","sql","sh","txt"
+      ].includes(e)
+
       if (ext && ["mp4", "webm", "ogg"].includes(ext)) {
         setMediaPreview({ type: "video", src: "/demo/video", name: file.name })
         setIsMediaPreviewOpen(true)
@@ -68,6 +72,13 @@ export function FileManager() {
       } else if (ext && ["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) {
         setMediaPreview({ type: "image", src: "/placeholder.jpg", name: file.name })
         setIsMediaPreviewOpen(true)
+      } else if (ext === "zip" || ext === "rar" || ext === "7z") {
+        handleZipPreview(file)
+      } else if (isCode(ext)) {
+        handleFileEdit(file)
+      } else {
+        // Mặc định mở trong editor dạng text
+        handleFileEdit(file)
       }
     }
   }
