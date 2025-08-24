@@ -23,63 +23,65 @@ export function StorageManagement({ stats }: StorageManagementProps) {
   const freeStorage = stats.totalStorage - stats.usedStorage
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Storage Management</h2>
-          <p className="text-muted-foreground">Monitor and manage storage across all nodes</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Storage Management</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Monitor and manage storage across all nodes</p>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <Button variant="outline" className="w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
+            <span className="sm:hidden">Refresh</span>
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Archive className="h-4 w-4 mr-2" />
-            Cleanup
+            <span className="hidden sm:inline">Cleanup</span>
+            <span className="sm:hidden">Cleanup</span>
           </Button>
         </div>
       </div>
 
       {/* Storage Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <HardDrive className="h-5 w-5" />
+            <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+              <HardDrive className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Total Storage</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatBytes(stats.totalStorage)}</div>
-            <p className="text-sm text-muted-foreground">Across all nodes</p>
+            <div className="text-2xl sm:text-3xl font-bold">{formatBytes(stats.totalStorage)}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Across all nodes</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Database className="h-5 w-5" />
+            <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+              <Database className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Used Storage</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatBytes(stats.usedStorage)}</div>
-            <p className="text-sm text-muted-foreground">{storageUsagePercent.toFixed(1)}% utilized</p>
+            <div className="text-2xl sm:text-3xl font-bold">{formatBytes(stats.usedStorage)}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">{storageUsagePercent.toFixed(1)}% utilized</p>
             <Progress value={storageUsagePercent} className="mt-2" />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="sm:col-span-2 lg:col-span-1">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
+            <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Available</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatBytes(freeStorage)}</div>
-            <p className="text-sm text-muted-foreground">Free space remaining</p>
+            <div className="text-2xl sm:text-3xl font-bold">{formatBytes(freeStorage)}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Free space remaining</p>
           </CardContent>
         </Card>
       </div>
@@ -87,17 +89,17 @@ export function StorageManagement({ stats }: StorageManagementProps) {
       {/* Node Storage Details */}
       <Card>
         <CardHeader>
-          <CardTitle>Storage by Node</CardTitle>
-          <CardDescription>Detailed storage breakdown for each server node</CardDescription>
+          <CardTitle className="text-base sm:text-lg">Storage by Node</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Detailed storage breakdown for each server node</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {stats.serverNodes.map((node) => {
               const nodeUsedBytes = node.diskTotal * (node.diskUsage / 100)
               const nodeFreeBytes = node.diskTotal - nodeUsedBytes
 
               return (
-                <div key={node.id} className="p-4 border rounded-lg">
+                <div key={node.id} className="p-3 sm:p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
                       <div

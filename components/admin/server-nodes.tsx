@@ -77,26 +77,27 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Server Nodes</h2>
-          <p className="text-muted-foreground">Manage and monitor your server infrastructure</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Server Nodes</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Manage and monitor your server infrastructure</p>
         </div>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Server className="h-4 w-4 mr-2" />
-          Add Node
+          <span className="hidden sm:inline">Add Node</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {nodes.map((node) => (
           <Card key={node.id} className="relative">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <Server className="h-5 w-5" />
-                  <span>{node.name}</span>
+                <CardTitle className="flex items-center space-x-2 text-sm sm:text-base">
+                  <Server className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="truncate">{node.name}</span>
                 </CardTitle>
                 <Badge
                   variant={
