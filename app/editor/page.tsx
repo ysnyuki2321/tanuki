@@ -4,12 +4,30 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { AdvancedCodeEditor } from "@/components/code-editor/advanced-code-editor"
-import { FileManager } from "@/components/file-manager/file-manager"
-import { FileSystemService, type FileItem } from "@/lib/file-system"
-import { Button } from "@/components/ui/button"
+import { ResponsiveHeader } from "@/components/navigation/responsive-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Maximize2, FileCode, FolderOpen, Play, Sparkles, Code2, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { FileSystemService, type FileItem } from "@/lib/file-system"
+import { 
+  Code2, 
+  Play, 
+  Sparkles, 
+  FileCode, 
+  Download, 
+  Save,
+  Settings,
+  Zap,
+  Monitor,
+  Smartphone,
+  Palette,
+  GitBranch,
+  Bug,
+  Search,
+  Terminal,
+  FolderTree,
+  Eye
+} from "lucide-react"
 
 export default function EditorPage() {
   const searchParams = useSearchParams()
@@ -42,30 +60,9 @@ export default function EditorPage() {
     loadFile()
   }, [fileId])
 
-  const handleFileSelect = (files: FileItem[]) => {
-    const codeFiles = files.filter((file) => {
-      const ext = file.name.split(".").pop()?.toLowerCase()
-      return [
-        "js", "jsx", "ts", "tsx", "vue", "svelte",
-        "py", "java", "cpp", "c", "cs", "php", "rb", "go", "rs",
-        "html", "css", "scss", "sass", "less",
-        "json", "xml", "yaml", "yml", "toml",
-        "md", "mdx", "txt",
-        "sql", "sh", "bash", "zsh",
-        "dockerfile", "gitignore", "env"
-      ].includes(ext || "")
-    })
-
-    if (codeFiles.length > 0) {
-      setSelectedFiles(codeFiles)
-      setShowEditor(true)
-    }
-  }
-
   const handleCloseEditor = () => {
     setShowEditor(false)
     setIsFullscreen(false)
-    // If opened from a direct file link, go back to dashboard
     if (fileId) {
       window.location.href = "/dashboard"
     }
@@ -80,9 +77,89 @@ export default function EditorPage() {
     setShowEditor(true)
   }
 
-  const handleBackToDashboard = () => {
-    window.location.href = "/dashboard"
-  }
+  const editorFeatures = [
+    {
+      title: "IntelliSense & Auto-completion",
+      description: "Smart code completion with error detection",
+      icon: <Zap className="h-6 w-6 text-blue-500" />
+    },
+    {
+      title: "Advanced Syntax Highlighting",
+      description: "Rich syntax highlighting for 50+ languages",
+      icon: <Palette className="h-6 w-6 text-green-500" />
+    },
+    {
+      title: "Multi-cursor Editing",
+      description: "Edit multiple locations simultaneously",
+      icon: <Monitor className="h-6 w-6 text-purple-500" />
+    },
+    {
+      title: "Git Integration",
+      description: "Built-in version control support",
+      icon: <GitBranch className="h-6 w-6 text-orange-500" />
+    },
+    {
+      title: "Error Detection & Linting",
+      description: "Real-time error detection and suggestions",
+      icon: <Bug className="h-6 w-6 text-red-500" />
+    },
+    {
+      title: "Code Execution",
+      description: "Run code directly in the editor",
+      icon: <Play className="h-6 w-6 text-indigo-500" />
+    }
+  ]
+
+  const developmentTools = [
+    {
+      title: "File Tree Explorer",
+      description: "Navigate project files easily"
+    },
+    {
+      title: "Multiple Tabs & Split View",
+      description: "Work with multiple files simultaneously"
+    },
+    {
+      title: "Theme Support (Light/Dark)",
+      description: "Customizable editor themes"
+    },
+    {
+      title: "Auto-save & Live Preview",
+      description: "Never lose your work"
+    },
+    {
+      title: "Find & Replace (Regex)",
+      description: "Powerful search and replace"
+    },
+    {
+      title: "Code Folding & Minimap",
+      description: "Navigate large files efficiently"
+    }
+  ]
+
+  const supportedLanguages = [
+    "JavaScript", "TypeScript", "React", "Vue", "Angular",
+    "Python", "Java", "C++", "C#", "Go", "Rust", "PHP",
+    "HTML", "CSS", "SCSS", "JSON", "XML", "YAML",
+    "SQL", "Markdown", "Dockerfile", "Shell"
+  ]
+
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      <Button variant="outline" size="sm" className="gap-2">
+        <Save className="h-4 w-4" />
+        <span className="hidden sm:inline">Save</span>
+      </Button>
+      <Button variant="outline" size="sm" className="gap-2">
+        <Play className="h-4 w-4" />
+        <span className="hidden sm:inline">Run</span>
+      </Button>
+      <Button variant="outline" size="sm" className="gap-2">
+        <Settings className="h-4 w-4" />
+        <span className="hidden sm:inline">Settings</span>
+      </Button>
+    </div>
+  )
 
   if (isLoading) {
     return (
@@ -99,6 +176,13 @@ export default function EditorPage() {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-background">
+          {!isFullscreen && (
+            <ResponsiveHeader 
+              title="Code Editor"
+              subtitle="Monaco-powered development environment"
+              actions={headerActions}
+            />
+          )}
           <AdvancedCodeEditor
             initialFiles={selectedFiles}
             onClose={handleCloseEditor}
@@ -113,89 +197,75 @@ export default function EditorPage() {
 
   return (
     <ProtectedRoute>
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={handleBackToDashboard}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <Code2 className="h-8 w-8" />
+      <div className="min-h-screen bg-background">
+        <ResponsiveHeader 
+          title="Code Editor"
+          subtitle="Professional development environment"
+          actions={headerActions}
+        />
+
+        <main className="container mx-auto px-4 py-6 space-y-8">
+          {/* Hero Section */}
+          <div className="text-center space-y-6">
+            <div className="flex items-center justify-center gap-4">
+              <h1 className="text-3xl lg:text-4xl font-bold flex items-center gap-3">
+                <Code2 className="h-10 w-10" />
                 Advanced Code Editor
-                <Badge variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Monaco Powered
-                </Badge>
               </h1>
-              <p className="text-muted-foreground">Professional code editing with VS Code features, syntax highlighting, and IntelliSense</p>
+              <Badge variant="outline" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-sm">
+                <Sparkles className="h-4 w-4 mr-1" />
+                Monaco Powered
+              </Badge>
+            </div>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Professional code editing with VS Code features, syntax highlighting, IntelliSense, and real-time collaboration
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={handleStartNewProject} 
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-8 py-3 text-lg"
+              >
+                <Play className="h-5 w-5 mr-2" />
+                Start New Project
+              </Button>
+              <Button variant="outline" className="px-8 py-3 text-lg">
+                <FileCode className="h-5 w-5 mr-2" />
+                Open Existing Files
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={handleStartNewProject} className="bg-gradient-to-r from-green-500 to-green-600">
-              <Play className="h-4 w-4 mr-2" />
-              Start New Project
-            </Button>
-            <Button onClick={() => setIsFullscreen(!isFullscreen)} variant="outline">
-              <Maximize2 className="h-4 w-4 mr-2" />
-              Fullscreen Mode
-            </Button>
-          </div>
-        </div>
 
-        <div className="grid gap-6">
+          {/* Professional Features */}
           <Card className="border-2 border-dashed border-primary/20 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileCode className="h-5 w-5" />
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+                <FileCode className="h-6 w-6" />
                 Professional Features
               </CardTitle>
-              <CardDescription>Enterprise-grade code editing powered by Monaco Editor</CardDescription>
+              <CardDescription className="text-lg">
+                Enterprise-grade code editing powered by Monaco Editor
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-green-600">✨ Editor Features</h3>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• IntelliSense & Auto-completion</li>
-                    <li>• Advanced Syntax Highlighting</li>
-                    <li>• Error Detection & Linting</li>
-                    <li>• Code Folding & Minimap</li>
-                    <li>• Multi-cursor Editing</li>
-                    <li>• Find & Replace (Regex)</li>
-                  </ul>
-                </div>
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-blue-600">🚀 Development Tools</h3>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• File Tree Explorer</li>
-                    <li>• Multiple Tabs & Split View</li>
-                    <li>• Theme Support (Light/Dark)</li>
-                    <li>• Auto-save & Live Preview</li>
-                    <li>• Code Execution</li>
-                    <li>• Git Integration Ready</li>
-                  </ul>
-                </div>
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-purple-600">🛠️ Supported Languages</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {[
-                      "JavaScript", "TypeScript", "React", "Vue",
-                      "Python", "Java", "C++", "C#", "Go", "Rust",
-                      "HTML", "CSS", "SCSS", "JSON", "SQL", "Markdown"
-                    ].map((lang) => (
-                      <Badge key={lang} variant="outline" className="text-xs">
-                        {lang}
-                      </Badge>
-                    ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {editorFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-4 p-4 rounded-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur">
+                    <div className="flex-shrink-0">
+                      {feature.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          {/* Quick Start Options */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -204,55 +274,165 @@ export default function EditorPage() {
                 </CardTitle>
                 <CardDescription>Jump right into coding with a new project</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Create a new project with TypeScript, React, or any framework. 
-                    Includes file explorer, auto-completion, and real-time error checking.
-                  </p>
-                  <Button onClick={handleStartNewProject} className="w-full bg-gradient-to-r from-green-500 to-green-600">
-                    <Play className="h-4 w-4 mr-2" />
-                    Create New Project
-                  </Button>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Create a new project with TypeScript, React, or any framework. 
+                  Includes file explorer, auto-completion, and real-time error checking.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <FileCode className="h-5 w-5 text-blue-500" />
+                      <span className="font-medium">TypeScript Project</span>
+                    </div>
+                    <Badge variant="outline">Recommended</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <FileCode className="h-5 w-5 text-green-500" />
+                      <span className="font-medium">React Application</span>
+                    </div>
+                    <Badge variant="outline">Popular</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <FileCode className="h-5 w-5 text-purple-500" />
+                      <span className="font-medium">Python Script</span>
+                    </div>
+                    <Badge variant="outline">Easy</Badge>
+                  </div>
                 </div>
+                <Button onClick={handleStartNewProject} className="w-full bg-gradient-to-r from-green-500 to-green-600">
+                  <Play className="h-4 w-4 mr-2" />
+                  Create New Project
+                </Button>
               </CardContent>
             </Card>
 
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FolderOpen className="h-5 w-5 text-blue-500" />
+                  <FolderTree className="h-5 w-5 text-blue-500" />
                   Open Existing Files
                 </CardTitle>
                 <CardDescription>Browse and edit your existing codebase</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Select files from your storage to open in the advanced editor. 
-                    Supports all major programming languages and frameworks.
-                  </p>
-                  <div className="text-sm">
-                    <p className="font-medium mb-2">Select files below to get started:</p>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Select files from your storage to open in the advanced editor. 
+                  Supports all major programming languages and frameworks.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <Terminal className="h-5 w-5 text-orange-500" />
+                    <div>
+                      <p className="font-medium">Recent: main.py</p>
+                      <p className="text-xs text-muted-foreground">Modified 2 hours ago</p>
+                    </div>
                   </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <FileCode className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium">Recent: index.ts</p>
+                      <p className="text-xs text-muted-foreground">Modified 1 day ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <FileCode className="h-5 w-5 text-green-500" />
+                    <div>
+                      <p className="font-medium">Recent: config.json</p>
+                      <p className="text-xs text-muted-foreground">Modified 3 days ago</p>
+                    </div>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Browse All Files
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Development Tools & Language Support */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor className="h-5 w-5 text-blue-500" />
+                  Development Tools
+                </CardTitle>
+                <CardDescription>
+                  Powerful tools for modern development
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {developmentTools.map((tool, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-sm">{tool.title}</p>
+                        <p className="text-xs text-muted-foreground">{tool.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Code2 className="h-5 w-5 text-green-500" />
+                  Supported Languages
+                </CardTitle>
+                <CardDescription>
+                  50+ programming languages supported
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {supportedLanguages.map((lang) => (
+                    <Badge key={lang} variant="outline" className="text-xs">
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="mt-4 p-4 rounded-lg bg-muted/50">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Auto-detection:</strong> The editor automatically detects file types and provides appropriate syntax highlighting, IntelliSense, and error checking for your code.
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <Card>
+          {/* Mobile Notice */}
+          <Card className="lg:hidden">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="h-5 w-5" />
-                File Browser
+                <Smartphone className="h-5 w-5" />
+                Mobile Experience
               </CardTitle>
-              <CardDescription>Browse your files and select code files to edit</CardDescription>
             </CardHeader>
-            <CardContent className="p-0">
-              <FileManager onFileSelect={handleFileSelect} />
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                For the best coding experience, we recommend using the editor on a desktop or tablet with a keyboard. 
+                However, you can still view and make quick edits on mobile devices.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Eye className="h-4 w-4" />
+                  View Mode Only
+                </Button>
+                <Button size="sm" onClick={handleStartNewProject} className="gap-2">
+                  <Code2 className="h-4 w-4" />
+                  Try Mobile Editor
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        </div>
+        </main>
       </div>
     </ProtectedRoute>
   )
