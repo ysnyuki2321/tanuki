@@ -107,7 +107,13 @@ export function FileList({
               className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
                 selectedFiles.includes(file.id) ? "ring-2 ring-primary bg-primary/5" : ""
               }`}
-              onClick={() => onFileSelect(file.id, !selectedFiles.includes(file.id))}
+              onClick={(e) => {
+                if ((e as any).detail === 2) {
+                  onFileOpen(file)
+                } else {
+                  onFileSelect(file.id, !selectedFiles.includes(file.id))
+                }
+              }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -196,7 +202,13 @@ export function FileList({
                 className={`cursor-pointer hover:bg-muted/50 ${
                   selectedFiles.includes(file.id) ? "bg-primary/5" : ""
                 }`}
-                onClick={() => onFileSelect(file.id, !selectedFiles.includes(file.id))}
+                onClick={(e) => {
+                  if ((e as any).detail === 2) {
+                    onFileOpen(file)
+                  } else {
+                    onFileSelect(file.id, !selectedFiles.includes(file.id))
+                  }
+                }}
               >
                 <TableCell>
                   <Checkbox

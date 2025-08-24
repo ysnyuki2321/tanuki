@@ -16,6 +16,7 @@ import { toast } from "@/components/ui/use-toast"
 export function FileManager() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [currentParentId, setCurrentParentId] = useState<string | undefined>(undefined)
+  const [currentPath, setCurrentPath] = useState<string>("/")
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(true)
@@ -30,7 +31,7 @@ export function FileManager() {
   const loadFiles = async (parentId?: string) => {
     setIsLoading(true)
     try {
-      const fileList = await FileSystemService.getFiles(parentId)
+      const fileList = await FileSystemService.getFiles(parentId ?? currentPath)
       setFiles(fileList)
     } catch (error) {
       console.error("Failed to load files:", error)
@@ -41,7 +42,7 @@ export function FileManager() {
 
   useEffect(() => {
     loadFiles(currentParentId)
-  }, [currentParentId])
+  }, [currentParentId, currentPath])
 
   const handleFileSelect = (fileId: string, isSelected: boolean) => {
     if (isSelected) {
@@ -54,6 +55,7 @@ export function FileManager() {
   const handleFileOpen = (file: FileItem) => {
     if (file.type === "folder") {
       setCurrentParentId(file.id)
+      setCurrentPath(file.path)
       setSelectedFiles([])
     } else {
       const ext = file.name.split(".").pop()?.toLowerCase()
@@ -123,11 +125,7 @@ export function FileManager() {
     }
   }
 
-  const getCurrentPath = () => {
-    if (!currentParentId) return "/"
-    const currentFolder = files.find((f) => f.id === currentParentId)
-    return currentFolder?.path || "/"
-  }
+  const getCurrentPath = () => currentPath
 
   const filteredFiles = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
@@ -146,6 +144,10 @@ export function FileManager() {
         onPathChange={(path) => {
           if (path === "/") {
             setCurrentParentId(undefined)
+            setCurrentPath("/")
+          } else {
+            setCurrentParentId(undefined)
+            setCurrentPath(path)
           }
         }}
       />
