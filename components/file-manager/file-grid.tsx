@@ -135,13 +135,8 @@ export function FileGrid({
           className={`p-2 sm:p-4 cursor-pointer transition-all hover:shadow-md group ${
             selectedFiles.includes(file.id) ? "ring-2 ring-primary" : ""
           }`}
-          onClick={(e) => {
-            // Desktop: single click selects; double click opens
-            if (e.detail === 2) {
-              onFileOpen(file)
-            } else {
-              onFileSelect(file.id, !selectedFiles.includes(file.id))
-            }
+          onClick={() => {
+            onFileOpen(file)
           }}
         >
           <div className="flex flex-col items-center space-y-2">
