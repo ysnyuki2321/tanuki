@@ -30,26 +30,30 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-24 bg-muted/30">
+    <section className="py-24 bg-gradient-to-br from-muted/20 via-background to-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Core Features</h2>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Essential tools for modern web storage and file management
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            <span className="text-gradient">Powerful Features</span> for Modern Developers
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Everything you need to code, store, and collaborate efficiently in one integrated platform
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {features.map((feature, index) => (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-card/80 backdrop-blur-sm">
               <CardHeader>
-                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-white" />
+                <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center mb-4 shadow-lg">
+                  <feature.icon className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-base leading-relaxed">{feature.description}</CardDescription>
+                <CardDescription className="text-base leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </CardDescription>
               </CardContent>
             </Card>
           ))}
