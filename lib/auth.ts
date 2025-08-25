@@ -43,13 +43,26 @@ export class AuthService {
   }
 
   async signIn(email: string, password: string): Promise<{ user: User | null; error: string | null }> {
-    // Mock authentication - replace with real API call
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
+    // Input validation
+    if (!email || !password) {
+      return { user: null, error: "Email and password are required" }
+    }
 
-    const user = mockUsers.find((u) => u.email === email)
+    if (!this.isValidEmail(email)) {
+      return { user: null, error: "Please enter a valid email address" }
+    }
 
-    if (!user || password !== "demo123") {
-      return { user: null, error: "Invalid email or password" }
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
+    const user = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase())
+
+    if (!user) {
+      return { user: null, error: "No account found with this email address" }
+    }
+
+    if (password !== "demo123") {
+      return { user: null, error: "Incorrect password. Please try again." }
     }
 
     this.currentUser = user
