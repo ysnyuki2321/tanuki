@@ -41,7 +41,7 @@ const routeConfigs = {
 
 // CORS configuration
 const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGINS || '*',
+  'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGINS || (process.env.NODE_ENV === 'production' ? '' : '*'),
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin',
   'Access-Control-Max-Age': '86400', // 24 hours
@@ -53,7 +53,7 @@ function getCSPHeader(): string {
   
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'" + (isDev ? " 'unsafe-inline' 'unsafe-eval'" : ""),
+    "script-src 'self'" + (isDev ? " 'unsafe-inline' 'unsafe-eval'" : ""),
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: blob: https:",
@@ -147,7 +147,7 @@ export async function middleware(request: NextRequest) {
     response.headers.delete('X-Powered-By')
     
     // Add custom security headers
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    response.headers.set('X-Robots-Tag', process.env.NODE_ENV === 'production' ? 'index, follow' : 'noindex, nofollow')
     response.headers.set('X-Content-Type-Options', 'nosniff')
     
     return response
