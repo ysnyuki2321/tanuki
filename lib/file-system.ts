@@ -116,6 +116,86 @@ Happy storage! 🎉`,
       mimeType: "application/sql",
       isShared: true,
       shareId: "sample-database",
+      content: `-- Tanuki Storage Platform Database Schema
+-- User management and file storage tables
+
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
+    avatar_url VARCHAR(500),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Files table
+CREATE TABLE files (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    size BIGINT NOT NULL,
+    mime_type VARCHAR(255),
+    file_path VARCHAR(1000) NOT NULL,
+    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    parent_folder_id UUID REFERENCES files(id) ON DELETE CASCADE,
+    is_folder BOOLEAN DEFAULT FALSE,
+    is_shared BOOLEAN DEFAULT FALSE,
+    share_token VARCHAR(100),
+    share_expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File versions for version control
+CREATE TABLE file_versions (
+    id SERIAL PRIMARY KEY,
+    file_id UUID REFERENCES files(id) ON DELETE CASCADE,
+    version_number INTEGER NOT NULL,
+    content TEXT,
+    size BIGINT NOT NULL,
+    created_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File shares and permissions
+CREATE TABLE file_shares (
+    id SERIAL PRIMARY KEY,
+    file_id UUID REFERENCES files(id) ON DELETE CASCADE,
+    shared_by INTEGER REFERENCES users(id),
+    shared_with_email VARCHAR(255),
+    permission_level VARCHAR(20) DEFAULT 'read', -- read, write, admin
+    expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for better performance
+CREATE INDEX idx_files_owner_id ON files(owner_id);
+CREATE INDEX idx_files_parent_folder_id ON files(parent_folder_id);
+CREATE INDEX idx_files_share_token ON files(share_token);
+CREATE INDEX idx_file_versions_file_id ON file_versions(file_id);
+CREATE INDEX idx_file_shares_file_id ON file_shares(file_id);
+
+-- Sample data
+INSERT INTO users (email, name, password_hash, role) VALUES
+('admin@tanuki.dev', 'Admin User', '$2b$10$example_hash', 'admin'),
+('user@tanuki.dev', 'Demo User', '$2b$10$example_hash', 'user');
+
+-- Sample notification preferences
+CREATE TABLE user_preferences (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    theme VARCHAR(20) DEFAULT 'light',
+    notifications_enabled BOOLEAN DEFAULT TRUE,
+    email_notifications BOOLEAN DEFAULT TRUE,
+    file_upload_notifications BOOLEAN DEFAULT TRUE,
+    share_notifications BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+`,
     },
     {
       id: "config-file",
