@@ -9,6 +9,7 @@ import { FileUploadZone } from "./file-upload-zone"
 import { Breadcrumb } from "./breadcrumb"
 import { CodeEditorModal } from "@/components/code-editor/code-editor-modal"
 import { ZipPreviewModal } from "@/components/zip-preview/zip-preview-modal"
+import { FilePreviewModal } from "@/components/file-preview/file-preview-modal"
 import { Loader2 } from "lucide-react"
 
 export function FileManager() {
