@@ -57,6 +57,25 @@ export class FileSystemService {
       path: "/Documents/README.md",
       parentId: "documents",
       mimeType: "text/markdown",
+      content: `# Tanuki Web Storage Platform
+
+Welcome to your personal cloud storage platform!
+
+## Features
+
+- 📁 **File Management**: Upload, organize, and manage your files
+- 🔧 **Code Editor**: Edit code files directly in the browser
+- 🗄️ **Database GUI**: Manage your databases with visual tools
+- 🔗 **File Sharing**: Share files securely with custom permissions
+
+## Getting Started
+
+1. Upload files using the drag-and-drop zone
+2. Create folders to organize your content
+3. Use the code editor for text and code files
+4. Share files with generated secure links
+
+Happy storage! 🎉`,
     },
     {
       id: "proposal",
