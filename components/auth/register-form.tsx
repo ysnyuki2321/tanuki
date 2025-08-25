@@ -11,6 +11,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { TanukiLogo } from "@/components/tanuki-logo"
+import { OAuthButtons } from "@/components/auth/oauth-buttons"
+import { isSupabaseConfigured } from "@/lib/supabase-client"
 import Link from "next/link"
 
 interface RegisterFormProps {
