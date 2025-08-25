@@ -69,6 +69,11 @@ export function FileManager() {
     setIsZipPreviewOpen(true)
   }
 
+  const handleFilePreview = (file: FileItem) => {
+    setFilePreviewFile(file)
+    setIsFilePreviewOpen(true)
+  }
+
   const handleFileUpload = async (uploadedFiles: File[]) => {
     for (const file of uploadedFiles) {
       try {
