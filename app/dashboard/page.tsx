@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TanukiLogo } from "@/components/tanuki-logo"
 import { SimpleThemeToggle } from "@/components/theme-toggle"
 import { EnhancedNotificationCenter } from "@/components/notifications/enhanced-notification-center"
-import { LogOut, Settings, User, Database, Code, BarChart3, Files, Bell } from "lucide-react"
+import { LogOut, Settings, User, BarChart3, Files, Bell } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,12 +32,12 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b bg-card">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        {/* Enhanced Header */}
+        <header className="border-b bg-card/80 backdrop-blur-md shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <TanukiLogo size={32} />
+              <TanukiLogo size={36} />
 
               <div className="flex items-center gap-4">
                 <SimpleThemeToggle />
@@ -45,11 +45,11 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowNotifications(true)}
-                  className="relative"
+                  className="relative hover:bg-primary/10 transition-colors"
                 >
                   <Bell className="w-4 h-4" />
                 </Button>
-                <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.full_name || user?.email}</span>
+                <span className="hidden sm:block text-sm text-muted-foreground font-medium">Welcome, {user?.full_name || user?.email}</span>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -67,19 +67,6 @@ export default function DashboardPage() {
                         <p className="w-[160px] truncate text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/database">
-                        <Database className="mr-2 h-4 w-4" />
-                        Database
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/editor">
-                        <Code className="mr-2 h-4 w-4" />
-                        Code Editor
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/profile">
