@@ -89,30 +89,42 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Enhanced Main Content */}
         <main className="container mx-auto px-4 py-8">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="files" className="flex items-center gap-2">
-                <Files className="w-4 h-4" />
-                Files
-              </TabsTrigger>
-            </TabsList>
+          <Tabs defaultValue="overview" className="space-y-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-gradient mb-2">
+                  {user?.full_name ? `Hello, ${user.full_name.split(' ')[0]}!` : 'Welcome!'}
+                </h1>
+                <p className="text-muted-foreground">Manage your workspace with powerful tools</p>
+              </div>
+              <TabsList className="grid grid-cols-2 bg-muted/50 backdrop-blur-sm border shadow-sm">
+                <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Overview</span>
+                </TabsTrigger>
+                <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Files className="w-4 h-4" />
+                  <span className="hidden sm:inline">Files</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="overview" className="space-y-4">
-              <UserDashboard />
+            <TabsContent value="overview" className="space-y-6">
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl border shadow-sm p-1">
+                <UserDashboard />
+              </div>
             </TabsContent>
 
-            <TabsContent value="files" className="space-y-4">
+            <TabsContent value="files" className="space-y-6">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">File Manager</h2>
-                <p className="text-muted-foreground">Manage your files, edit code, and organize your digital workspace</p>
+                <h2 className="text-2xl font-bold mb-2 text-gradient">File Manager</h2>
+                <p className="text-muted-foreground">Edit code, manage files, and query databases - all in one place</p>
               </div>
-              <RealFileManager />
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl border shadow-sm p-6">
+                <RealFileManager />
+              </div>
             </TabsContent>
           </Tabs>
         </main>
