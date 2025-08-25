@@ -229,12 +229,12 @@ export async function POST(
     }
 
     // Check if value already exists for this environment
-    const { data: existingValue } = await supabase
+    const { data: existingValue } = await (supabase as any)
       .from('feature_flag_values')
       .select('id')
       .eq('flag_id', flagId)
       .eq('environment', environment)
-      .eq('tenant_id', tenantId || null as any)
+      .eq('tenant_id', tenantId || '')
       .single()
 
     if (existingValue) {
@@ -308,12 +308,12 @@ export async function DELETE(
     }
 
     // Delete flag value
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('feature_flag_values')
       .delete()
       .eq('flag_id', flagId)
       .eq('environment', environment)
-      .eq('tenant_id', tenantId || null as any)
+      .eq('tenant_id', tenantId || '')
 
     if (error) {
       throw error

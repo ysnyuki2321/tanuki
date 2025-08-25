@@ -98,7 +98,7 @@ export function RealCodeEditor() {
   const [showSettings, setShowSettings] = useState(false);
   const [recentFiles, setRecentFiles] = useState<DbFile[]>([]);
   const editorRef = useRef<any>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Load recent code files
   useEffect(() => {

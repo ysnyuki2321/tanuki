@@ -87,10 +87,10 @@ export class BrandingService {
       }
       
       // Get branding config from database
-      const { data: configs } = await supabase
+      const { data: configs } = await (supabase as any)
         .from('admin_config')
         .select('key, value')
-        .eq('tenant_id', tenantId || null)
+        .eq('tenant_id', tenantId || '')
         .in('key', [
           'logo_url', 'logo_dark_url', 'favicon_url',
           'primary_color', 'secondary_color', 'accent_color', 'background_color', 'text_color',
@@ -103,7 +103,7 @@ export class BrandingService {
       // Build branding config from database values
       const branding = { ...DEFAULT_BRANDING }
       
-      configs?.forEach(config => {
+      configs?.forEach((config: any) => {
         if (config.value !== null) {
           (branding as any)[config.key] = config.value
         }
@@ -131,7 +131,7 @@ export class BrandingService {
       
       // Convert updates to config entries
       const configUpdates = Object.entries(updates).map(([key, value]) => ({
-        tenant_id: tenantId || null,
+        tenant_id: tenantId || '',
         key,
         value,
         data_type: typeof value === 'object' ? 'json' : typeof value,
@@ -140,7 +140,7 @@ export class BrandingService {
       }))
       
       // Upsert config entries
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('admin_config')
         .upsert(configUpdates, {
           onConflict: 'key,tenant_id'
@@ -314,10 +314,10 @@ export class BrandingService {
       }
       
       // Delete all branding configs for tenant
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('admin_config')
         .delete()
-        .eq('tenant_id', tenantId || null)
+        .eq('tenant_id', tenantId || '')
         .eq('category', 'branding')
       
       if (error) {

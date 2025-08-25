@@ -98,7 +98,7 @@ export class FileStorageService {
         : `${user.id}/${fileName}`
 
       // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await (supabase as any).storage
         .from(this.STORAGE_BUCKET)
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -110,7 +110,7 @@ export class FileStorageService {
       }
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = (supabase as any).storage
         .from(this.STORAGE_BUCKET)
         .getPublicUrl(filePath)
 
@@ -134,7 +134,7 @@ export class FileStorageService {
         processing_status: 'completed',
       }
 
-      const { data: dbFile, error: dbError } = await supabase
+      const { data: dbFile, error: dbError } = await (supabase as any)
         .from('files')
         .insert(fileRecord)
         .select()

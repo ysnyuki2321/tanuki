@@ -146,8 +146,8 @@ export function ShareManagement({ userId }: ShareManagementProps) {
   const filteredShares = shares.filter(share => {
     // Search filter
     const matchesSearch = !searchTerm || 
-      share.file?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      share.file?.original_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      (share as any).file_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (share as any).original_file_name?.toLowerCase().includes(searchTerm.toLowerCase())
 
     // Status filter
     const status = getShareStatus(share)
@@ -321,13 +321,13 @@ export function ShareManagement({ userId }: ShareManagementProps) {
                         <TableCell>
                           <div className="space-y-1">
                             <p className="font-medium truncate max-w-[200px]">
-                              {share.file?.original_name || 'Unknown File'}
+                              {(share as any).file?.original_name || 'Unknown File'}
                             </p>
-                            {share.file?.size && (
-                              <p className="text-xs text-muted-foreground">
-                                {formatBytes(share.file.size)}
-                              </p>
-                            )}
+                                                          {(share as any).file?.size && (
+                                <p className="text-xs text-muted-foreground">
+                                  {formatBytes((share as any).file.size)}
+                                </p>
+                              )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -449,17 +449,17 @@ export function ShareManagement({ userId }: ShareManagementProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">File Name</p>
-                      <p className="font-medium">{selectedShare.file?.original_name}</p>
+                      <p className="font-medium">{(selectedShare as any).file?.original_name}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">File Size</p>
                       <p className="font-medium">
-                        {selectedShare.file?.size ? formatBytes(selectedShare.file.size) : 'Unknown'}
+                        {(selectedShare as any).file?.size ? formatBytes((selectedShare as any).file.size) : 'Unknown'}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">File Type</p>
-                      <p className="font-medium">{selectedShare.file?.mime_type || 'Unknown'}</p>
+                      <p className="font-medium">{(selectedShare as any).file?.mime_type || 'Unknown'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Status</p>

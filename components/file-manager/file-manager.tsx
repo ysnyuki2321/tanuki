@@ -377,7 +377,7 @@ export function FileManager() {
       <CodeEditorModal isOpen={isEditorOpen} onClose={() => setIsEditorOpen(false)} files={editorFiles} />
 
       {zipPreviewFile && (
-        <ZipPreviewModal isOpen={isZipPreviewOpen} onClose={() => setIsZipPreviewOpen(false)} file={zipPreviewFile} />
+        <ZipPreviewModal isOpen={isZipPreviewOpen} onClose={() => setIsZipPreviewOpen(false)} fileName={zipPreviewFile.name} />
       )}
 
       {filePreviewFile && (

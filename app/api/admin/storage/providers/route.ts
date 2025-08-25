@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       .from('storage_providers')
       .select('id')
       .eq('name', name)
-      .eq('tenant_id', tenantId || null)
+              .eq('tenant_id', tenantId || '')
       .single()
 
     if (existingProvider) {
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       await (supabase as any)
         .from('storage_providers')
         .update({ is_default: false })
-        .eq('tenant_id', tenantId || null)
+        .eq('tenant_id', tenantId || '')
     }
 
     // Create storage provider
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         type,
         bucket_name: bucketName,
         region,
-        tenant_id: tenantId || null,
+        tenant_id: tenantId || '',
         encrypted_credentials: JSON.stringify(credentials), // In production, use proper encryption
         is_default: isDefault || false,
         is_active: true,

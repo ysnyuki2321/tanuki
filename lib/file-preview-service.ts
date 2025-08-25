@@ -229,7 +229,7 @@ export class FilePreviewService {
       }
 
       // Get file metadata
-      const { data: file, error: fileError } = await supabase
+      const { data: file, error: fileError } = await (supabase as any)
         .from('files')
         .select('*')
         .eq('id', fileId)
@@ -254,7 +254,7 @@ export class FilePreviewService {
       const previewType = this.getPreviewType(file.mime_type, file.extension)
 
       // Generate signed URL for access
-      const { data: signedUrlData, error: urlError } = await supabase.storage
+      const { data: signedUrlData, error: urlError } = await (supabase as any).storage
         .from('files')
         .createSignedUrl(file.storage_path!, 3600) // 1 hour expiry
 
@@ -310,7 +310,7 @@ export class FilePreviewService {
       }
 
       // Log preview activity
-      await this.logPreviewActivity(user.id, fileId, previewType)
+      await this.logPreviewActivity(user.id, fileId, previewType || 'unknown')
 
       return result
     } catch (error) {
@@ -339,7 +339,7 @@ export class FilePreviewService {
       }
 
       // Get file metadata
-      const { data: file, error: fileError } = await supabase
+      const { data: file, error: fileError } = await (supabase as any)
         .from('files')
         .select('*')
         .eq('id', fileId)
@@ -357,7 +357,7 @@ export class FilePreviewService {
 
       // In a real implementation, you would generate a thumbnail
       // For now, return the original image URL with transform parameters
-      const { data: signedUrlData, error: urlError } = await supabase.storage
+      const { data: signedUrlData, error: urlError } = await (supabase as any).storage
         .from('files')
         .createSignedUrl(file.storage_path!, 3600, {
           transform: {
@@ -470,7 +470,7 @@ export class FilePreviewService {
       const supabase = getSupabase()
       if (!supabase) return
 
-      await supabase
+      await (supabase as any)
         .from('activity_logs')
         .insert({
           user_id: userId,

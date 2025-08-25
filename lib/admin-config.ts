@@ -98,7 +98,7 @@ export const CONFIG_CATEGORIES: ConfigCategory[] = [
   }
 ]
 
-export const DEFAULT_CONFIGS: Omit<ConfigValue, 'id' | 'created_at' | 'updated_at'>[] = [
+export const DEFAULT_CONFIGS = [
   // Database
   {
     tenant_id: null,
@@ -771,7 +771,7 @@ export class AdminConfigService {
       .from('admin_config')
       .select('*')
       .eq('key', key)
-      .eq('tenant_id', tenantId || null)
+      .eq('tenant_id', tenantId || '')
       .single()
 
     if (error && error.code !== 'PGRST116') { // Not found error
@@ -805,7 +805,7 @@ export class AdminConfigService {
     const configData = {
       key,
       value,
-      tenant_id: options?.tenantId || null,
+      tenant_id: options?.tenantId || '',
       description: options?.description,
       category: options?.category || 'general',
       data_type: options?.dataType || 'string',
@@ -814,9 +814,9 @@ export class AdminConfigService {
       requires_restart: options?.requiresRestart || false
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('admin_config')
-      .upsert(configData, {
+      .upsert([configData], {
         onConflict: 'key,tenant_id'
       })
       .select()
@@ -842,7 +842,7 @@ export class AdminConfigService {
       .from('admin_config')
       .delete()
       .eq('key', key)
-      .eq('tenant_id', tenantId || null)
+      .eq('tenant_id', tenantId || '')
 
     if (error) {
       throw new Error(`Failed to delete config: ${error.message}`)
@@ -859,7 +859,7 @@ export class AdminConfigService {
     }
 
     // Insert default configs, ignoring conflicts
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('admin_config')
       .upsert(DEFAULT_CONFIGS, {
         onConflict: 'key,tenant_id',

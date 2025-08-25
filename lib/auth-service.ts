@@ -237,7 +237,7 @@ export class AuthService {
       if (!user) return null
 
       // Get full user profile from database
-      const { data: profile } = await supabase
+      const { data: profile } = await (supabase as any)
         .from('users')
         .select('*')
         .eq('id', user.id)
@@ -258,7 +258,7 @@ export class AuthService {
     }
 
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await (supabaseAdmin as any)
         .from('users')
         .insert({
           id: userId,
@@ -287,7 +287,7 @@ export class AuthService {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('users')
         .update({
           ...updates,
@@ -312,7 +312,7 @@ export class AuthService {
     if (!supabase) return
 
     try {
-      await supabase
+      await (supabase as any)
         .from('users')
         .update({
           last_login: new Date().toISOString(),
@@ -333,7 +333,7 @@ export class AuthService {
 
     try {
       // Update email_verified in our users table
-      const { error: dbError } = await supabaseAdmin
+      const { error: dbError } = await (supabaseAdmin as any)
         .from('users')
         .update({
           email_verified: true,
@@ -390,6 +390,7 @@ export class AuthService {
 
   // Check if user has permission
   static async hasPermission(userId: string, permission: string): Promise<boolean> {
+    const supabase = getSupabase()
     if (!supabase) return false
 
     try {
@@ -433,10 +434,11 @@ export class AuthService {
 
   // Get user by ID (admin function)
   static async getUserById(userId: string): Promise<DbUser | null> {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) return null
 
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await (supabaseAdmin as any)
         .from('users')
         .select('*')
         .eq('id', userId)
@@ -458,7 +460,7 @@ export class AuthService {
     }
 
     try {
-      const { data } = await supabaseAdmin
+      const { data } = await (supabaseAdmin as any)
         .from('users')
         .select('*')
         .range(offset, offset + limit - 1)
@@ -473,6 +475,7 @@ export class AuthService {
 
   // Delete user (admin function)
   static async deleteUser(userId: string) {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured')
     }
@@ -485,7 +488,7 @@ export class AuthService {
       }
 
       // Delete user profile from database
-      const { error: dbError } = await supabaseAdmin
+      const { error: dbError } = await (supabaseAdmin as any)
         .from('users')
         .delete()
         .eq('id', userId)
