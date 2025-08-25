@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { FileStorageService, type FileUploadOptions } from '@/lib/file-storage';
-import { type DbFile } from '@/lib/supabase';
+import { type DbFile } from '@/lib/database-schema';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
