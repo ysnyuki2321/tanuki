@@ -26,6 +26,11 @@ interface AppConfig {
   aws_secret_key: string | null;
   aws_bucket: string | null;
   aws_region: string | null;
+
+  // Google Cloud Storage settings
+  gcs_project_id: string | null;
+  gcs_key_file: string | null;
+  gcs_bucket: string | null;
   
   // Payment gateways - default null
   stripe_public_key: string | null;
@@ -124,6 +129,11 @@ export const getConfig = (): AppConfig => {
     aws_secret_key: env.AWS_SECRET_ACCESS_KEY || null,
     aws_bucket: env.AWS_BUCKET || null,
     aws_region: env.AWS_REGION || null,
+
+    // Google Cloud Storage
+    gcs_project_id: env.GCS_PROJECT_ID || null,
+    gcs_key_file: env.GCS_KEY_FILE || null,
+    gcs_bucket: env.GCS_BUCKET || null,
     
     // Payment
     stripe_public_key: env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || null,
