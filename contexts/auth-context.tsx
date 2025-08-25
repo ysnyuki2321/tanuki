@@ -2,12 +2,21 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { AuthService, type AuthState } from "@/lib/auth"
+import { AuthService } from "@/lib/auth-service"
+import { type DbUser } from "@/lib/supabase"
+
+interface AuthState {
+  user: DbUser | null
+  isLoading: boolean
+  isAuthenticated: boolean
+}
 
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>
+  signUp: (email: string, password: string, metadata?: { full_name?: string; company?: string; phone?: string }) => Promise<{ success: boolean; error?: string }>
   signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>
+  updateProfile: (updates: Partial<DbUser>) => Promise<{ success: boolean; error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -19,56 +28,92 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
   })
 
-  const authService = AuthService.getInstance()
-
   useEffect(() => {
     // Check for existing session on mount
-    const user = authService.getCurrentUser()
-    setState({
-      user,
-      isLoading: false,
-      isAuthenticated: !!user,
+    loadUser()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        await loadUser()
+      } else if (event === 'SIGNED_OUT') {
+        setState({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+        })
+      }
     })
+
+    return () => subscription.unsubscribe()
   }, [])
+
+  const loadUser = async () => {
+    setState(prev => ({ ...prev, isLoading: true }))
+
+    try {
+      const user = await AuthService.getCurrentUser()
+      setState({
+        user,
+        isLoading: false,
+        isAuthenticated: !!user,
+      })
+    } catch (error) {
+      console.error('Error loading user:', error)
+      setState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+      })
+    }
+  }
 
   const signIn = async (email: string, password: string) => {
     setState((prev) => ({ ...prev, isLoading: true }))
 
-    const { user, error } = await authService.signIn(email, password)
+    try {
+      const { user } = await AuthService.signIn(email, password)
 
-    if (user) {
-      setState({
-        user,
-        isLoading: false,
-        isAuthenticated: true,
-      })
-      return { success: true }
-    } else {
+      if (user) {
+        // Load full user profile
+        await loadUser()
+        return { success: true }
+      } else {
+        setState((prev) => ({ ...prev, isLoading: false }))
+        return { success: false, error: "Sign in failed" }
+      }
+    } catch (error: any) {
       setState((prev) => ({ ...prev, isLoading: false }))
-      return { success: false, error: error || "Sign in failed" }
+      return { success: false, error: error.message || "Sign in failed" }
     }
   }
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, metadata?: {
+    full_name?: string
+    company?: string
+    phone?: string
+  }) => {
     setState((prev) => ({ ...prev, isLoading: true }))
 
-    const { user, error } = await authService.signUp(email, password, name)
+    try {
+      const { user } = await AuthService.signUp(email, password, metadata)
 
-    if (user) {
-      setState({
-        user,
-        isLoading: false,
-        isAuthenticated: true,
-      })
-      return { success: true }
-    } else {
+      if (user) {
+        // Load full user profile
+        await loadUser()
+        return { success: true }
+      } else {
+        setState((prev) => ({ ...prev, isLoading: false }))
+        return { success: false, error: "Sign up failed" }
+      }
+    } catch (error: any) {
       setState((prev) => ({ ...prev, isLoading: false }))
-      return { success: false, error: error || "Sign up failed" }
+      return { success: false, error: error.message || "Sign up failed" }
     }
   }
 
   const signOut = async () => {
-    await authService.signOut()
+    await AuthService.signOut()
     setState({
       user: null,
       isLoading: false,
@@ -76,7 +121,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  return <AuthContext.Provider value={{ ...state, signIn, signUp, signOut }}>{children}</AuthContext.Provider>
+  const resetPassword = async (email: string) => {
+    try {
+      await AuthService.resetPassword(email)
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message || "Password reset failed" }
+    }
+  }
+
+  const updateProfile = async (updates: Partial<DbUser>) => {
+    if (!state.user) {
+      return { success: false, error: "Not authenticated" }
+    }
+
+    try {
+      await AuthService.updateUserProfile(state.user.id, updates)
+
+      // Reload user data
+      await loadUser()
+
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message || "Profile update failed" }
+    }
+  }
+
+  return (
+    <AuthContext.Provider value={{
+      ...state,
+      signIn,
+      signUp,
+      signOut,
+      resetPassword,
+      updateProfile
+    }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

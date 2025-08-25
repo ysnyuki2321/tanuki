@@ -8,6 +8,7 @@ import { SystemOverview } from "./system-overview"
 import { UserManagement } from "./user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
+import SetupWizard from "./setup-wizard"
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<SystemStats | null>(null)
@@ -65,13 +66,18 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="setup" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="setup">
+          <SetupWizard />
+        </TabsContent>
 
         <TabsContent value="overview">
           <SystemOverview stats={stats} />

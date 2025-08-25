@@ -41,7 +41,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       return
     }
 
-    const result = await signUp(email, password, name)
+    const result = await signUp(email, password, { full_name: name })
 
     if (result.success) {
       onSuccess?.()

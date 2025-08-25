@@ -1,334 +1,551 @@
+import { supabase, supabaseAdmin, type DbFile } from './supabase'
+import { AuthService } from './auth-service'
+
 export interface FileVersion {
   id: string
-  fileId: string
-  versionNumber: number
-  content: string
-  size: number
-  checksum: string
-  createdAt: string
-  createdBy: string
-  changeDescription?: string
-  tags?: string[]
-}
-
-export interface FileHistory {
-  fileId: string
-  fileName: string
-  totalVersions: number
-  currentVersion: number
-  versions: FileVersion[]
-  totalSize: number
+  file_id: string
+  version_number: number
+  size: number | null
+  storage_path: string | null
+  checksum: string | null
+  changes_description: string | null
+  created_by: string | null
+  created_at: string
+  file?: DbFile
+  creator?: {
+    full_name: string | null
+    email: string
+  }
 }
 
 export interface VersionComparison {
   oldVersion: FileVersion
   newVersion: FileVersion
-  changes: {
-    linesAdded: number
-    linesRemoved: number
-    linesModified: number
-    additions: string[]
-    deletions: string[]
-    modifications: { line: number; old: string; new: string }[]
-  }
+  sizeDifference: number
+  timeDifference: number
 }
-
-// Mock versioning data
-const mockVersions: FileVersion[] = [
-  {
-    id: "v1",
-    fileId: "readme",
-    versionNumber: 1,
-    content: `# Tanuki Web Storage Platform
-
-Welcome to your personal cloud storage platform!
-
-## Features
-
-- File Management: Upload and organize files
-- Code Editor: Edit code files in browser
-- Database GUI: Manage databases visually
-
-## Getting Started
-
-1. Upload files
-2. Create folders
-3. Edit code files
-4. Share files
-
-Happy storage!`,
-    size: 512,
-    checksum: "abc123",
-    createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-    createdBy: "user@tanuki.dev",
-    changeDescription: "Initial file creation",
-    tags: ["initial", "documentation"]
-  },
-  {
-    id: "v2",
-    fileId: "readme",
-    versionNumber: 2,
-    content: `# Tanuki Web Storage Platform
-
-Welcome to your personal cloud storage platform!
-
-## Features
-
-- 📁 **File Management**: Upload, organize, and manage your files
-- 🔧 **Code Editor**: Edit code files directly in the browser
-- 🗄️ **Database GUI**: Manage your databases with visual tools
-- 🔗 **File Sharing**: Share files securely with custom permissions
-
-## Getting Started
-
-1. Upload files using the drag-and-drop zone
-2. Create folders to organize your content
-3. Use the code editor for text and code files
-4. Share files with generated secure links
-
-Happy storage! 🎉`,
-    size: 768,
-    checksum: "def456",
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    createdBy: "admin@tanuki.dev",
-    changeDescription: "Added emojis and improved formatting",
-    tags: ["update", "formatting"]
-  },
-  {
-    id: "v3",
-    fileId: "readme",
-    versionNumber: 3,
-    content: `# Tanuki Web Storage Platform
-
-Welcome to your personal cloud storage platform!
-
-## Features
-
-- 📁 **File Management**: Upload, organize, and manage your files
-- 🔧 **Code Editor**: Edit code files directly in the browser
-- 🗄️ **Database GUI**: Manage your databases with visual tools
-- 🔗 **File Sharing**: Share files securely with custom permissions
-
-## Getting Started
-
-1. Upload files using the drag-and-drop zone
-2. Create folders to organize your content
-3. Use the code editor for text and code files
-4. Share files with generated secure links
-
-## New Features
-
-- Advanced search and filtering
-- File versioning and history
-- Real-time notifications
-
-Happy storage! 🎉`,
-    size: 1024,
-    checksum: "ghi789",
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    createdBy: "user@tanuki.dev",
-    changeDescription: "Added new features section",
-    tags: ["update", "features"]
-  }
-]
 
 export class FileVersioningService {
-  private static instance: FileVersioningService
-  private versions: FileVersion[] = [...mockVersions]
-
-  static getInstance(): FileVersioningService {
-    if (!FileVersioningService.instance) {
-      FileVersioningService.instance = new FileVersioningService()
-    }
-    return FileVersioningService.instance
-  }
-
-  async getFileHistory(fileId: string): Promise<FileHistory | null> {
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    const fileVersions = this.versions
-      .filter(v => v.fileId === fileId)
-      .sort((a, b) => b.versionNumber - a.versionNumber)
-
-    if (fileVersions.length === 0) return null
-
-    const totalSize = fileVersions.reduce((sum, v) => sum + v.size, 0)
-
-    return {
-      fileId,
-      fileName: "README.md", // In real implementation, get from file service
-      totalVersions: fileVersions.length,
-      currentVersion: Math.max(...fileVersions.map(v => v.versionNumber)),
-      versions: fileVersions,
-      totalSize
-    }
-  }
-
-  async getVersion(versionId: string): Promise<FileVersion | null> {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    return this.versions.find(v => v.id === versionId) || null
-  }
-
-  async createVersion(
+  // Create a new version of a file
+  static async createVersion(
     fileId: string, 
-    content: string, 
-    createdBy: string, 
-    changeDescription?: string,
-    tags?: string[]
-  ): Promise<FileVersion> {
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    const existingVersions = this.versions.filter(v => v.fileId === fileId)
-    const nextVersion = existingVersions.length > 0 
-      ? Math.max(...existingVersions.map(v => v.versionNumber)) + 1 
-      : 1
-
-    const newVersion: FileVersion = {
-      id: `v${Date.now()}`,
-      fileId,
-      versionNumber: nextVersion,
-      content,
-      size: new Blob([content]).size,
-      checksum: this.generateChecksum(content),
-      createdAt: new Date().toISOString(),
-      createdBy,
-      changeDescription,
-      tags
-    }
-
-    this.versions.push(newVersion)
-    return newVersion
-  }
-
-  async restoreVersion(fileId: string, versionId: string): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, 400))
-
-    const version = this.versions.find(v => v.id === versionId)
-    if (!version) return false
-
-    // In real implementation, this would update the actual file
-    // For now, we'll create a new version with the restored content
-    await this.createVersion(
-      fileId,
-      version.content,
-      "system",
-      `Restored from version ${version.versionNumber}`,
-      ["restore"]
-    )
-
-    return true
-  }
-
-  async deleteVersion(versionId: string): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    const index = this.versions.findIndex(v => v.id === versionId)
-    if (index === -1) return false
-
-    this.versions.splice(index, 1)
-    return true
-  }
-
-  async compareVersions(versionId1: string, versionId2: string): Promise<VersionComparison | null> {
-    await new Promise(resolve => setTimeout(resolve, 400))
-
-    const version1 = await this.getVersion(versionId1)
-    const version2 = await this.getVersion(versionId2)
-
-    if (!version1 || !version2) return null
-
-    const [oldVersion, newVersion] = version1.versionNumber < version2.versionNumber 
-      ? [version1, version2] 
-      : [version2, version1]
-
-    const changes = this.calculateChanges(oldVersion.content, newVersion.content)
-
-    return {
-      oldVersion,
-      newVersion,
-      changes
-    }
-  }
-
-  async searchVersions(fileId: string, query: string): Promise<FileVersion[]> {
-    await new Promise(resolve => setTimeout(resolve, 200))
-
-    const fileVersions = this.versions.filter(v => v.fileId === fileId)
-    
-    if (!query) return fileVersions
-
-    const lowerQuery = query.toLowerCase()
-    return fileVersions.filter(version =>
-      version.changeDescription?.toLowerCase().includes(lowerQuery) ||
-      version.tags?.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
-      version.content.toLowerCase().includes(lowerQuery)
-    )
-  }
-
-  private generateChecksum(content: string): string {
-    // Simple hash function for demo purposes
-    let hash = 0
-    for (let i = 0; i < content.length; i++) {
-      const char = content.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash = hash & hash // Convert to 32-bit integer
-    }
-    return Math.abs(hash).toString(16)
-  }
-
-  private calculateChanges(oldContent: string, newContent: string) {
-    const oldLines = oldContent.split('\n')
-    const newLines = newContent.split('\n')
-    
-    const additions: string[] = []
-    const deletions: string[] = []
-    const modifications: { line: number; old: string; new: string }[] = []
-
-    // Simple diff algorithm for demo
-    const maxLines = Math.max(oldLines.length, newLines.length)
-    
-    for (let i = 0; i < maxLines; i++) {
-      const oldLine = oldLines[i]
-      const newLine = newLines[i]
-
-      if (oldLine === undefined && newLine !== undefined) {
-        additions.push(newLine)
-      } else if (oldLine !== undefined && newLine === undefined) {
-        deletions.push(oldLine)
-      } else if (oldLine !== newLine) {
-        modifications.push({ line: i + 1, old: oldLine, new: newLine })
+    newContent: Blob, 
+    changesDescription?: string
+  ): Promise<{ success: boolean; version?: FileVersion; error?: string }> {
+    try {
+      if (!supabase) {
+        return { success: false, error: 'Database not configured' }
       }
-    }
 
-    return {
-      linesAdded: additions.length,
-      linesRemoved: deletions.length,
-      linesModified: modifications.length,
-      additions,
-      deletions,
-      modifications
+      const user = await AuthService.getCurrentUser()
+      if (!user) {
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Get current file
+      const { data: currentFile, error: fileError } = await supabase
+        .from('files')
+        .select('*')
+        .eq('id', fileId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (fileError || !currentFile) {
+        return { success: false, error: 'File not found or access denied' }
+      }
+
+      // Get current version count
+      const { data: versions, error: versionError } = await supabase
+        .from('file_versions')
+        .select('version_number')
+        .eq('file_id', fileId)
+        .order('version_number', { ascending: false })
+        .limit(1)
+
+      if (versionError) {
+        return { success: false, error: 'Failed to get version information' }
+      }
+
+      const nextVersionNumber = (versions?.[0]?.version_number || 0) + 1
+
+      // Calculate checksum
+      const checksum = await this.calculateChecksum(newContent)
+
+      // Generate storage path for new version
+      const fileExt = currentFile.original_name.split('.').pop()
+      const versionPath = `${currentFile.path}_v${nextVersionNumber}.${fileExt}`
+
+      // Upload new version to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('files')
+        .upload(versionPath, newContent, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) {
+        return { success: false, error: uploadError.message }
+      }
+
+      // Create version record
+      const versionData = {
+        file_id: fileId,
+        version_number: nextVersionNumber,
+        size: newContent.size,
+        storage_path: uploadData.path,
+        checksum,
+        changes_description: changesDescription || null,
+        created_by: user.id,
+      }
+
+      const { data: version, error: versionCreateError } = await supabase
+        .from('file_versions')
+        .insert(versionData)
+        .select()
+        .single()
+
+      if (versionCreateError) {
+        // Clean up uploaded file
+        await supabase.storage.from('files').remove([uploadData.path])
+        return { success: false, error: versionCreateError.message }
+      }
+
+      // Update main file record
+      const { error: updateError } = await supabase
+        .from('files')
+        .update({
+          version_number: nextVersionNumber,
+          size: newContent.size,
+          storage_path: uploadData.path,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', fileId)
+
+      if (updateError) {
+        console.warn('Failed to update main file record:', updateError)
+      }
+
+      // Log activity
+      await this.logVersionActivity(user.id, 'version.create', fileId, {
+        versionNumber: nextVersionNumber,
+        changesDescription,
+      })
+
+      return { success: true, version: version as FileVersion }
+    } catch (error) {
+      console.error('Error creating version:', error)
+      return { success: false, error: 'Failed to create version' }
     }
   }
 
-  formatFileSize(bytes: number): string {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    if (bytes === 0) return '0 Bytes'
-    const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
+  // Get all versions of a file
+  static async getFileVersions(fileId: string): Promise<FileVersion[]> {
+    try {
+      if (!supabase) return []
+
+      const user = await AuthService.getCurrentUser()
+      if (!user) return []
+
+      // Check if user has access to the file
+      const { data: file } = await supabase
+        .from('files')
+        .select('user_id')
+        .eq('id', fileId)
+        .single()
+
+      if (!file || file.user_id !== user.id) {
+        return []
+      }
+
+      const { data: versions, error } = await supabase
+        .from('file_versions')
+        .select(`
+          *,
+          creator:users!created_by(full_name, email)
+        `)
+        .eq('file_id', fileId)
+        .order('version_number', { ascending: false })
+
+      if (error) {
+        console.error('Error loading versions:', error)
+        return []
+      }
+
+      return versions as FileVersion[]
+    } catch (error) {
+      console.error('Error getting file versions:', error)
+      return []
+    }
   }
 
-  getVersionStats(versions: FileVersion[]) {
-    const totalSize = versions.reduce((sum, v) => sum + v.size, 0)
-    const avgSize = versions.length > 0 ? totalSize / versions.length : 0
-    const sizeGrowth = versions.length > 1 
-      ? ((versions[0].size - versions[versions.length - 1].size) / versions[versions.length - 1].size) * 100
-      : 0
+  // Restore a file to a specific version
+  static async restoreToVersion(
+    fileId: string, 
+    versionNumber: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!supabase) {
+        return { success: false, error: 'Database not configured' }
+      }
 
-    return {
-      totalVersions: versions.length,
-      totalSize: this.formatFileSize(totalSize),
-      averageSize: this.formatFileSize(avgSize),
-      sizeGrowth: Math.round(sizeGrowth * 100) / 100
+      const user = await AuthService.getCurrentUser()
+      if (!user) {
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Get the target version
+      const { data: version, error: versionError } = await supabase
+        .from('file_versions')
+        .select('*')
+        .eq('file_id', fileId)
+        .eq('version_number', versionNumber)
+        .single()
+
+      if (versionError || !version) {
+        return { success: false, error: 'Version not found' }
+      }
+
+      // Get current file
+      const { data: currentFile, error: fileError } = await supabase
+        .from('files')
+        .select('*')
+        .eq('id', fileId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (fileError || !currentFile) {
+        return { success: false, error: 'File not found or access denied' }
+      }
+
+      // Download version content
+      if (!version.storage_path) {
+        return { success: false, error: 'Version storage path not found' }
+      }
+
+      const { data: versionData, error: downloadError } = await supabase.storage
+        .from('files')
+        .download(version.storage_path)
+
+      if (downloadError || !versionData) {
+        return { success: false, error: 'Failed to download version content' }
+      }
+
+      // Create new version from current state before restoring
+      await this.createVersion(
+        fileId, 
+        versionData, 
+        `Restored to version ${versionNumber}`
+      )
+
+      // Update main file to point to restored version
+      const { error: updateError } = await supabase
+        .from('files')
+        .update({
+          storage_path: version.storage_path,
+          size: version.size,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', fileId)
+
+      if (updateError) {
+        return { success: false, error: updateError.message }
+      }
+
+      // Log activity
+      await this.logVersionActivity(user.id, 'version.restore', fileId, {
+        restoredToVersion: versionNumber,
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error restoring version:', error)
+      return { success: false, error: 'Failed to restore version' }
+    }
+  }
+
+  // Delete a specific version
+  static async deleteVersion(
+    fileId: string, 
+    versionNumber: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!supabase) {
+        return { success: false, error: 'Database not configured' }
+      }
+
+      const user = await AuthService.getCurrentUser()
+      if (!user) {
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Check if user owns the file
+      const { data: file } = await supabase
+        .from('files')
+        .select('user_id')
+        .eq('id', fileId)
+        .single()
+
+      if (!file || file.user_id !== user.id) {
+        return { success: false, error: 'Access denied' }
+      }
+
+      // Get the version to delete
+      const { data: version, error: versionError } = await supabase
+        .from('file_versions')
+        .select('*')
+        .eq('file_id', fileId)
+        .eq('version_number', versionNumber)
+        .single()
+
+      if (versionError || !version) {
+        return { success: false, error: 'Version not found' }
+      }
+
+      // Delete from storage
+      if (version.storage_path) {
+        const { error: storageError } = await supabase.storage
+          .from('files')
+          .remove([version.storage_path])
+
+        if (storageError) {
+          console.warn('Failed to delete version from storage:', storageError)
+        }
+      }
+
+      // Delete version record
+      const { error: deleteError } = await supabase
+        .from('file_versions')
+        .delete()
+        .eq('id', version.id)
+
+      if (deleteError) {
+        return { success: false, error: deleteError.message }
+      }
+
+      // Log activity
+      await this.logVersionActivity(user.id, 'version.delete', fileId, {
+        deletedVersion: versionNumber,
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting version:', error)
+      return { success: false, error: 'Failed to delete version' }
+    }
+  }
+
+  // Compare two versions
+  static async compareVersions(
+    fileId: string, 
+    version1: number, 
+    version2: number
+  ): Promise<VersionComparison | null> {
+    try {
+      if (!supabase) return null
+
+      const user = await AuthService.getCurrentUser()
+      if (!user) return null
+
+      // Get both versions
+      const { data: versions, error } = await supabase
+        .from('file_versions')
+        .select('*')
+        .eq('file_id', fileId)
+        .in('version_number', [version1, version2])
+
+      if (error || !versions || versions.length !== 2) {
+        return null
+      }
+
+      const v1 = versions.find(v => v.version_number === version1)
+      const v2 = versions.find(v => v.version_number === version2)
+
+      if (!v1 || !v2) return null
+
+      const oldVersion = v1.version_number < v2.version_number ? v1 : v2
+      const newVersion = v1.version_number < v2.version_number ? v2 : v1
+
+      const sizeDifference = (newVersion.size || 0) - (oldVersion.size || 0)
+      const timeDifference = new Date(newVersion.created_at).getTime() - new Date(oldVersion.created_at).getTime()
+
+      return {
+        oldVersion: oldVersion as FileVersion,
+        newVersion: newVersion as FileVersion,
+        sizeDifference,
+        timeDifference,
+      }
+    } catch (error) {
+      console.error('Error comparing versions:', error)
+      return null
+    }
+  }
+
+  // Get version content for download
+  static async downloadVersion(
+    fileId: string, 
+    versionNumber: number
+  ): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+      if (!supabase) {
+        return { success: false, error: 'Database not configured' }
+      }
+
+      const user = await AuthService.getCurrentUser()
+      if (!user) {
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Check file access
+      const { data: file } = await supabase
+        .from('files')
+        .select('user_id')
+        .eq('id', fileId)
+        .single()
+
+      if (!file || file.user_id !== user.id) {
+        return { success: false, error: 'Access denied' }
+      }
+
+      // Get version
+      const { data: version, error: versionError } = await supabase
+        .from('file_versions')
+        .select('*')
+        .eq('file_id', fileId)
+        .eq('version_number', versionNumber)
+        .single()
+
+      if (versionError || !version || !version.storage_path) {
+        return { success: false, error: 'Version not found' }
+      }
+
+      // Generate signed URL
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from('files')
+        .createSignedUrl(version.storage_path, 3600) // 1 hour expiry
+
+      if (urlError) {
+        return { success: false, error: urlError.message }
+      }
+
+      return { success: true, url: signedUrlData.signedUrl }
+    } catch (error) {
+      console.error('Error downloading version:', error)
+      return { success: false, error: 'Failed to download version' }
+    }
+  }
+
+  // Calculate file checksum
+  private static async calculateChecksum(file: Blob): Promise<string> {
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const hash = await crypto.subtle.digest('SHA-256', arrayBuffer)
+      const hashArray = Array.from(new Uint8Array(hash))
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    } catch (error) {
+      console.error('Error calculating checksum:', error)
+      return ''
+    }
+  }
+
+  // Log versioning activity
+  private static async logVersionActivity(
+    userId: string, 
+    action: string, 
+    fileId: string, 
+    details: any
+  ) {
+    if (!supabase) return
+
+    try {
+      await supabase
+        .from('activity_logs')
+        .insert({
+          user_id: userId,
+          action,
+          resource_type: 'file_version',
+          resource_id: fileId,
+          details,
+        })
+    } catch (error) {
+      console.error('Error logging version activity:', error)
+    }
+  }
+
+  // Clean up old versions (keep only last N versions)
+  static async cleanupOldVersions(
+    fileId: string, 
+    keepCount: number = 10
+  ): Promise<{ success: boolean; deletedCount?: number; error?: string }> {
+    try {
+      if (!supabase) {
+        return { success: false, error: 'Database not configured' }
+      }
+
+      const user = await AuthService.getCurrentUser()
+      if (!user) {
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Check file access
+      const { data: file } = await supabase
+        .from('files')
+        .select('user_id')
+        .eq('id', fileId)
+        .single()
+
+      if (!file || file.user_id !== user.id) {
+        return { success: false, error: 'Access denied' }
+      }
+
+      // Get all versions
+      const { data: versions, error: versionsError } = await supabase
+        .from('file_versions')
+        .select('*')
+        .eq('file_id', fileId)
+        .order('version_number', { ascending: false })
+
+      if (versionsError) {
+        return { success: false, error: versionsError.message }
+      }
+
+      if (!versions || versions.length <= keepCount) {
+        return { success: true, deletedCount: 0 }
+      }
+
+      // Delete old versions
+      const versionsToDelete = versions.slice(keepCount)
+      const storagePathsToDelete = versionsToDelete
+        .map(v => v.storage_path)
+        .filter(Boolean) as string[]
+
+      // Delete from storage
+      if (storagePathsToDelete.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from('files')
+          .remove(storagePathsToDelete)
+
+        if (storageError) {
+          console.warn('Failed to delete some versions from storage:', storageError)
+        }
+      }
+
+      // Delete from database
+      const versionIdsToDelete = versionsToDelete.map(v => v.id)
+      const { error: deleteError } = await supabase
+        .from('file_versions')
+        .delete()
+        .in('id', versionIdsToDelete)
+
+      if (deleteError) {
+        return { success: false, error: deleteError.message }
+      }
+
+      return { success: true, deletedCount: versionsToDelete.length }
+    } catch (error) {
+      console.error('Error cleaning up versions:', error)
+      return { success: false, error: 'Failed to cleanup versions' }
     }
   }
 }
+
+export default FileVersioningService

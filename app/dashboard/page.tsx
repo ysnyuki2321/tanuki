@@ -1,12 +1,14 @@
 "use client"
 
 import { ProtectedRoute } from "@/components/auth/protected-route"
-import { FileManager } from "@/components/file-manager/file-manager"
+import RealFileManager from "@/components/file-manager/real-file-manager"
+import UserDashboard from "@/components/dashboard/user-dashboard"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TanukiLogo } from "@/components/tanuki-logo"
 import { SimpleThemeToggle } from "@/components/theme-toggle"
-import { LogOut, Settings, User, Database, Code } from "lucide-react"
+import { LogOut, Settings, User, Database, Code, BarChart3, Files } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,21 +38,21 @@ export default function DashboardPage() {
 
               <div className="flex items-center gap-4">
                 <SimpleThemeToggle />
-                <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.name}</span>
+                <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.full_name || user?.email}</span>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name} />
-                        <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={user?.avatar_url || "/placeholder.svg"} alt={user?.full_name || user?.email} />
+                        <AvatarFallback>{user?.full_name?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{user?.name}</p>
+                        <p className="font-medium">{user?.full_name || 'User'}</p>
                         <p className="w-[160px] truncate text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
@@ -91,12 +93,30 @@ export default function DashboardPage() {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">File Manager</h1>
-            <p className="text-muted-foreground">Manage your files, edit code, and organize your digital workspace</p>
-          </div>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="files" className="flex items-center gap-2">
+                <Files className="w-4 h-4" />
+                Files
+              </TabsTrigger>
+            </TabsList>
 
-          <FileManager />
+            <TabsContent value="overview" className="space-y-4">
+              <UserDashboard />
+            </TabsContent>
+
+            <TabsContent value="files" className="space-y-4">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">File Manager</h2>
+                <p className="text-muted-foreground">Manage your files, edit code, and organize your digital workspace</p>
+              </div>
+              <RealFileManager />
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     </ProtectedRoute>
