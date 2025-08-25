@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getConfig } from '@/lib/config';
-import { getSupabaseAdmin } from '@/lib/supabase-client';
+import { getSupabaseAdmin, getCurrentUser } from '@/lib/supabase-client';
 import type { DbAdminConfig } from '@/lib/database-schema';
 
 // GET - Load current configuration
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Require admin authentication
+  const user = await getCurrentUser(request);
+  if (!user || user.role !== 'admin') {
+    return NextResponse.json(
+      { error: 'Unauthorized - Admin access required' },
+      { status: 403 }
+    );
+  }
   try {
     const config = getConfig();
     
@@ -66,6 +74,14 @@ export async function GET() {
 
 // POST - Save configuration
 export async function POST(request: NextRequest) {
+  // Require admin authentication
+  const user = await getCurrentUser(request);
+  if (!user || user.role !== 'admin') {
+    return NextResponse.json(
+      { error: 'Unauthorized - Admin access required' },
+      { status: 403 }
+    );
+  }
   try {
     const body = await request.json();
     
