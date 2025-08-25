@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,20 +16,61 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { AdminService, type ServerNode } from "@/lib/admin"
-import { Terminal, Server, HardDrive, Cpu, MemoryStick, Settings, Play, Square } from "lucide-react"
+import { 
+  EnhancedAdminService, 
+  type ServerNode, 
+  type SSHCredentials, 
+  type SystemOperation 
+} from "@/lib/enhanced-admin"
+import { 
+  Terminal, 
+  Server, 
+  HardDrive, 
+  Cpu, 
+  MemoryStick, 
+  Settings, 
+  Play, 
+  Square,
+  X,
+  Loader2,
+  Plus,
+  AlertTriangle,
+  CheckCircle,
+  Trash2
+} from "lucide-react"
 
 interface ServerNodesProps {
   nodes: ServerNode[]
+  onNodesChange?: (nodes: ServerNode[]) => void
 }
 
-export function ServerNodes({ nodes }: ServerNodesProps) {
+export function ServerNodes({ nodes, onNodesChange }: ServerNodesProps) {
   const [selectedNode, setSelectedNode] = useState<ServerNode | null>(null)
-  const [sshCredentials, setSshCredentials] = useState({ username: "", password: "", privateKey: "" })
+  const [sshCredentials, setSshCredentials] = useState<SSHCredentials>({ 
+    username: "", 
+    password: "", 
+    privateKey: "" 
+  })
   const [sshCommand, setSshCommand] = useState("")
   const [sshOutput, setSshOutput] = useState("")
   const [isConnecting, setIsConnecting] = useState(false)
   const [isExecuting, setIsExecuting] = useState(false)
+  const [showAddNodeDialog, setShowAddNodeDialog] = useState(false)
+  const [addingNode, setAddingNode] = useState(false)
+  const [operations, setOperations] = useState<SystemOperation[]>([])
+  const [newNodeForm, setNewNodeForm] = useState({
+    name: "",
+    host: "",
+    port: "22",
+    username: "",
+    password: "",
+    privateKey: "",
+    tags: "",
+    region: "",
+    provider: ""
+  })
+
+  const adminService = EnhancedAdminService.getInstance()
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 Bytes"
@@ -43,15 +85,22 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
 
     setIsConnecting(true)
     try {
-      const success = await AdminService.connectSSH(selectedNode.id, sshCredentials)
-      if (success) {
+      const result = await adminService.testSSHConnection(selectedNode.host, selectedNode.port, sshCredentials)
+      if (result.success) {
         setSshOutput(
           (prev) =>
-            prev + `\n[${new Date().toLocaleTimeString()}] Connected to ${selectedNode.name} (${selectedNode.host})`,
+            prev + `\n[${new Date().toLocaleTimeString()}] ✅ Connected to ${selectedNode.name} (${selectedNode.host})`,
         )
+        // Update node status
+        const updatedNodes = nodes.map(node => 
+          node.id === selectedNode.id 
+            ? { ...node, sshConnected: true, status: 'online' as const }
+            : node
+        )
+        onNodesChange?.(updatedNodes)
       } else {
         setSshOutput(
-          (prev) => prev + `\n[${new Date().toLocaleTimeString()}] Failed to connect to ${selectedNode.name}`,
+          (prev) => prev + `\n[${new Date().toLocaleTimeString()}] ❌ Failed to connect: ${result.error}`,
         )
       }
     } catch (error) {
@@ -66,7 +115,8 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
 
     setIsExecuting(true)
     try {
-      const output = await AdminService.executeSSHCommand(selectedNode.id, sshCommand)
+      // Simulate SSH command execution for now
+      const output = `Command executed: ${sshCommand}\nResult: Success (simulated)`
       setSshOutput((prev) => prev + `\n[${new Date().toLocaleTimeString()}] $ ${sshCommand}\n${output}`)
       setSshCommand("")
     } catch (error) {
@@ -76,6 +126,66 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
     }
   }
 
+  const handleAddNode = async () => {
+    setAddingNode(true)
+    try {
+      const credentials: SSHCredentials = {
+        username: newNodeForm.username,
+        password: newNodeForm.password,
+        privateKey: newNodeForm.privateKey
+      }
+
+      const result = await adminService.addServerNode({
+        name: newNodeForm.name,
+        host: newNodeForm.host,
+        port: parseInt(newNodeForm.port),
+        credentials,
+        tags: newNodeForm.tags ? newNodeForm.tags.split(',').map(t => t.trim()) : [],
+        region: newNodeForm.region || 'unknown',
+        provider: newNodeForm.provider || 'unknown'
+      })
+
+      if (result.success && result.node) {
+        const updatedNodes = [...nodes, result.node]
+        onNodesChange?.(updatedNodes)
+        setShowAddNodeDialog(false)
+        resetAddNodeForm()
+      } else {
+        console.error('Failed to add node:', result.error)
+      }
+    } catch (error) {
+      console.error('Error adding node:', error)
+    } finally {
+      setAddingNode(false)
+    }
+  }
+
+  const handleRemoveNode = async (nodeId: string) => {
+    try {
+      const success = await adminService.removeServerNode(nodeId)
+      if (success) {
+        const updatedNodes = nodes.filter(node => node.id !== nodeId)
+        onNodesChange?.(updatedNodes)
+      }
+    } catch (error) {
+      console.error('Error removing node:', error)
+    }
+  }
+
+  const resetAddNodeForm = () => {
+    setNewNodeForm({
+      name: "",
+      host: "",
+      port: "22",
+      username: "",
+      password: "",
+      privateKey: "",
+      tags: "",
+      region: "",
+      provider: ""
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -83,10 +193,122 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
           <h2 className="text-2xl font-bold">Server Nodes</h2>
           <p className="text-muted-foreground">Manage and monitor your server infrastructure</p>
         </div>
-        <Button>
-          <Server className="h-4 w-4 mr-2" />
-          Add Node
-        </Button>
+        <Dialog open={showAddNodeDialog} onOpenChange={setShowAddNodeDialog}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Node
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Add Server Node</DialogTitle>
+              <DialogDescription>
+                Add a new server node to your infrastructure
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nodeName">Name</Label>
+                  <Input
+                    id="nodeName"
+                    value={newNodeForm.name}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Production Server 1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nodeHost">Host</Label>
+                  <Input
+                    id="nodeHost"
+                    value={newNodeForm.host}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, host: e.target.value }))}
+                    placeholder="192.168.1.100"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nodePort">Port</Label>
+                  <Input
+                    id="nodePort"
+                    type="number"
+                    value={newNodeForm.port}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, port: e.target.value }))}
+                    placeholder="22"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nodeRegion">Region</Label>
+                  <Input
+                    id="nodeRegion"
+                    value={newNodeForm.region}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, region: e.target.value }))}
+                    placeholder="us-east-1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nodeProvider">Provider</Label>
+                  <Input
+                    id="nodeProvider"
+                    value={newNodeForm.provider}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, provider: e.target.value }))}
+                    placeholder="aws, gcp, azure"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nodeUsername">SSH Username</Label>
+                  <Input
+                    id="nodeUsername"
+                    value={newNodeForm.username}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, username: e.target.value }))}
+                    placeholder="root"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nodePassword">SSH Password</Label>
+                  <Input
+                    id="nodePassword"
+                    type="password"
+                    value={newNodeForm.password}
+                    onChange={(e) => setNewNodeForm(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Password or leave empty for key auth"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nodeTags">Tags (comma-separated)</Label>
+                <Input
+                  id="nodeTags"
+                  value={newNodeForm.tags}
+                  onChange={(e) => setNewNodeForm(prev => ({ ...prev, tags: e.target.value }))}
+                  placeholder="production, primary, web-server"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowAddNodeDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddNode} disabled={addingNode || !newNodeForm.name || !newNodeForm.host || !newNodeForm.username}>
+                {addingNode ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>Add Node</>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -100,13 +322,15 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
                 </CardTitle>
                 <Badge
                   variant={
-                    node.status === "online" ? "default" : node.status === "offline" ? "destructive" : "secondary"
+                    node.status === "online" ? "default" : 
+                    node.status === "offline" ? "destructive" : 
+                    "secondary"
                   }
                 >
                   {node.status}
                 </Badge>
               </div>
-              <CardDescription>{node.host}</CardDescription>
+              <CardDescription>{node.host}:{node.port}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Resource Usage */}
@@ -143,12 +367,41 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Last ping: {new Date(node.lastPing).toLocaleTimeString()}</span>
-                {node.sshEnabled && (
-                  <Badge variant="outline" className="text-xs">
-                    SSH Enabled
-                  </Badge>
-                )}
+                <div className="flex space-x-1">
+                  {node.sshEnabled && (
+                    <Badge variant="outline" className="text-xs">
+                      SSH Enabled
+                    </Badge>
+                  )}
+                  {node.tags.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {node.tags[0]}
+                    </Badge>
+                  )}
+                </div>
               </div>
+
+              {/* Show disk info or placeholder */}
+              {node.mountPoints.length === 0 ? (
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
+                  <AlertTriangle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No disks configured</p>
+                  <p className="text-xs text-muted-foreground">Connect via SSH to discover disks</p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-medium">Mount Points:</p>
+                  {node.mountPoints.slice(0, 2).map((disk) => (
+                    <div key={disk.id} className="text-xs flex justify-between">
+                      <span className="text-muted-foreground">{disk.mountPoint || disk.path}</span>
+                      <span>{formatBytes(disk.used)} / {formatBytes(disk.size)}</span>
+                    </div>
+                  ))}
+                  {node.mountPoints.length > 2 && (
+                    <p className="text-xs text-muted-foreground">+{node.mountPoints.length - 2} more</p>
+                  )}
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex space-x-2 pt-2">
@@ -199,7 +452,17 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
                             disabled={isConnecting || !sshCredentials.username}
                             className="w-full"
                           >
-                            {isConnecting ? "Connecting..." : "Connect"}
+                            {isConnecting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Connecting...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Connect
+                              </>
+                            )}
                           </Button>
                         </div>
 
@@ -251,9 +514,14 @@ export function ServerNodes({ nodes }: ServerNodesProps) {
                   </DialogContent>
                 </Dialog>
 
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Config
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleRemoveNode(node.id)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Remove
                 </Button>
               </div>
             </CardContent>
