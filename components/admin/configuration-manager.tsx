@@ -253,6 +253,35 @@ export function ConfigurationManager() {
     }
   }
 
+  const testOAuthConnection = async (provider: 'google' | 'github') => {
+    try {
+      setTesting(`oauth_${provider}`)
+
+      const response = await fetch('/api/admin/oauth/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider,
+          config: configValues
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message)
+      } else {
+        toast.error(result.error)
+      }
+    } catch (error) {
+      toast.error(`${provider} OAuth test failed`)
+    } finally {
+      setTesting(null)
+    }
+  }
+
   const initializeDefaults = async () => {
     try {
       setLoading(true)
