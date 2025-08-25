@@ -5,6 +5,7 @@ import { FileManager } from "@/components/file-manager/file-manager"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { TanukiLogo } from "@/components/tanuki-logo"
+import { SimpleThemeToggle } from "@/components/theme-toggle"
 import { LogOut, Settings, User, Database, Code } from "lucide-react"
 import {
   DropdownMenu,
