@@ -23,6 +23,8 @@ export function FileManager() {
   const [editorFiles, setEditorFiles] = useState<FileItem[]>([])
   const [isZipPreviewOpen, setIsZipPreviewOpen] = useState(false)
   const [zipPreviewFile, setZipPreviewFile] = useState<FileItem | null>(null)
+  const [isFilePreviewOpen, setIsFilePreviewOpen] = useState(false)
+  const [filePreviewFile, setFilePreviewFile] = useState<FileItem | null>(null)
 
   const loadFiles = async (parentId?: string) => {
     setIsLoading(true)
