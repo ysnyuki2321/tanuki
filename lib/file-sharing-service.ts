@@ -247,10 +247,10 @@ export class FileSharingService {
       }
 
       // Increment download count
-      await supabase
+      await (supabase as any)
         .from('shares')
         .update({ 
-          download_count: shareInfo.share.download_count + 1 
+          download_count: (shareInfo.share as any).download_count + 1 
         })
         .eq('token', token)
 
