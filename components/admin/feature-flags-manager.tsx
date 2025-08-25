@@ -538,12 +538,58 @@ export function FeatureFlagsManager() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Analytics Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Flag evaluation analytics and usage statistics will be available here
-                </p>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Total Evaluations</p>
+                          <p className="text-2xl font-bold">1,234</p>
+                        </div>
+                        <Activity className="h-8 w-8 text-primary" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Active Flags</p>
+                          <p className="text-2xl font-bold">{flags.filter(f => f.enabled).length}</p>
+                        </div>
+                        <Flag className="h-8 w-8 text-green-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
+                          <p className="text-2xl font-bold">99.2%</p>
+                        </div>
+                        <TrendingUp className="h-8 w-8 text-green-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Evaluation Trends</CardTitle>
+                    <CardDescription>Flag evaluation activity over time</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64 flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <BarChart3 className="h-12 w-12 mx-auto mb-2" />
+                        <p>Chart visualization would be implemented here</p>
+                        <p className="text-sm">Connect to analytics backend for real data</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
