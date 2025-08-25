@@ -39,7 +39,21 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <FeatureFlagsProvider
+                environment={process.env.NODE_ENV || 'production'}
+                preloadedFlags={[
+                  'new_dashboard_ui',
+                  'advanced_file_editor',
+                  'collaboration_features',
+                  'real_time_sync',
+                  'enhanced_search',
+                  'beta_features'
+                ]}
+              >
+                {children}
+              </FeatureFlagsProvider>
+            </AuthProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </body>
