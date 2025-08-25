@@ -73,19 +73,18 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <Tabs defaultValue="setup" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="setup">Setup</TabsTrigger>
+      <Tabs defaultValue="configuration" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="configuration">Configuration</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="setup">
-          {isRealAdmin ? <RealSetupWizard /> : <SetupWizard />}
+        <TabsContent value="configuration">
+          <ConfigurationManager />
         </TabsContent>
 
         <TabsContent value="overview">
