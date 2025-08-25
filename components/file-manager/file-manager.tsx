@@ -283,12 +283,19 @@ export function FileManager() {
         }}
       />
 
+      <AdvancedSearch
+        filters={searchFilters}
+        onFiltersChange={setSearchFilters}
+        onReset={resetSearchFilters}
+        resultCount={filteredFiles.length}
+      />
+
       <FileManagerToolbar
         selectedCount={selectedFiles.length}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        searchQuery={searchFilters.query}
+        onSearchChange={(query) => setSearchFilters(prev => ({ ...prev, query }))}
         onDeleteSelected={() => {
           selectedFiles.forEach(handleFileDelete)
         }}
