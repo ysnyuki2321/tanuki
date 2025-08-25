@@ -60,7 +60,11 @@ export class FileStorageService {
   // Upload file to storage
   static async uploadFile(options: FileUploadOptions): Promise<FileUploadResult> {
     if (!supabase) {
-      return { success: false, error: 'Supabase not configured' }
+      return { success: false, error: 'Storage not configured. Please setup database connection first.' }
+    }
+
+    if (!this.isConfigured()) {
+      return { success: false, error: 'Storage service not properly configured' }
     }
 
     const { file, folder, projectId, isPublic = false, tags = [] } = options
@@ -451,7 +455,15 @@ export class FileStorageService {
 
   // Log activity
   private static async logActivity(userId: string, action: string, resourceId: string, details: any) {
-    if (!supabase) return
+    if (!supabase) {
+      console.debug('Activity logging skipped - database not configured')
+      return
+    }
+
+    if (!userId || !action) {
+      console.warn('Invalid activity log parameters')
+      return
+    }
 
     try {
       await supabase
@@ -461,16 +473,22 @@ export class FileStorageService {
           action,
           resource_type: 'file',
           resource_id: resourceId,
-          details,
+          details: details || {},
         })
     } catch (error) {
-      console.error('Log activity error:', error)
+      console.warn('Activity logging failed (non-critical):', error)
+      // Don't throw - logging failure shouldn't break the main flow
     }
   }
 
   // Get storage usage for user
   static async getStorageUsage(userId: string): Promise<{ used: number; quota: number; fileCount: number }> {
     if (!supabase) {
+      console.warn('Storage usage check skipped - database not configured')
+      return { used: 0, quota: 0, fileCount: 0 }
+    }
+
+    if (!userId) {
       return { used: 0, quota: 0, fileCount: 0 }
     }
 
