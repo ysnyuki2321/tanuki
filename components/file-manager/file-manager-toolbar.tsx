@@ -21,7 +21,7 @@ export function FileManagerToolbar({
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={onNewFolder}>
           <FolderPlus className="w-4 h-4 mr-2" />
           New Folder
         </Button>
@@ -35,16 +35,6 @@ export function FileManagerToolbar({
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search files..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 w-64"
-          />
-        </div>
-
         <div className="flex border rounded-lg">
           <Button
             variant={viewMode === "grid" ? "default" : "ghost"}
