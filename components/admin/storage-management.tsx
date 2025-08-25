@@ -29,21 +29,41 @@ export function StorageManagement({ stats }: StorageManagementProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Storage Management</h2>
-          <p className="text-muted-foreground">Monitor and manage storage across all nodes</p>
-        </div>
-        <div className="flex space-x-2">
-          <Button variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button variant="outline">
-            <Archive className="h-4 w-4 mr-2" />
-            Cleanup
-          </Button>
+          <p className="text-muted-foreground">Monitor disk usage and manage cloud storage providers</p>
         </div>
       </div>
 
-      {/* Storage Overview */}
+      <Tabs defaultValue="monitoring" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="monitoring">
+            <HardDrive className="h-4 w-4 mr-2" />
+            Disk Monitoring
+          </TabsTrigger>
+          <TabsTrigger value="providers">
+            <Cloud className="h-4 w-4 mr-2" />
+            Storage Providers
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="monitoring" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Disk Usage Monitoring</h3>
+              <p className="text-muted-foreground">Monitor and manage storage across all nodes</p>
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button variant="outline">
+                <Archive className="h-4 w-4 mr-2" />
+                Cleanup
+              </Button>
+            </div>
+          </div>
+
+          {/* Storage Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
@@ -221,6 +241,12 @@ export function StorageManagement({ stats }: StorageManagementProps) {
           </CardContent>
         </Card>
       </div>
+        </TabsContent>
+
+        <TabsContent value="providers">
+          <StorageProviderManager />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
