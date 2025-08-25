@@ -35,7 +35,9 @@ export function FileList({
   onFileDelete,
   onFileRename,
   onFileShare,
-  onFileEdit, // Added onFileEdit prop
+  onFileEdit,
+  onZipPreview,
+  onFilePreview,
 }: FileListProps) {
   const [editingFile, setEditingFile] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
