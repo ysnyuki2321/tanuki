@@ -34,22 +34,7 @@ export default function DashboardPage() {
               <TanukiLogo size={32} />
 
               <div className="flex items-center gap-4">
-                <div className="hidden md:flex items-center gap-2">
-                  <Link href="/database">
-                    <Button variant="outline" size="sm">
-                      <Database className="w-4 h-4 mr-2" />
-                      Database GUI
-                    </Button>
-                  </Link>
-                  <Link href="/editor">
-                    <Button variant="outline" size="sm">
-                      <Code className="w-4 h-4 mr-2" />
-                      Code Editor
-                    </Button>
-                  </Link>
-                </div>
-
-                <span className="text-sm text-muted-foreground">Welcome back, {user?.name}</span>
+                <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.name}</span>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -60,23 +45,31 @@ export default function DashboardPage() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent className="w-48" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
                         <p className="font-medium">{user?.name}</p>
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">{user?.email}</p>
+                        <p className="w-[160px] truncate text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
+                    <DropdownMenuItem asChild>
+                      <Link href="/database">
+                        <Database className="mr-2 h-4 w-4" />
+                        Database
+                      </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/editor">
+                        <Code className="mr-2 h-4 w-4" />
+                        Code Editor
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
