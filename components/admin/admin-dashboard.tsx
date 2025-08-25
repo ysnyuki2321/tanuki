@@ -101,6 +101,9 @@ export function AdminDashboard() {
           <FeatureFlagsManager />
         </TabsContent>
 
+        <TabsContent value="email">
+          <EmailTemplateManager />
+        </TabsContent>
 
         <TabsContent value="servers">
           <ServerNodes nodes={stats.serverNodes} />
