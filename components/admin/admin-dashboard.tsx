@@ -99,9 +99,6 @@ export function AdminDashboard() {
           <FeatureFlagsManager />
         </TabsContent>
 
-        <TabsContent value="branding">
-          <BrandingManager />
-        </TabsContent>
 
         <TabsContent value="servers">
           <ServerNodes nodes={stats.serverNodes} />
