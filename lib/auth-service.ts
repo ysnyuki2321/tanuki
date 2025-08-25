@@ -1,4 +1,5 @@
-import { supabase, supabaseAdmin, isSupabaseConfigured, type DbUser } from './supabase'
+import { getSupabase, getSupabaseAdmin, isSupabaseConfigured } from './supabase-client'
+import type { DbUser } from './database-schema'
 import { getConfig } from './config'
 
 // Authentication service with null-safe operations
@@ -14,6 +15,7 @@ export class AuthService {
     company?: string
     phone?: string
   }) {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured. Please setup database connection first.')
     }
@@ -65,6 +67,7 @@ export class AuthService {
 
   // Sign in with email/password
   static async signIn(email: string, password: string) {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured. Please setup database connection first.')
     }
@@ -93,6 +96,7 @@ export class AuthService {
 
   // Sign out
   static async signOut() {
+    const supabase = getSupabase()
     if (!supabase) return { error: null }
 
     try {
@@ -187,6 +191,7 @@ export class AuthService {
 
   // Create user profile in database
   static async createUserProfile(userId: string, profileData: Partial<DbUser>) {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured')
     }
