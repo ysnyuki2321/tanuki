@@ -2,33 +2,51 @@
 import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AdminService, type SystemStats, type User } from "@/lib/admin"
+import { EnhancedAdminService, type SystemStats, type User } from "@/lib/enhanced-admin"
 import { AlertTriangle, CheckCircle } from "lucide-react"
 import { SystemOverview } from "./system-overview"
-import { UserManagement } from "./user-management"
+import { AdvancedUserManagement } from "./advanced-user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
+import { SSHManagement } from "./ssh-management"
+import { NotificationManagement } from "./notification-management"
+import { MonitoringDashboard } from "./monitoring-dashboard"
+import { EmailVerificationManagement } from "./email-verification-management"
+import { BrandingManagement } from "./branding-management"
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<SystemStats | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const adminService = EnhancedAdminService.getInstance()
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [statsData, usersData] = await Promise.all([AdminService.getSystemStats(), AdminService.getUsers()])
-        setStats(statsData)
-        setUsers(usersData)
-      } catch (error) {
-        console.error("[v0] Failed to load admin data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     loadData()
   }, [])
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      const [statsData, usersData] = await Promise.all([
+        adminService.getSystemStats(),
+        adminService.getUsers()
+      ])
+      setStats(statsData)
+      setUsers(usersData)
+    } catch (error) {
+      console.error("[Enhanced Admin] Failed to load admin data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await loadData()
+    setRefreshing(false)
+  }
 
   if (loading) {
     return (
@@ -66,10 +84,15 @@ export function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
+          <TabsTrigger value="ssh">SSH</TabsTrigger>
+          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="email">Email Config</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
 
@@ -78,11 +101,41 @@ export function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="users">
-          <UserManagement users={users} onUsersChange={setUsers} />
+          <AdvancedUserManagement users={users} onUsersChange={setUsers} />
         </TabsContent>
 
         <TabsContent value="servers">
-          <ServerNodes nodes={stats.serverNodes} />
+          <ServerNodes
+            nodes={stats?.serverNodes || []}
+            onNodesChange={(nodes) => {
+              if (stats) {
+                setStats(prev => prev ? { ...prev, serverNodes: nodes } : null)
+              }
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="ssh">
+          <SSHManagement
+            nodes={stats?.serverNodes || []}
+            onNodesChange={(nodes) => setStats(prev => prev ? { ...prev, serverNodes: nodes } : null)}
+          />
+        </TabsContent>
+
+        <TabsContent value="monitoring">
+          <MonitoringDashboard />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <NotificationManagement />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailVerificationManagement />
+        </TabsContent>
+
+        <TabsContent value="branding">
+          <BrandingManagement />
         </TabsContent>
 
         <TabsContent value="storage">
