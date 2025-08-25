@@ -32,26 +32,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing session on mount
     loadUser()
 
-    // Listen for auth state changes
-    const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        await loadUser()
-      } else if (event === 'SIGNED_OUT') {
-        setState({
-          user: null,
-          isLoading: false,
-          isAuthenticated: false,
-        })
-      }
-    })
+    // Listen for auth state changes (only if service is configured)
+    let subscription: any = null
 
-    return () => subscription.unsubscribe()
+    try {
+      const authStateChange = AuthService.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          await loadUser()
+        } else if (event === 'SIGNED_OUT') {
+          setState({
+            user: null,
+            isLoading: false,
+            isAuthenticated: false,
+          })
+        }
+      })
+
+      subscription = authStateChange?.data?.subscription
+    } catch (error) {
+      console.warn('Auth state listener setup failed (non-critical):', error)
+      // Continue without auth state listener if setup fails
+      setState(prev => ({ ...prev, isLoading: false }))
+    }
+
+    return () => {
+      if (subscription?.unsubscribe) {
+        subscription.unsubscribe()
+      }
+    }
   }, [])
 
   const loadUser = async () => {
     setState(prev => ({ ...prev, isLoading: true }))
 
     try {
+      // Check if auth service is configured
+      if (!AuthService.isConfigured()) {
+        console.warn('Auth service not configured - user will be treated as anonymous')
+        setState({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+        })
+        return
+      }
+
       const user = await AuthService.getCurrentUser()
       setState({
         user,
@@ -59,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
       })
     } catch (error) {
-      console.error('Error loading user:', error)
+      console.warn('Error loading user (non-critical):', error)
       setState({
         user: null,
         isLoading: false,
