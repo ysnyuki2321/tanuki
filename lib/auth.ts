@@ -71,19 +71,36 @@ export class AuthService {
   }
 
   async signUp(email: string, password: string, name: string): Promise<{ user: User | null; error: string | null }> {
-    // Mock registration - replace with real API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Input validation
+    if (!email || !password || !name) {
+      return { user: null, error: "All fields are required" }
+    }
 
-    if (mockUsers.find((u) => u.email === email)) {
-      return { user: null, error: "Email already exists" }
+    if (!this.isValidEmail(email)) {
+      return { user: null, error: "Please enter a valid email address" }
+    }
+
+    if (password.length < 8) {
+      return { user: null, error: "Password must be at least 8 characters long" }
+    }
+
+    if (name.trim().length < 2) {
+      return { user: null, error: "Name must be at least 2 characters long" }
+    }
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
+    if (mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase())) {
+      return { user: null, error: "An account with this email already exists" }
     }
 
     const newUser: User = {
       id: Date.now().toString(),
-      email,
-      name,
+      email: email.toLowerCase(),
+      name: name.trim(),
       role: "user",
-      avatar: "/abstract-user-avatar.png",
+      avatar: undefined,
     }
 
     mockUsers.push(newUser)
