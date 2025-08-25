@@ -95,33 +95,55 @@ export class RateLimiter {
     if (this.initialized) return
 
     try {
-      // Dynamically import Redis client
-      const Redis = await import('ioredis')
-      
       const redisUrl = process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL
-      
-      if (redisUrl) {
-        if (redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')) {
-          // Standard Redis connection
-          this.redis = new Redis.default(redisUrl, {
-            retryDelayOnFailover: 100,
-            maxRetriesPerRequest: 3,
-            lazyConnect: true
-          }) as any
-        } else {
-          // Upstash Redis REST API
-          const { Redis: UpstashRedis } = await import('@upstash/redis')
-          this.redis = UpstashRedis.fromEnv() as any
-        }
-        
-        console.log('Redis rate limiter initialized')
-      } else {
+      const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+      if (!redisUrl) {
         console.warn('No Redis URL configured, using in-memory fallback for rate limiting')
+        this.initialized = true
+        return
       }
-      
+
+      // Validate Redis URL format
+      if (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://') && !redisUrl.startsWith('https://')) {
+        console.warn('Invalid Redis URL format, using in-memory fallback for rate limiting')
+        this.initialized = true
+        return
+      }
+
+      if (redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')) {
+        // Standard Redis connection
+        const Redis = await import('ioredis')
+        this.redis = new Redis.default(redisUrl, {
+          retryDelayOnFailover: 100,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          connectTimeout: 5000,
+          commandTimeout: 3000
+        }) as any
+
+        // Test connection
+        await this.redis.ping()
+        console.log('Redis rate limiter initialized with ioredis')
+      } else if (redisUrl.startsWith('https://') && upstashToken) {
+        // Upstash Redis REST API
+        const { Redis: UpstashRedis } = await import('@upstash/redis')
+        this.redis = new UpstashRedis({
+          url: redisUrl,
+          token: upstashToken
+        }) as any
+
+        // Test connection
+        await this.redis.ping()
+        console.log('Redis rate limiter initialized with Upstash')
+      } else {
+        console.warn('Redis configuration incomplete, using in-memory fallback for rate limiting')
+      }
+
       this.initialized = true
     } catch (error) {
       console.warn('Failed to initialize Redis for rate limiting, using in-memory fallback:', error)
+      this.redis = null
       this.initialized = true
     }
   }
