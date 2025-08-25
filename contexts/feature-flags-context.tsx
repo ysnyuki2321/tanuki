@@ -60,7 +60,7 @@ export function FeatureFlagsProvider({
       },
       customProperties: {}
     }
-  }, [user, tenant, environment])
+  }, [user, environment])
 
   // Evaluate a single flag
   const evaluateFlag = useCallback(async (flagKey: string): Promise<FeatureFlagEvaluation> => {
