@@ -221,7 +221,7 @@ export class ServiceChecker {
         const { getSupabase } = await import('./supabase-client')
         const supabase = getSupabase()
         if (supabase) {
-          const { error } = await supabase.from('users').select('count').limit(1)
+          const { error } = await (supabase as any).from('users').select('count').limit(1)
           results.database = !error
         }
       }

@@ -298,7 +298,7 @@ export class FeatureFlagService {
       
       // Set cached flags
       DEFAULT_FEATURES.forEach(feature => {
-        const config = configs?.find(c => c.key === `feature_${feature.key}`)
+        const config = configs?.find((c: any) => c.key === `feature_${feature.key}`)
         const enabled = config ? config.value : feature.defaultValue
         this.cachedFlags.set(feature.key, enabled)
       })
@@ -347,10 +347,10 @@ export class FeatureFlagService {
       }
       
       // Update database
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('admin_config')
         .upsert({
-          tenant_id: tenantId || null,
+          tenant_id: tenantId || '',
           key: `feature_${featureKey}`,
           value: enabled,
           data_type: 'boolean',
@@ -421,7 +421,7 @@ export class FeatureFlagService {
       const { error } = await supabase
         .from('admin_config')
         .delete()
-        .eq('tenant_id', tenantId || null)
+        .eq('tenant_id', tenantId || '')
         .eq('category', 'features')
       
       if (error) {

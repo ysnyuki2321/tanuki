@@ -87,7 +87,7 @@ export class FileSharingService {
         is_active: true
       }
 
-      const { data: share, error: shareError } = await supabase
+      const { data: share, error: shareError } = await (supabase as any)
         .from('shares')
         .insert(shareData)
         .select()
@@ -98,7 +98,7 @@ export class FileSharingService {
       }
 
       // Update file share token for quick access
-      await supabase
+      await (supabase as any)
         .from('files')
         .update({ share_token: shareToken })
         .eq('id', fileId)
@@ -140,19 +140,19 @@ export class FileSharingService {
         .eq('token', token)
         .single()
 
-      if (error || !share || !share.file) {
+      if (error || !share || !(share as any).file) {
         return null
       }
 
       const now = new Date()
-      const isExpired = share.expires_at ? new Date(share.expires_at) < now : false
-      const downloadLimitReached = share.max_downloads ? share.download_count >= share.max_downloads : false
-      const requiresPassword = !!share.password_hash
+      const isExpired = (share as any).expires_at ? new Date((share as any).expires_at) < now : false
+      const downloadLimitReached = (share as any).max_downloads ? (share as any).download_count >= (share as any).max_downloads : false
+      const requiresPassword = !!(share as any).password_hash
       
-      const isValid = share.is_active && !isExpired && !downloadLimitReached
+      const isValid = (share as any).is_active && !isExpired && !downloadLimitReached
 
       let errorMessage = undefined
-      if (!share.is_active) {
+      if (!(share as any).is_active) {
         errorMessage = 'This share link has been deactivated'
       } else if (isExpired) {
         errorMessage = 'This share link has expired'
@@ -162,7 +162,7 @@ export class FileSharingService {
 
       return {
         share: share as DbShare,
-        file: share.file as DbFile,
+        file: (share as any).file as DbFile,
         isValid,
         requiresPassword,
         isExpired,
