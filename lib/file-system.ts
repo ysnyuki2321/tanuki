@@ -16,6 +16,7 @@ export interface FileItem {
 
 // Mock file system service
 export class FileSystemService {
+  private static instance: FileSystemService
   private static files: FileItem[] = [
     // Root folders
     {
