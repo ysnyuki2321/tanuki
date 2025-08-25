@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AdminService, type SystemStats, type User } from "@/lib/admin"
 import { AlertTriangle, CheckCircle } from "lucide-react"
 import { SystemOverview } from "./system-overview"
-import { UserManagement } from "./user-management"
+import { AdvancedUserManagement } from "./advanced-user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
 import { SSHManagement } from "./ssh-management"
@@ -82,7 +82,7 @@ export function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="users">
-          <UserManagement users={users} onUsersChange={setUsers} />
+          <AdvancedUserManagement users={users} onUsersChange={setUsers} />
         </TabsContent>
 
         <TabsContent value="servers">
