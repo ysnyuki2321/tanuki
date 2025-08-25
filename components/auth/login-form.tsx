@@ -128,6 +128,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               </Link>
             </div>
 
+            {/* OAuth buttons - only show if Supabase is configured */}
+            {!isDemoMode && (
+              <OAuthButtons
+                onLoading={(loading) => {}}
+                disabled={isLoading}
+              />
+            )}
+
             <div className="text-center text-sm text-muted-foreground">
               Admin: admin@tanuki.dev / Yuki@2321<br />
               Demo: user@tanuki.dev / demo123
