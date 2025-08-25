@@ -1,12 +1,12 @@
 "use client"
 
 import { ProtectedRoute } from "@/components/auth/protected-route"
-import { FileManager } from "@/components/file-manager/file-manager"
+import { UserProfile } from "@/components/profile/user-profile"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { TanukiLogo } from "@/components/tanuki-logo"
 import { SimpleThemeToggle } from "@/components/theme-toggle"
-import { LogOut, Settings, User, Database, Code } from "lucide-react"
+import { LogOut, ArrowLeft } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 
-export default function DashboardPage() {
+export default function ProfilePage() {
   const { user, signOut } = useAuth()
 
   const handleSignOut = async () => {
@@ -32,12 +32,19 @@ export default function DashboardPage() {
         <header className="border-b bg-card">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <TanukiLogo size={32} />
+              <div className="flex items-center gap-4">
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="sm">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Dashboard
+                  </Button>
+                </Link>
+                <TanukiLogo size={32} />
+              </div>
 
               <div className="flex items-center gap-4">
                 <SimpleThemeToggle />
-                <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.name}</span>
-
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -55,29 +62,6 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/database">
-                        <Database className="mr-2 h-4 w-4" />
-                        Database
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/editor">
-                        <Code className="mr-2 h-4 w-4" />
-                        Code Editor
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
@@ -92,11 +76,11 @@ export default function DashboardPage() {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">File Manager</h1>
-            <p className="text-muted-foreground">Manage your files, edit code, and organize your digital workspace</p>
+            <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
+            <p className="text-muted-foreground">Manage your account settings and preferences</p>
           </div>
 
-          <FileManager />
+          <UserProfile />
         </main>
       </div>
     </ProtectedRoute>

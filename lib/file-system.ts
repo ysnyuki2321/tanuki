@@ -10,10 +10,13 @@ export interface FileItem {
   mimeType?: string
   isShared?: boolean
   shareId?: string
+  content?: string // For text files
+  url?: string // For file downloads/previews
 }
 
 // Mock file system service
 export class FileSystemService {
+  private static instance: FileSystemService
   private static files: FileItem[] = [
     // Root folders
     {
@@ -55,6 +58,25 @@ export class FileSystemService {
       path: "/Documents/README.md",
       parentId: "documents",
       mimeType: "text/markdown",
+      content: `# Tanuki Web Storage Platform
+
+Welcome to your personal cloud storage platform!
+
+## Features
+
+- 📁 **File Management**: Upload, organize, and manage your files
+- 🔧 **Code Editor**: Edit code files directly in the browser
+- 🗄️ **Database GUI**: Manage your databases with visual tools
+- 🔗 **File Sharing**: Share files securely with custom permissions
+
+## Getting Started
+
+1. Upload files using the drag-and-drop zone
+2. Create folders to organize your content
+3. Use the code editor for text and code files
+4. Share files with generated secure links
+
+Happy storage! 🎉`,
     },
     {
       id: "proposal",
@@ -94,6 +116,86 @@ export class FileSystemService {
       mimeType: "application/sql",
       isShared: true,
       shareId: "sample-database",
+      content: `-- Tanuki Storage Platform Database Schema
+-- User management and file storage tables
+
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
+    avatar_url VARCHAR(500),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Files table
+CREATE TABLE files (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    size BIGINT NOT NULL,
+    mime_type VARCHAR(255),
+    file_path VARCHAR(1000) NOT NULL,
+    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    parent_folder_id UUID REFERENCES files(id) ON DELETE CASCADE,
+    is_folder BOOLEAN DEFAULT FALSE,
+    is_shared BOOLEAN DEFAULT FALSE,
+    share_token VARCHAR(100),
+    share_expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File versions for version control
+CREATE TABLE file_versions (
+    id SERIAL PRIMARY KEY,
+    file_id UUID REFERENCES files(id) ON DELETE CASCADE,
+    version_number INTEGER NOT NULL,
+    content TEXT,
+    size BIGINT NOT NULL,
+    created_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File shares and permissions
+CREATE TABLE file_shares (
+    id SERIAL PRIMARY KEY,
+    file_id UUID REFERENCES files(id) ON DELETE CASCADE,
+    shared_by INTEGER REFERENCES users(id),
+    shared_with_email VARCHAR(255),
+    permission_level VARCHAR(20) DEFAULT 'read', -- read, write, admin
+    expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for better performance
+CREATE INDEX idx_files_owner_id ON files(owner_id);
+CREATE INDEX idx_files_parent_folder_id ON files(parent_folder_id);
+CREATE INDEX idx_files_share_token ON files(share_token);
+CREATE INDEX idx_file_versions_file_id ON file_versions(file_id);
+CREATE INDEX idx_file_shares_file_id ON file_shares(file_id);
+
+-- Sample data
+INSERT INTO users (email, name, password_hash, role) VALUES
+('admin@tanuki.dev', 'Admin User', '$2b$10$example_hash', 'admin'),
+('user@tanuki.dev', 'Demo User', '$2b$10$example_hash', 'user');
+
+-- Sample notification preferences
+CREATE TABLE user_preferences (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    theme VARCHAR(20) DEFAULT 'light',
+    notifications_enabled BOOLEAN DEFAULT TRUE,
+    email_notifications BOOLEAN DEFAULT TRUE,
+    file_upload_notifications BOOLEAN DEFAULT TRUE,
+    share_notifications BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+`,
     },
     {
       id: "config-file",
@@ -105,6 +207,44 @@ export class FileSystemService {
       path: "/Projects/config.json",
       parentId: "projects",
       mimeType: "application/json",
+      content: `{
+  "app": {
+    "name": "Tanuki Storage Platform",
+    "version": "1.0.0",
+    "description": "Advanced web storage with code editing and database management"
+  },
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "cors": {
+      "enabled": true,
+      "origins": ["http://localhost:3000", "https://tanuki.app"]
+    }
+  },
+  "database": {
+    "type": "postgresql",
+    "host": "localhost",
+    "port": 5432,
+    "name": "tanuki_db",
+    "ssl": false
+  },
+  "storage": {
+    "provider": "local",
+    "maxFileSize": "100MB",
+    "allowedTypes": [
+      "image/*",
+      "text/*",
+      "application/pdf",
+      "application/zip"
+    ]
+  },
+  "features": {
+    "codeEditor": true,
+    "databaseGui": true,
+    "fileSharing": true,
+    "analytics": true
+  }
+}`,
     },
     {
       id: "main-script",
@@ -116,6 +256,56 @@ export class FileSystemService {
       path: "/Projects/main.py",
       parentId: "projects",
       mimeType: "text/x-python",
+      content: `#!/usr/bin/env python3
+"""
+Main application entry point for Tanuki Storage Platform
+"""
+
+import os
+import sys
+from datetime import datetime
+from typing import Dict, List, Optional
+
+class TanukiApp:
+    def __init__(self, config_path: str = "config.json"):
+        self.config_path = config_path
+        self.started_at = datetime.now()
+        self.version = "1.0.0"
+
+    def initialize(self) -> bool:
+        """Initialize the application"""
+        print(f"🚀 Starting Tanuki Storage Platform v{self.version}")
+        print(f"📅 Started at: {self.started_at}")
+
+        # Load configuration
+        if not self.load_config():
+            print("❌ Failed to load configuration")
+            return False
+
+        print("✅ Application initialized successfully")
+        return True
+
+    def load_config(self) -> bool:
+        """Load application configuration"""
+        try:
+            # Configuration loading logic here
+            return True
+        except Exception as e:
+            print(f"Error loading config: {e}")
+            return False
+
+    def run(self):
+        """Main application loop"""
+        if not self.initialize():
+            sys.exit(1)
+
+        print("🎯 Application is running...")
+        # Main application logic here
+
+if __name__ == "__main__":
+    app = TanukiApp()
+    app.run()
+`,
     },
 
     // Media
@@ -226,5 +416,12 @@ export class FileSystemService {
   static async searchFiles(query: string): Promise<FileItem[]> {
     await new Promise((resolve) => setTimeout(resolve, 200))
     return this.files.filter((file) => file.name.toLowerCase().includes(query.toLowerCase()))
+  }
+
+  static getInstance(): FileSystemService {
+    if (!FileSystemService.instance) {
+      FileSystemService.instance = new FileSystemService()
+    }
+    return FileSystemService.instance
   }
 }

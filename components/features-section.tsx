@@ -3,40 +3,28 @@ import { Code2, Database, FileText, Share2, Terminal, Zap } from "lucide-react"
 
 const features = [
   {
-    icon: Code2,
-    title: "Advanced Code Editor",
+    icon: FileText,
+    title: "File Management",
     description:
-      "Full-featured code editor with syntax highlighting, auto-completion, and multi-language support. Edit your files directly in the browser.",
+      "Organize and manage your files with intuitive tools. Preview documents, images, and archives without downloading.",
+  },
+  {
+    icon: Code2,
+    title: "Code Editor",
+    description:
+      "Edit code directly in your browser with syntax highlighting and auto-completion for popular languages.",
   },
   {
     icon: Database,
-    title: "Database GUI Editor",
+    title: "Database Tools",
     description:
-      "Visual database management with intuitive GUI. Edit tables, run queries, and manage your data without complex commands.",
-  },
-  {
-    icon: FileText,
-    title: "Smart File Management",
-    description:
-      "Organize, preview, and manage all your files. Support for zip preview without extraction and intelligent file categorization.",
+      "Visual database management with simple GUI. Create tables, run queries, and manage data easily.",
   },
   {
     icon: Share2,
-    title: "Secure File Sharing",
+    title: "Secure Sharing",
     description:
-      "Share files and folders with customizable permissions. Generate secure links and control access with advanced sharing options.",
-  },
-  {
-    icon: Terminal,
-    title: "SSH Integration",
-    description:
-      "Connect to remote servers via SSH. Easily manage files across multiple VPS instances and expand storage dynamically.",
-  },
-  {
-    icon: Zap,
-    title: "High Performance",
-    description:
-      "Optimized for speed and efficiency. Smooth experience on both mobile and desktop with minimal loading times.",
+      "Share files securely with customizable permissions and time-limited access links.",
   },
 ]
 
@@ -44,14 +32,14 @@ export function FeaturesSection() {
   return (
     <section className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Professional tools that solve real problems in web storage and file management
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Core Features</h2>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            Essential tools for modern web storage and file management
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {features.map((feature, index) => (
             <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>

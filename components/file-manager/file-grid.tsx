@@ -20,6 +20,7 @@ import {
   Edit,
   Trash2,
   Eye,
+  Clock,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -33,6 +34,8 @@ interface FileGridProps {
   onFileShare: (fileId: string) => void
   onFileEdit?: (file: FileItem) => void
   onZipPreview?: (file: FileItem) => void
+  onFilePreview?: (file: FileItem) => void
+  onFileHistory?: (file: FileItem) => void
 }
 
 export function FileGrid({
@@ -45,6 +48,8 @@ export function FileGrid({
   onFileShare,
   onFileEdit,
   onZipPreview,
+  onFilePreview,
+  onFileHistory,
 }: FileGridProps) {
   const [editingFile, setEditingFile] = useState<string | null>(null)
   const [editingName, setEditingName] = useState("")
@@ -156,6 +161,12 @@ export function FileGrid({
                     <Eye className="h-4 w-4 mr-2" />
                     Open
                   </DropdownMenuItem>
+                  {onFilePreview && file.type === "file" && (
+                    <DropdownMenuItem onClick={() => onFilePreview(file)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </DropdownMenuItem>
+                  )}
                   {isCodeFile(file) && onFileEdit && (
                     <DropdownMenuItem onClick={() => onFileEdit(file)}>
                       <Edit className="h-4 w-4 mr-2" />
@@ -176,6 +187,12 @@ export function FileGrid({
                     <Share className="h-4 w-4 mr-2" />
                     Share
                   </DropdownMenuItem>
+                  {onFileHistory && file.type === "file" && (
+                    <DropdownMenuItem onClick={() => onFileHistory(file)}>
+                      <Clock className="h-4 w-4 mr-2" />
+                      History
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem>
                     <Download className="h-4 w-4 mr-2" />
                     Download

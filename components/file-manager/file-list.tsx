@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FileSystemService, type FileItem } from "@/lib/file-system"
-import { MoreHorizontal, Download, Share, Edit, Trash2, Code } from "lucide-react"
+import { MoreHorizontal, Download, Share, Edit, Trash2, Code, Eye, Clock } from "lucide-react"
 import { useState } from "react"
 
 interface FileListProps {
@@ -22,7 +22,10 @@ interface FileListProps {
   onFileDelete: (fileId: string) => void
   onFileRename: (fileId: string, newName: string) => void
   onFileShare: (fileId: string) => void
-  onFileEdit?: (file: FileItem) => void // Added onFileEdit prop
+  onFileEdit?: (file: FileItem) => void
+  onZipPreview?: (file: FileItem) => void
+  onFilePreview?: (file: FileItem) => void
+  onFileHistory?: (file: FileItem) => void
 }
 
 export function FileList({
@@ -33,7 +36,10 @@ export function FileList({
   onFileDelete,
   onFileRename,
   onFileShare,
-  onFileEdit, // Added onFileEdit prop
+  onFileEdit,
+  onZipPreview,
+  onFilePreview,
+  onFileHistory,
 }: FileListProps) {
   const [editingFile, setEditingFile] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
@@ -152,6 +158,12 @@ export function FileList({
                       <Download className="mr-2 h-4 w-4" />
                       {file.type === "folder" ? "Open" : "Download"}
                     </DropdownMenuItem>
+                    {onFilePreview && file.type === "file" && (
+                      <DropdownMenuItem onClick={() => onFilePreview(file)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Preview
+                      </DropdownMenuItem>
+                    )}
                     {isEditableFile(file) && onFileEdit && (
                       <DropdownMenuItem onClick={() => onFileEdit(file)}>
                         <Code className="mr-2 h-4 w-4" />
@@ -166,6 +178,12 @@ export function FileList({
                       <Share className="mr-2 h-4 w-4" />
                       Share
                     </DropdownMenuItem>
+                    {onFileHistory && file.type === "file" && (
+                      <DropdownMenuItem onClick={() => onFileHistory(file)}>
+                        <Clock className="mr-2 h-4 w-4" />
+                        History
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onFileDelete(file.id)} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
