@@ -48,7 +48,7 @@ export function FeatureFlagsProvider({
   const buildContext = useCallback((): FeatureFlagContext => {
     return {
       userId: user?.id,
-      tenantId: user?.tenant_id,
+      tenantId: user?.tenant_id || undefined,
       environment,
       userProperties: {
         email: user?.email,

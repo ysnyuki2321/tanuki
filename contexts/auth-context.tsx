@@ -132,7 +132,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, isLoading: true }))
 
     try {
-      const { user } = await AuthService.signIn(email, password)
+      const result = await AuthService.signIn(email, password)
+      const user = 'user' in result ? result.user : undefined
 
       if (user) {
         // Load full user profile

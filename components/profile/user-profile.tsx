@@ -164,8 +164,8 @@ export function UserProfile() {
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <Avatar className="w-24 h-24">
-                    <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name} />
-                    <AvatarFallback className="text-2xl">{user?.name?.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={user?.avatar_url || "/placeholder.svg"} alt={user?.full_name || undefined} />
+                    <AvatarFallback className="text-2xl">{user?.full_name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <Button
                     size="sm"
@@ -176,7 +176,7 @@ export function UserProfile() {
                   </Button>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{user?.name}</h3>
+                  <h3 className="font-semibold text-lg">{user?.full_name}</h3>
                   <p className="text-muted-foreground">{user?.email}</p>
                   <Badge variant={user?.role === "admin" ? "default" : "secondary"} className="mt-2">
                     <Shield className="w-3 h-3 mr-1" />
