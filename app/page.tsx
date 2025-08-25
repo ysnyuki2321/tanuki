@@ -1,29 +1,60 @@
 "use client"
 
-import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
-import { FeaturesSection } from "@/components/features-section"
-import { DemoSection } from "@/components/demo-section"
-import { SetupStatus } from "@/components/setup-status"
+import { useState, useEffect } from "react"
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    console.log('HomePage component mounted')
+    setMounted(true)
+  }, [])
+
+  console.log('HomePage rendering, mounted:', mounted)
+
   return (
-    <main className="min-h-screen pt-16">
-      <Header />
-      <HeroSection />
+    <main style={{
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      color: 'white',
+      padding: '40px 20px',
+      minHeight: '100vh',
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+          🦝 Tanuki Storage Platform
+        </h1>
 
-      {/* Setup Status Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-center mb-8">Platform Status</h2>
-            <SetupStatus />
-          </div>
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', opacity: 0.9 }}>
+          {mounted ? 'React is working! ✅' : 'Loading React... ⏳'}
+        </p>
+
+        <div style={{
+          background: 'rgba(255,255,255,0.1)',
+          padding: '20px',
+          borderRadius: '10px',
+          margin: '20px 0'
+        }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Debug Information</h2>
+          <ul style={{ textAlign: 'left', listStyle: 'none', padding: 0 }}>
+            <li>✅ HTML structure is working</li>
+            <li>✅ CSS styles are applying</li>
+            <li>✅ JavaScript is executing</li>
+            <li>{mounted ? '✅' : '⏳'} React hooks are working</li>
+            <li>✅ Page is accessible</li>
+          </ul>
         </div>
-      </section>
 
-      <FeaturesSection />
-      <DemoSection />
+        <div style={{
+          background: 'rgba(255,255,255,0.1)',
+          padding: '20px',
+          borderRadius: '10px',
+          marginTop: '20px'
+        }}>
+          <h3>Next Steps:</h3>
+          <p>If you can see this page, the core application is working. The white screen issue might be related to specific components.</p>
+        </div>
+      </div>
     </main>
   )
 }
