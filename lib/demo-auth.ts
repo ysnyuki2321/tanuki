@@ -15,7 +15,7 @@ const DEMO_USERS: DemoUser[] = [
   {
     id: 'demo-admin-1',
     email: 'admin@tanuki.dev',
-    password: 'demo123',
+    password: 'Yuki@2321',
     full_name: 'Admin User',
     avatar_url: null,
     phone: null,

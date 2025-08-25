@@ -122,7 +122,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             </Button>
 
             <div className="text-center text-sm text-muted-foreground">
-              Demo credentials: admin@tanuki.dev / demo123
+              Demo credentials: admin@tanuki.dev / Yuki@2321
             </div>
 
             <div className="text-center">
