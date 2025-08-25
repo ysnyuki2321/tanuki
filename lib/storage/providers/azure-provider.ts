@@ -412,7 +412,7 @@ export class AzureStorageProvider implements StorageProvider {
     }
   }
 
-  async move(sourceKey: string, destinationKey: string): StorageObject> {
+  async move(sourceKey: string, destinationKey: string): Promise<StorageObject> {
     await this.ensureInitialized()
 
     try {
