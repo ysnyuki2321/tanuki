@@ -26,8 +26,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [isDemoMode, setIsDemoMode] = useState(false)
 
   const { signUp, isLoading } = useAuth()
+
+  useEffect(() => {
+    setIsDemoMode(!isSupabaseConfigured())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
