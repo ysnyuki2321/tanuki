@@ -85,12 +85,17 @@ export const getConfig = (): AppConfig => {
     env = (window as any).__ENV__ || {}
 
     // Fallback to any NEXT_PUBLIC_ vars that might be available
-    if (typeof process !== 'undefined' && process.env) {
-      Object.keys(process.env).forEach(key => {
-        if (key.startsWith('NEXT_PUBLIC_') && !env[key]) {
-          env[key] = process.env[key]
-        }
-      })
+    try {
+      if (typeof process !== 'undefined' && process?.env) {
+        Object.keys(process.env).forEach(key => {
+          if (key.startsWith('NEXT_PUBLIC_') && !env[key]) {
+            env[key] = process.env[key]
+          }
+        })
+      }
+    } catch (error) {
+      // Ignore process access errors on client-side
+      console.debug('Process env access not available on client side')
     }
   }
   
