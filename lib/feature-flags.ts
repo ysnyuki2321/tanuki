@@ -290,10 +290,10 @@ export class FeatureFlagService {
       }
       
       // Get feature flags from database
-      const { data: configs } = await supabase
+      const { data: configs } = await (supabase as any)
         .from('admin_config')
         .select('key, value')
-        .eq('tenant_id', tenantId || null)
+        .eq('tenant_id', tenantId || '')
         .eq('category', 'features')
       
       // Set cached flags
