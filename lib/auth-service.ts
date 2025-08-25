@@ -155,11 +155,9 @@ export class AuthService {
       return await DemoAuthService.resetPassword(email)
     }
 
-    const config = getConfig()
-
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${config.app_url}/auth/reset-password`,
+        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/reset-password`,
       })
 
       if (error) {
