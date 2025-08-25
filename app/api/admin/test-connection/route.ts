@@ -68,9 +68,9 @@ async function testEmailConnection(config: any) {
     
     // For demo purposes, just validate the configuration
     // In real implementation, use nodemailer to test SMTP connection
-    const nodemailer = require('nodemailer');
+    const nodemailer = await import('nodemailer');
     
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.default.createTransporter({
       host: config.smtp_host,
       port: parseInt(config.smtp_port) || 587,
       secure: parseInt(config.smtp_port) === 465,
