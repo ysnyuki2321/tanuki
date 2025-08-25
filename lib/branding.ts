@@ -124,6 +124,7 @@ export class BrandingService {
   // Update branding configuration
   static async updateBranding(updates: Partial<BrandingConfig>, tenantId?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }
@@ -266,6 +267,7 @@ export class BrandingService {
   // Upload logo file
   static async uploadLogo(file: File, type: 'logo' | 'logo_dark' | 'favicon', tenantId?: string): Promise<{ success: boolean; url?: string; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }
@@ -306,6 +308,7 @@ export class BrandingService {
   // Reset branding to defaults
   static async resetBranding(tenantId?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }

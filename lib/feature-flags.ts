@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabase } from './supabase-client'
 import { getConfig } from './config'
 
 export interface FeatureFlag {
@@ -280,6 +280,7 @@ export class FeatureFlagService {
   // Initialize feature flags from database
   static async initializeFlags(tenantId?: string) {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         // Use default values if no database
         DEFAULT_FEATURES.forEach(feature => {
@@ -325,6 +326,7 @@ export class FeatureFlagService {
   // Enable/disable a feature
   static async setFeature(featureKey: string, enabled: boolean, tenantId?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }
@@ -410,6 +412,7 @@ export class FeatureFlagService {
   // Reset features to defaults
   static async resetToDefaults(tenantId?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }
