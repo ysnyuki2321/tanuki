@@ -86,6 +86,11 @@ export function FileManager() {
     setIsFilePreviewOpen(true)
   }
 
+  const handleFileHistory = (file: FileItem) => {
+    setFileHistoryFile(file)
+    setIsFileHistoryOpen(true)
+  }
+
   const handleFileUpload = async (uploadedFiles: File[]) => {
     for (const file of uploadedFiles) {
       try {
