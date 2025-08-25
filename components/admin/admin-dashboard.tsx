@@ -9,15 +9,22 @@ import { UserManagement } from "./user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
 import SetupWizard from "./setup-wizard"
+import RealSetupWizard from "./real-setup-wizard"
+import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<SystemStats | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [isRealAdmin, setIsRealAdmin] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Check if current user is real admin
+        const realAdmin = RealAdminAuthService.isAuthenticatedAdmin()
+        setIsRealAdmin(realAdmin)
+
         const [statsData, usersData] = await Promise.all([AdminService.getSystemStats(), AdminService.getUsers()])
         setStats(statsData)
         setUsers(usersData)
@@ -76,7 +83,7 @@ export function AdminDashboard() {
         </TabsList>
 
         <TabsContent value="setup">
-          <SetupWizard />
+          {isRealAdmin ? <RealSetupWizard /> : <SetupWizard />}
         </TabsContent>
 
         <TabsContent value="overview">
