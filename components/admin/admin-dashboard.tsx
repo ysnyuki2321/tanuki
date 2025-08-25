@@ -11,6 +11,7 @@ import { StorageManagement } from "./storage-management"
 import SetupWizard from "./setup-wizard"
 import RealSetupWizard from "./real-setup-wizard"
 import FeatureFlagsManager from "./feature-flags-manager"
+import BrandingManager from "./branding-manager"
 import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 export function AdminDashboard() {
@@ -75,11 +76,12 @@ export function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="setup" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
@@ -98,6 +100,10 @@ export function AdminDashboard() {
 
         <TabsContent value="features">
           <FeatureFlagsManager />
+        </TabsContent>
+
+        <TabsContent value="branding">
+          <BrandingManager />
         </TabsContent>
 
         <TabsContent value="servers">
