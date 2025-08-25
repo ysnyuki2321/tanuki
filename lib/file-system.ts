@@ -127,6 +127,44 @@ Happy storage! 🎉`,
       path: "/Projects/config.json",
       parentId: "projects",
       mimeType: "application/json",
+      content: `{
+  "app": {
+    "name": "Tanuki Storage Platform",
+    "version": "1.0.0",
+    "description": "Advanced web storage with code editing and database management"
+  },
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "cors": {
+      "enabled": true,
+      "origins": ["http://localhost:3000", "https://tanuki.app"]
+    }
+  },
+  "database": {
+    "type": "postgresql",
+    "host": "localhost",
+    "port": 5432,
+    "name": "tanuki_db",
+    "ssl": false
+  },
+  "storage": {
+    "provider": "local",
+    "maxFileSize": "100MB",
+    "allowedTypes": [
+      "image/*",
+      "text/*",
+      "application/pdf",
+      "application/zip"
+    ]
+  },
+  "features": {
+    "codeEditor": true,
+    "databaseGui": true,
+    "fileSharing": true,
+    "analytics": true
+  }
+}`,
     },
     {
       id: "main-script",
