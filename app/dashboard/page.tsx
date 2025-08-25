@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import RealFileManager from "@/components/file-manager/real-file-manager"
 import UserDashboard from "@/components/dashboard/user-dashboard"
@@ -8,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TanukiLogo } from "@/components/tanuki-logo"
 import { SimpleThemeToggle } from "@/components/theme-toggle"
-import { LogOut, Settings, User, Database, Code, BarChart3, Files } from "lucide-react"
+import { EnhancedNotificationCenter } from "@/components/notifications/enhanced-notification-center"
+import { LogOut, Settings, User, Database, Code, BarChart3, Files, Bell } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,7 @@ import Link from "next/link"
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth()
+  const [showNotifications, setShowNotifications] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
@@ -38,6 +41,14 @@ export default function DashboardPage() {
 
               <div className="flex items-center gap-4">
                 <SimpleThemeToggle />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNotifications(true)}
+                  className="relative"
+                >
+                  <Bell className="w-4 h-4" />
+                </Button>
                 <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.full_name || user?.email}</span>
 
                 <DropdownMenu>
@@ -118,6 +129,12 @@ export default function DashboardPage() {
             </TabsContent>
           </Tabs>
         </main>
+
+        {/* Notification Center */}
+        <EnhancedNotificationCenter
+          isOpen={showNotifications}
+          onClose={() => setShowNotifications(false)}
+        />
       </div>
     </ProtectedRoute>
   )
