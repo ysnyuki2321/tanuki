@@ -53,7 +53,10 @@ export default function RootLayout({
                   'beta_features'
                 ]}
               >
-                {children}
+                <NotificationProvider>
+                  {children}
+                  <Toaster />
+                </NotificationProvider>
               </FeatureFlagsProvider>
             </AuthProvider>
           </ThemeProvider>
