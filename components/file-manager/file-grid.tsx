@@ -49,6 +49,7 @@ export function FileGrid({
   onFileEdit,
   onZipPreview,
   onFilePreview,
+  onFileHistory,
 }: FileGridProps) {
   const [editingFile, setEditingFile] = useState<string | null>(null)
   const [editingName, setEditingName] = useState("")
