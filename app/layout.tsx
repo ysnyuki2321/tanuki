@@ -25,7 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmSans.variable}>
       <body className="antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
