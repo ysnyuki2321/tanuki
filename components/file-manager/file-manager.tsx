@@ -11,6 +11,7 @@ import { AdvancedSearch, type SearchFilters } from "./advanced-search"
 import { CodeEditorModal } from "@/components/code-editor/code-editor-modal"
 import { ZipPreviewModal } from "@/components/zip-preview/zip-preview-modal"
 import { FilePreviewModal } from "@/components/file-preview/file-preview-modal"
+import { FileHistoryModal } from "@/components/file-history/file-history-modal"
 import { Loader2 } from "lucide-react"
 
 export function FileManager() {
