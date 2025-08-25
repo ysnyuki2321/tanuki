@@ -8,10 +8,8 @@ import { SystemOverview } from "./system-overview"
 import { UserManagement } from "./user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
-import SetupWizard from "./setup-wizard"
-import RealSetupWizard from "./real-setup-wizard"
+import ConfigurationManager from "./configuration-manager"
 import FeatureFlagsManager from "./feature-flags-manager"
-import BrandingManager from "./branding-manager"
 import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 export function AdminDashboard() {
