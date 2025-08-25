@@ -95,33 +95,55 @@ export class RateLimiter {
     if (this.initialized) return
 
     try {
-      // Dynamically import Redis client
-      const Redis = await import('ioredis')
-      
       const redisUrl = process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL
-      
-      if (redisUrl) {
-        if (redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')) {
-          // Standard Redis connection
-          this.redis = new Redis.default(redisUrl, {
-            retryDelayOnFailover: 100,
-            maxRetriesPerRequest: 3,
-            lazyConnect: true
-          }) as any
-        } else {
-          // Upstash Redis REST API
-          const { Redis: UpstashRedis } = await import('@upstash/redis')
-          this.redis = UpstashRedis.fromEnv() as any
-        }
-        
-        console.log('Redis rate limiter initialized')
-      } else {
+      const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+      if (!redisUrl) {
         console.warn('No Redis URL configured, using in-memory fallback for rate limiting')
+        this.initialized = true
+        return
       }
-      
+
+      // Validate Redis URL format
+      if (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://') && !redisUrl.startsWith('https://')) {
+        console.warn('Invalid Redis URL format, using in-memory fallback for rate limiting')
+        this.initialized = true
+        return
+      }
+
+      if (redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')) {
+        // Standard Redis connection
+        const Redis = await import('ioredis')
+        this.redis = new Redis.default(redisUrl, {
+          retryDelayOnFailover: 100,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          connectTimeout: 5000,
+          commandTimeout: 3000
+        }) as any
+
+        // Test connection
+        await this.redis.ping()
+        console.log('Redis rate limiter initialized with ioredis')
+      } else if (redisUrl.startsWith('https://') && upstashToken) {
+        // Upstash Redis REST API
+        const { Redis: UpstashRedis } = await import('@upstash/redis')
+        this.redis = new UpstashRedis({
+          url: redisUrl,
+          token: upstashToken
+        }) as any
+
+        // Test connection
+        await this.redis.ping()
+        console.log('Redis rate limiter initialized with Upstash')
+      } else {
+        console.warn('Redis configuration incomplete, using in-memory fallback for rate limiting')
+      }
+
       this.initialized = true
     } catch (error) {
       console.warn('Failed to initialize Redis for rate limiting, using in-memory fallback:', error)
+      this.redis = null
       this.initialized = true
     }
   }
@@ -200,24 +222,39 @@ export class RateLimiter {
       const now = Date.now()
       const resetTime = now + config.windowMs
 
+      // Check if redis connection is still alive
+      if (typeof this.redis.ping === 'function') {
+        await Promise.race([
+          this.redis.ping(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Redis ping timeout')), 1000))
+        ])
+      }
+
       // Use Redis pipeline for atomic operations
       const pipeline = this.redis.pipeline()
       pipeline.incr(key)
       pipeline.expire(key, windowSeconds)
-      
-      const results = await pipeline.exec()
-      
+
+      const results = await Promise.race([
+        pipeline.exec(),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Redis operation timeout')), 3000))
+      ])
+
       if (!results || results.length < 2) {
-        throw new Error('Redis pipeline failed')
+        throw new Error('Redis pipeline failed - invalid results')
       }
 
       const [incrResult, expireResult] = results
-      
+
       if (incrResult[0]) {
         throw incrResult[0]
       }
 
       const count = incrResult[1] as number
+      if (typeof count !== 'number' || isNaN(count)) {
+        throw new Error('Invalid count returned from Redis')
+      }
+
       const remaining = Math.max(0, config.max - count)
       const allowed = count <= config.max
 
@@ -228,7 +265,9 @@ export class RateLimiter {
         resetTime
       }
     } catch (error) {
-      console.error('Redis rate limit check failed:', error)
+      console.warn('Redis rate limit check failed, falling back to in-memory:', error)
+      // Disable Redis for this instance if it's consistently failing
+      this.redis = null
       return this.checkRateLimitFallback(key, config)
     }
   }
