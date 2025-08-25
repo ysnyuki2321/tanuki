@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { CheckCircle, AlertCircle, Loader2, ArrowRight } from 'lucide-react'
 import { getSupabase } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -274,5 +274,24 @@ export default function AuthCallbackPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 p-8">
+            <Loader2 className="w-8 h-8 animate-spin" />
+            <p className="text-center text-muted-foreground">
+              Loading...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   )
 }
