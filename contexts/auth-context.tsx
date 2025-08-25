@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { AuthService } from "@/lib/auth-service"
 import { type DbUser } from "@/lib/database-schema"
 import { DemoAuthService } from "@/lib/demo-auth"
+import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 interface AuthState {
   user: DbUser | null
@@ -72,6 +73,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, isLoading: true }))
 
     try {
+      // First check if there's a real admin session
+      const adminUser = RealAdminAuthService.getCurrentAdminUser()
+      if (adminUser) {
+        setState({
+          user: {
+            ...adminUser,
+            role: 'admin',
+            tenant_id: null,
+            storage_quota: null,
+            file_count_limit: null,
+            avatar_url: null,
+            phone: null,
+            company: null,
+            email_verified: true,
+            subscription_plan: null,
+            subscription_status: null,
+            subscription_expires: null,
+            timezone: null,
+            language: null,
+            theme: null,
+            updated_at: adminUser.created_at
+          } as DbUser,
+          isLoading: false,
+          isAuthenticated: true,
+        })
+        return
+      }
+
       // Check if auth service is configured
       if (!AuthService.isConfigured()) {
         console.warn('Auth service not configured - user will be treated as anonymous')

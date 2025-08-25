@@ -2,6 +2,7 @@ import { getSupabase, getSupabaseAdmin, isSupabaseConfigured } from './supabase-
 import type { DbUser } from './database-schema'
 import { getConfig } from './config'
 import { DemoAuthService } from './demo-auth'
+import { RealAdminAuthService } from './real-admin-auth'
 
 // Authentication service with null-safe operations
 export class AuthService {
@@ -69,9 +70,42 @@ export class AuthService {
 
   // Sign in with email/password
   static async signIn(email: string, password: string) {
+    // Check if this is a real admin login
+    if (RealAdminAuthService.isRealAdmin(email)) {
+      const result = await RealAdminAuthService.authenticateAdmin(email, password)
+      if (result.success && result.session) {
+        // Convert admin session to regular auth format
+        return {
+          success: true,
+          user: {
+            ...result.session.user,
+            role: 'admin',
+            tenant_id: null,
+            storage_quota: null,
+            file_count_limit: null,
+            avatar_url: null,
+            phone: null,
+            company: null,
+            email_verified: true,
+            subscription_plan: null,
+            subscription_status: null,
+            subscription_expires: null,
+            timezone: null,
+            language: null,
+            theme: null,
+            created_at: result.session.user.created_at,
+            updated_at: result.session.user.created_at,
+            last_login: result.session.user.last_login
+          } as DbUser
+        }
+      } else {
+        return result
+      }
+    }
+
     const supabase = getSupabase()
     if (!supabase) {
-      // Fallback to demo mode
+      // Fallback to demo mode for regular users
       return await DemoAuthService.signIn(email, password)
     }
 
