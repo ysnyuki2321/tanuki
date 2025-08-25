@@ -22,7 +22,9 @@ interface FileListProps {
   onFileDelete: (fileId: string) => void
   onFileRename: (fileId: string, newName: string) => void
   onFileShare: (fileId: string) => void
-  onFileEdit?: (file: FileItem) => void // Added onFileEdit prop
+  onFileEdit?: (file: FileItem) => void
+  onZipPreview?: (file: FileItem) => void
+  onFilePreview?: (file: FileItem) => void
 }
 
 export function FileList({
