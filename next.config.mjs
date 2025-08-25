@@ -9,8 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
   },
 }
 
