@@ -2,6 +2,7 @@ import { getSupabase, getSupabaseAdmin } from './supabase-client'
 import type { DbFile } from './database-schema'
 import { getConfig } from './config'
 import { AuthService } from './auth-service'
+import { DemoFileStorageService } from './demo-file-storage'
 
 export interface FileUploadOptions {
   file: File
@@ -24,7 +25,7 @@ export class FileStorageService {
   
   // Check if storage is configured
   static isConfigured(): boolean {
-    return !!getSupabase()
+    return !!getSupabase() || DemoFileStorageService.isDemoMode()
   }
 
   // Initialize storage bucket if not exists
@@ -63,7 +64,8 @@ export class FileStorageService {
   static async uploadFile(options: FileUploadOptions): Promise<FileUploadResult> {
     const supabase = getSupabase()
     if (!supabase) {
-      return { success: false, error: 'Storage not configured. Please setup database connection first.' }
+      // Fallback to demo storage
+      return await DemoFileStorageService.uploadFile(options)
     }
 
     if (!this.isConfigured()) {
@@ -178,7 +180,7 @@ export class FileStorageService {
   static async downloadFile(fileId: string): Promise<{ success: boolean; url?: string; error?: string }> {
     const supabase = getSupabase()
     if (!supabase) {
-      return { success: false, error: 'Supabase not configured' }
+      return await DemoFileStorageService.downloadFile(fileId)
     }
 
     try {
@@ -244,7 +246,7 @@ export class FileStorageService {
   static async deleteFile(fileId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = getSupabase()
     if (!supabase) {
-      return { success: false, error: 'Supabase not configured' }
+      return await DemoFileStorageService.deleteFile(fileId)
     }
 
     try {
@@ -329,7 +331,10 @@ export class FileStorageService {
     search?: string
   } = {}): Promise<DbFile[]> {
     const supabase = getSupabase()
-    if (!supabase) return []
+    if (!supabase) {
+      const demoFiles = await DemoFileStorageService.listFiles(options)
+      return demoFiles as DbFile[]
+    }
 
     const { userId, folderId, projectId, limit = 50, offset = 0, search } = options
 
@@ -494,8 +499,7 @@ export class FileStorageService {
   static async getStorageUsage(userId: string): Promise<{ used: number; quota: number; fileCount: number }> {
     const supabase = getSupabase()
     if (!supabase) {
-      console.warn('Storage usage check skipped - database not configured')
-      return { used: 0, quota: 0, fileCount: 0 }
+      return await DemoFileStorageService.getStorageUsage(userId)
     }
 
     if (!userId) {

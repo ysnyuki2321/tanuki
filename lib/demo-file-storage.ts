@@ -323,6 +323,11 @@ export class DemoFileStorageService {
     return `demo://file/${fileId}`
   }
 
+  // Check if demo mode is active
+  static isDemoMode(): boolean {
+    return typeof window !== 'undefined'
+  }
+
   // Clear all demo files
   static clearDemoFiles(): void {
     if (typeof window === 'undefined') return
