@@ -1,6 +1,6 @@
 import React from 'react'
 import { getConfig, getSetupStatus } from './config'
-import { isSupabaseConfigured } from './supabase'
+import { isSupabaseConfigured } from './supabase-client'
 
 export interface ServiceStatus {
   name: string
@@ -218,7 +218,8 @@ export class ServiceChecker {
     try {
       // Test database connection
       if (isSupabaseConfigured()) {
-        const { supabase } = await import('./supabase')
+        const { getSupabase } = await import('./supabase-client')
+        const supabase = getSupabase()
         if (supabase) {
           const { error } = await supabase.from('users').select('count').limit(1)
           results.database = !error

@@ -5,6 +5,7 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import ErrorBoundary from "@/components/error-boundary"
+import EnvInjector, { getClientSafeEnvVars } from "@/components/env-injector"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -23,9 +24,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const clientEnvVars = getClientSafeEnvVars()
+
   return (
     <html lang="en" className={dmSans.variable}>
       <body className="antialiased">
+        <EnvInjector envVars={clientEnvVars} />
         <ErrorBoundary>
           <ThemeProvider
             attribute="class"
