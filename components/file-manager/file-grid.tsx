@@ -158,6 +158,12 @@ export function FileGrid({
                     <Eye className="h-4 w-4 mr-2" />
                     Open
                   </DropdownMenuItem>
+                  {onFilePreview && file.type === "file" && (
+                    <DropdownMenuItem onClick={() => onFilePreview(file)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </DropdownMenuItem>
+                  )}
                   {isCodeFile(file) && onFileEdit && (
                     <DropdownMenuItem onClick={() => onFileEdit(file)}>
                       <Edit className="h-4 w-4 mr-2" />
