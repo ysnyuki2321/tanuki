@@ -325,6 +325,7 @@ export function FileManager() {
           onFileEdit={handleFileEdit}
           onZipPreview={handleZipPreview}
           onFilePreview={handleFilePreview}
+          onFileHistory={handleFileHistory}
         />
       ) : (
         <FileList
@@ -338,6 +339,7 @@ export function FileManager() {
           onFileEdit={handleFileEdit}
           onZipPreview={handleZipPreview}
           onFilePreview={handleFilePreview}
+          onFileHistory={handleFileHistory}
         />
       )}
 
