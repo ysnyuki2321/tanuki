@@ -33,6 +33,7 @@ interface FileGridProps {
   onFileShare: (fileId: string) => void
   onFileEdit?: (file: FileItem) => void
   onZipPreview?: (file: FileItem) => void
+  onFilePreview?: (file: FileItem) => void
 }
 
 export function FileGrid({
