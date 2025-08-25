@@ -49,16 +49,29 @@ export class AuthService {
 
       // Create user profile if signup successful
       if (data.user && !error) {
-        await this.createUserProfile(data.user.id, {
-          email,
-          full_name: metadata?.full_name || null,
-          company: metadata?.company || null,
-          phone: metadata?.phone || null,
-          email_verified: false,
-          role: 'user',
-          storage_quota: config.default_storage_quota,
-          file_count_limit: config.default_file_limit,
-        })
+        try {
+          const response = await fetch('/api/auth/create-profile', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email,
+              metadata: {
+                full_name: metadata?.full_name || null,
+                company: metadata?.company || null,
+                phone: metadata?.phone || null,
+              }
+            })
+          });
+
+          if (!response.ok) {
+            console.error('Failed to create user profile');
+          }
+        } catch (error) {
+          console.error('Error creating user profile:', error);
+        }
       }
 
       return { user: data.user, session: data.session }
