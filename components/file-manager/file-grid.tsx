@@ -187,6 +187,12 @@ export function FileGrid({
                     <Share className="h-4 w-4 mr-2" />
                     Share
                   </DropdownMenuItem>
+                  {onFileHistory && file.type === "file" && (
+                    <DropdownMenuItem onClick={() => onFileHistory(file)}>
+                      <Clock className="h-4 w-4 mr-2" />
+                      History
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem>
                     <Download className="h-4 w-4 mr-2" />
                     Download
