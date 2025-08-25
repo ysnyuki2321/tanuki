@@ -54,7 +54,9 @@ export default function RootLayout({
                 ]}
               >
                 <NotificationProvider>
-                  {children}
+                  <main className="pt-16">
+                    {children}
+                  </main>
                   <Toaster />
                 </NotificationProvider>
               </FeatureFlagsProvider>
