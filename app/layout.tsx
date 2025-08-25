@@ -5,7 +5,8 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import ErrorBoundary from "@/components/error-boundary"
-import EnvInjector, { getClientSafeEnvVars } from "@/components/env-injector"
+import EnvInjector from "@/components/env-injector"
+import { getClientSafeEnvVars } from "@/lib/env-utils"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
