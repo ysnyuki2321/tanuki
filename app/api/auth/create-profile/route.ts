@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       theme: null
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await (supabaseAdmin as any)
       .from('users')
       .insert([userProfile])
       .select()

@@ -4,7 +4,7 @@ import { getCurrentUser, getSupabaseAdmin } from '@/lib/supabase-client'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -16,11 +16,18 @@ export async function GET(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const { searchParams } = new URL(request.url)
     const environment = searchParams.get('environment')
 
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     let query = supabase
       .from('feature_flag_values')
@@ -53,7 +60,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -65,7 +72,7 @@ export async function PUT(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const body = await request.json()
     const {
       environment,
@@ -93,6 +100,13 @@ export async function PUT(
     }
 
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if flag exists
     const { data: flag, error: flagError } = await supabase
@@ -126,7 +140,7 @@ export async function PUT(
     const flagValue = await featureFlagsService.updateFlagValue(
       flagId,
       environment,
-      value !== undefined ? value : flag.default_value,
+      value !== undefined ? value : (flag as any).default_value,
       {
         enabled: enabled !== undefined ? enabled : true,
         rolloutPercentage: rolloutPercentage !== undefined ? rolloutPercentage : 100,
@@ -152,7 +166,7 @@ export async function PUT(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -164,7 +178,7 @@ export async function POST(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const body = await request.json()
     const {
       environment,
@@ -193,6 +207,13 @@ export async function POST(
 
     const supabase = getSupabaseAdmin()
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+
     // Check if flag exists
     const { data: flag, error: flagError } = await supabase
       .from('feature_flags')
@@ -213,7 +234,7 @@ export async function POST(
       .select('id')
       .eq('flag_id', flagId)
       .eq('environment', environment)
-      .eq('tenant_id', tenantId || null)
+      .eq('tenant_id', tenantId || null as any)
       .single()
 
     if (existingValue) {
@@ -253,7 +274,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -265,7 +286,7 @@ export async function DELETE(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const { searchParams } = new URL(request.url)
     const environment = searchParams.get('environment')
     const tenantId = searchParams.get('tenantId')
@@ -279,13 +300,20 @@ export async function DELETE(
 
     const supabase = getSupabaseAdmin()
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+
     // Delete flag value
     const { error } = await supabase
       .from('feature_flag_values')
       .delete()
       .eq('flag_id', flagId)
       .eq('environment', environment)
-      .eq('tenant_id', tenantId || null)
+      .eq('tenant_id', tenantId || null as any)
 
     if (error) {
       throw error

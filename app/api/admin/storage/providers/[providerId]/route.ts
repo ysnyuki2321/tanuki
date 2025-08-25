@@ -5,7 +5,7 @@ import type { StorageConfig } from '@/lib/storage/storage-interface'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { providerId: string } }
+  { params }: { params: Promise<{ providerId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -17,8 +17,15 @@ export async function GET(
       )
     }
 
-    const { providerId } = params
+    const { providerId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     const { data: provider, error } = await supabase
       .from('storage_providers')
@@ -35,9 +42,9 @@ export async function GET(
 
     // Decrypt credentials
     const providerWithCredentials = {
-      ...provider,
-      credentials: provider.encrypted_credentials ? 
-        JSON.parse(provider.encrypted_credentials) : {}
+      ...(provider as any),
+      credentials: (provider as any).encrypted_credentials ? 
+        JSON.parse((provider as any).encrypted_credentials) : {}
     }
 
     return NextResponse.json(providerWithCredentials)
@@ -56,7 +63,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { providerId: string } }
+  { params }: { params: Promise<{ providerId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -68,7 +75,7 @@ export async function PUT(
       )
     }
 
-    const { providerId } = params
+    const { providerId } = await params
     const body = await request.json()
     const {
       name,
@@ -80,6 +87,13 @@ export async function PUT(
     } = body
 
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if provider exists
     const { data: existingProvider, error: fetchError } = await supabase
@@ -98,9 +112,9 @@ export async function PUT(
     // Validate storage configuration if credentials were updated
     if (credentials) {
       const config: StorageConfig = {
-        provider: existingProvider.type,
-        bucketName: bucketName || existingProvider.bucket_name,
-        region: region !== undefined ? region : existingProvider.region,
+        provider: (existingProvider as any).type,
+        bucketName: bucketName || (existingProvider as any).bucket_name,
+        region: region !== undefined ? region : (existingProvider as any).region,
         credentials
       }
 
@@ -119,11 +133,11 @@ export async function PUT(
     }
 
     // If setting as default, unset other defaults
-    if (isDefault && !existingProvider.is_default) {
-      await supabase
+    if (isDefault && !(existingProvider as any).is_default) {
+      await (supabase as any)
         .from('storage_providers')
         .update({ is_default: false })
-        .eq('tenant_id', existingProvider.tenant_id || null)
+        .eq('tenant_id', (existingProvider as any).tenant_id || null)
         .neq('id', providerId)
     }
 
@@ -140,7 +154,7 @@ export async function PUT(
     if (isDefault !== undefined) updateData.is_default = isDefault
 
     // Update provider
-    const { data: updatedProvider, error: updateError } = await supabase
+    const { data: updatedProvider, error: updateError } = await (supabase as any)
       .from('storage_providers')
       .update(updateData)
       .eq('id', providerId)
@@ -163,8 +177,8 @@ export async function PUT(
     }
 
     return NextResponse.json({
-      ...updatedProvider,
-      credentials: credentials || JSON.parse(existingProvider.encrypted_credentials || '{}')
+      ...(updatedProvider as any),
+      credentials: credentials || JSON.parse((existingProvider as any).encrypted_credentials || '{}')
     })
 
   } catch (error) {
@@ -181,7 +195,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { providerId: string } }
+  { params }: { params: Promise<{ providerId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -193,8 +207,15 @@ export async function DELETE(
       )
     }
 
-    const { providerId } = params
+    const { providerId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if provider exists
     const { data: existingProvider, error: fetchError } = await supabase
@@ -211,7 +232,7 @@ export async function DELETE(
     }
 
     // Prevent deleting default provider
-    if (existingProvider.is_default) {
+    if ((existingProvider as any).is_default) {
       return NextResponse.json(
         { 
           error: 'Cannot delete default storage provider',
@@ -222,10 +243,10 @@ export async function DELETE(
     }
 
     // Check if provider is being used by files
-    const { data: filesUsingProvider } = await supabase
+    const { data: filesUsingProvider } = await (supabase as any)
       .from('files')
       .select('id')
-      .eq('storage_provider', existingProvider.name)
+      .eq('storage_provider', (existingProvider as any).name)
       .limit(1)
 
     if (filesUsingProvider && filesUsingProvider.length > 0) {
@@ -239,7 +260,7 @@ export async function DELETE(
     }
 
     // Delete the provider
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await (supabase as any)
       .from('storage_providers')
       .delete()
       .eq('id', providerId)
@@ -269,23 +290,27 @@ async function testConnectionAsync(providerId: string, config: StorageConfig) {
     const isHealthy = await validator.testConnection(config)
     
     const supabase = getSupabaseAdmin()
-    await supabase
-      .from('storage_providers')
-      .update({
-        health_status: isHealthy ? 'healthy' : 'unhealthy',
-        last_health_check: new Date().toISOString()
-      })
-      .eq('id', providerId)
+    if (supabase) {
+      await (supabase as any)
+        .from('storage_providers')
+        .update({
+          health_status: isHealthy ? 'healthy' : 'unhealthy',
+          last_health_check: new Date().toISOString()
+        })
+        .eq('id', providerId)
+    }
   } catch (error) {
     console.error('Failed to test storage provider connection:', error)
     
     const supabase = getSupabaseAdmin()
-    await supabase
-      .from('storage_providers')
-      .update({
-        health_status: 'unhealthy',
-        last_health_check: new Date().toISOString()
-      })
-      .eq('id', providerId)
+    if (supabase) {
+      await (supabase as any)
+        .from('storage_providers')
+        .update({
+          health_status: 'unhealthy',
+          last_health_check: new Date().toISOString()
+        })
+        .eq('id', providerId)
+    }
   }
 }

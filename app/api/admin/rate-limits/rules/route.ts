@@ -14,6 +14,13 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+
     // Get all rate limit rules
     const { data: rules, error } = await supabase
       .from('rate_limit_rules')
@@ -88,6 +95,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+
     // Check if a rule with the same path and method already exists
     const { data: existingRule } = await supabase
       .from('rate_limit_rules')
@@ -105,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create rate limit rule
-    const { data: rule, error } = await supabase
+    const { data: rule, error } = await (supabase as any)
       .from('rate_limit_rules')
       .insert({
         name,

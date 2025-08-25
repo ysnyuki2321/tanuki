@@ -21,7 +21,7 @@ import {
   Edit3, 
   Trash2, 
   Copy, 
-  Toggle, 
+  ToggleLeft, 
   Target, 
   Settings, 
   Activity,
@@ -56,7 +56,8 @@ interface FlagValue {
 }
 
 export function FeatureFlagsManager() {
-  const { user, tenant } = useAuth()
+  const { user } = useAuth()
+  const tenant = (user as any)?.tenant_id ? { id: (user as any).tenant_id } : null
   const [flags, setFlags] = useState<DbFeatureFlag[]>([])
   const [flagValues, setFlagValues] = useState<Record<string, DbFeatureFlagValue[]>>({})
   const [loading, setLoading] = useState(true)
@@ -455,7 +456,6 @@ export function FeatureFlagsManager() {
                             {(flag.environments || ['development', 'staging', 'production']).map(env => (
                               <div key={env} className="flex items-center gap-2">
                                 <Switch
-                                  size="sm"
                                   checked={getEnvironmentStatus(flag.id, env)}
                                   onCheckedChange={(checked) => handleToggleFlag(flag.id, env, checked)}
                                 />

@@ -6,7 +6,7 @@ import type { DbAdminConfig } from '@/lib/database-schema';
 // GET - Load current configuration
 export async function GET(request: NextRequest) {
   // Require admin authentication
-  const user = await getCurrentUser(request);
+  const user = await getCurrentUser();
   if (!user || user.role !== 'admin') {
     return NextResponse.json(
       { error: 'Unauthorized - Admin access required' },
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 // POST - Save configuration
 export async function POST(request: NextRequest) {
   // Require admin authentication
-  const user = await getCurrentUser(request);
+  const user = await getCurrentUser();
   if (!user || user.role !== 'admin') {
     return NextResponse.json(
       { error: 'Unauthorized - Admin access required' },
@@ -398,14 +398,17 @@ async function saveConfigToDatabase(config: any) {
       description: item.description,
       editable_by_tenant: true,
       requires_restart: ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_KEY'].includes(item.key),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      tenant_id: null,
+      validation_rules: null,
+      default_value: null
     }));
 
   try {
     // Use upsert to insert or update existing config items
     const { error } = await supabaseAdmin
       .from('admin_config')
-      .upsert(configToSave, {
+      .upsert(configToSave as any, {
         onConflict: 'key',
         ignoreDuplicates: false
       });

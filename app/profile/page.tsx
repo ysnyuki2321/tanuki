@@ -49,15 +49,15 @@ export default function ProfilePage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name} />
-                        <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={(user as any)?.avatar_url || "/placeholder.svg"} alt={(user as any)?.full_name} />
+                        <AvatarFallback>{(user as any)?.full_name?.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{user?.name}</p>
+                        <p className="font-medium">{(user as any)?.full_name}</p>
                         <p className="w-[160px] truncate text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>

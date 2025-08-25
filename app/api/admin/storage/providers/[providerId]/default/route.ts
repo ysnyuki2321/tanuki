@@ -3,7 +3,7 @@ import { getCurrentUser, getSupabaseAdmin } from '@/lib/supabase-client'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { providerId: string } }
+  { params }: { params: Promise<{ providerId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -15,8 +15,15 @@ export async function PUT(
       )
     }
 
-    const { providerId } = params
+    const { providerId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Get the target provider
     const { data: targetProvider, error: fetchError } = await supabase
@@ -33,7 +40,7 @@ export async function PUT(
     }
 
     // Check if provider is active
-    if (!targetProvider.is_active) {
+    if (!(targetProvider as any).is_active) {
       return NextResponse.json(
         { 
           error: 'Cannot set inactive provider as default',
@@ -44,7 +51,7 @@ export async function PUT(
     }
 
     // Check health status
-    if (targetProvider.health_status === 'unhealthy') {
+    if ((targetProvider as any).health_status === 'unhealthy') {
       return NextResponse.json(
         { 
           error: 'Cannot set unhealthy provider as default',
@@ -55,17 +62,17 @@ export async function PUT(
     }
 
     // Start a transaction to update default status
-    const { error: resetError } = await supabase
+    const { error: resetError } = await (supabase as any)
       .from('storage_providers')
       .update({ is_default: false })
-      .eq('tenant_id', targetProvider.tenant_id || null)
+      .eq('tenant_id', (targetProvider as any).tenant_id || null)
 
     if (resetError) {
       throw resetError
     }
 
     // Set the target provider as default
-    const { data: updatedProvider, error: updateError } = await supabase
+    const { data: updatedProvider, error: updateError } = await (supabase as any)
       .from('storage_providers')
       .update({ 
         is_default: true,
@@ -81,7 +88,7 @@ export async function PUT(
 
     // Update application configuration to use new default provider
     // This would typically update a configuration cache or restart services
-    await updateStorageManagerConfiguration(targetProvider.tenant_id)
+    await updateStorageManagerConfiguration((targetProvider as any).tenant_id)
 
     return NextResponse.json({
       success: true,

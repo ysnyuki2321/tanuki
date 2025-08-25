@@ -21,6 +21,14 @@ export async function GET(request: NextRequest) {
 
     // Get flag values for each flag
     const supabase = getSupabaseAdmin()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+    
     const flagValues: Record<string, any[]> = {}
 
     for (const flag of flags) {
@@ -93,6 +101,14 @@ export async function POST(request: NextRequest) {
 
     // Check if flag key already exists
     const supabase = getSupabaseAdmin()
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
+    
     const { data: existingFlag } = await supabase
       .from('feature_flags')
       .select('id')
