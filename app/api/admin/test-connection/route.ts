@@ -4,7 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const { type, config } = await request.json();
     
-    let result = { success: false, error: 'Unknown connection type' };
+    let result: { success: boolean; error?: string; message?: string } = { success: false, error: 'Unknown connection type' };
     
     switch (type) {
       case 'database':
@@ -70,7 +70,7 @@ async function testEmailConnection(config: any) {
     // In real implementation, use nodemailer to test SMTP connection
     const nodemailer = await import('nodemailer');
     
-    const transporter = nodemailer.default.createTransporter({
+    const transporter = nodemailer.default.createTransport({
       host: config.smtp_host,
       port: parseInt(config.smtp_port) || 587,
       secure: parseInt(config.smtp_port) === 465,

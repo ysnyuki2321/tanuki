@@ -18,6 +18,12 @@ export async function GET(request: NextRequest) {
     const tenantId = searchParams.get('tenantId')
 
     const supabase = getSupabaseAdmin()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Get storage providers for tenant
     let query = supabase
@@ -39,9 +45,9 @@ export async function GET(request: NextRequest) {
 
     // Decrypt sensitive credentials (in production, use proper encryption)
     const providersWithDecryptedCredentials = providers?.map(provider => ({
-      ...provider,
-      credentials: provider.encrypted_credentials ? 
-        JSON.parse(provider.encrypted_credentials) : {}
+      ...(provider as any),
+      credentials: (provider as any).encrypted_credentials ? 
+        JSON.parse((provider as any).encrypted_credentials) : {}
     })) || []
 
     return NextResponse.json({
@@ -112,6 +118,12 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if name already exists for this tenant
     const { data: existingProvider } = await supabase
@@ -130,14 +142,14 @@ export async function POST(request: NextRequest) {
 
     // If this is set as default, unset other defaults
     if (isDefault) {
-      await supabase
+      await (supabase as any)
         .from('storage_providers')
         .update({ is_default: false })
         .eq('tenant_id', tenantId || null)
     }
 
     // Create storage provider
-    const { data: provider, error } = await supabase
+    const { data: provider, error } = await (supabase as any)
       .from('storage_providers')
       .insert({
         name,
@@ -185,23 +197,27 @@ async function testConnectionAsync(providerId: string, config: StorageConfig) {
     const isHealthy = await validator.testConnection(config)
     
     const supabase = getSupabaseAdmin()
-    await supabase
-      .from('storage_providers')
-      .update({
-        health_status: isHealthy ? 'healthy' : 'unhealthy',
-        last_health_check: new Date().toISOString()
-      })
-      .eq('id', providerId)
+    if (supabase) {
+      await (supabase as any)
+        .from('storage_providers')
+        .update({
+          health_status: isHealthy ? 'healthy' : 'unhealthy',
+          last_health_check: new Date().toISOString()
+        })
+        .eq('id', providerId)
+    }
   } catch (error) {
     console.error('Failed to test storage provider connection:', error)
     
     const supabase = getSupabaseAdmin()
-    await supabase
-      .from('storage_providers')
-      .update({
-        health_status: 'unhealthy',
-        last_health_check: new Date().toISOString()
-      })
-      .eq('id', providerId)
+    if (supabase) {
+      await (supabase as any)
+        .from('storage_providers')
+        .update({
+          health_status: 'unhealthy',
+          last_health_check: new Date().toISOString()
+        })
+        .eq('id', providerId)
+    }
   }
 }

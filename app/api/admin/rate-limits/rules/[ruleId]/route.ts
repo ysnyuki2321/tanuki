@@ -3,7 +3,7 @@ import { getCurrentUser, getSupabaseAdmin } from '@/lib/supabase-client'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { ruleId: string } }
+  { params }: { params: Promise<{ ruleId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -15,8 +15,15 @@ export async function GET(
       )
     }
 
-    const { ruleId } = params
+    const { ruleId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     const { data: rule, error } = await supabase
       .from('rate_limit_rules')
@@ -47,7 +54,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { ruleId: string } }
+  { params }: { params: Promise<{ ruleId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -59,7 +66,7 @@ export async function PATCH(
       )
     }
 
-    const { ruleId } = params
+    const { ruleId } = await params
     const body = await request.json()
     const {
       name,
@@ -73,6 +80,13 @@ export async function PATCH(
     } = body
 
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if rule exists
     const { data: existingRule, error: fetchError } = await supabase
@@ -118,7 +132,7 @@ export async function PATCH(
     if (enabled !== undefined) updateData.enabled = enabled
 
     // Update rule
-    const { data: updatedRule, error: updateError } = await supabase
+    const { data: updatedRule, error: updateError } = await (supabase as any)
       .from('rate_limit_rules')
       .update(updateData)
       .eq('id', ruleId)
@@ -145,7 +159,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { ruleId: string } }
+  { params }: { params: Promise<{ ruleId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -157,8 +171,15 @@ export async function DELETE(
       )
     }
 
-    const { ruleId } = params
+    const { ruleId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if rule exists
     const { data: existingRule, error: fetchError } = await supabase

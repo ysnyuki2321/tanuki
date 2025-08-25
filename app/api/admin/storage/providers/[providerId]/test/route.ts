@@ -5,7 +5,7 @@ import type { StorageConfig } from '@/lib/storage/storage-interface'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { providerId: string } }
+  { params }: { params: Promise<{ providerId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -17,8 +17,14 @@ export async function POST(
       )
     }
 
-    const { providerId } = params
+    const { providerId } = await params
     const supabase = getSupabaseAdmin()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Get storage provider
     const { data: provider, error } = await supabase
@@ -35,14 +41,14 @@ export async function POST(
     }
 
     // Parse credentials
-    const credentials = provider.encrypted_credentials ? 
-      JSON.parse(provider.encrypted_credentials) : {}
+    const credentials = (provider as any).encrypted_credentials ? 
+      JSON.parse((provider as any).encrypted_credentials) : {}
 
     // Create storage config for testing
     const config: StorageConfig = {
-      provider: provider.type,
-      bucketName: provider.bucket_name,
-      region: provider.region,
+      provider: (provider as any).type,
+      bucketName: (provider as any).bucket_name,
+      region: (provider as any).region,
       credentials
     }
 
@@ -55,7 +61,7 @@ export async function POST(
       const responseTime = Date.now() - startTime
 
       // Update health status in database
-      await supabase
+      await (supabase as any)
         .from('storage_providers')
         .update({
           health_status: isHealthy ? 'healthy' : 'unhealthy',
@@ -75,7 +81,7 @@ export async function POST(
       const responseTime = Date.now() - startTime
 
       // Update health status as unhealthy
-      await supabase
+      await (supabase as any)
         .from('storage_providers')
         .update({
           health_status: 'unhealthy',

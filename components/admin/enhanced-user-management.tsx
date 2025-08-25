@@ -800,14 +800,14 @@ export function EnhancedUserManagement() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   checked={sendEmailReset}
-                  onCheckedChange={setSendEmailReset}
+                  onCheckedChange={(checked) => setSendEmailReset(checked === true)}
                 />
                 <Label>Send password reset email</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   checked={generateTempPassword}
-                  onCheckedChange={setGenerateTempPassword}
+                  onCheckedChange={(checked) => setGenerateTempPassword(checked === true)}
                 />
                 <Label>Generate temporary password</Label>
               </div>

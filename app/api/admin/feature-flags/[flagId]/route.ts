@@ -3,7 +3,7 @@ import { getCurrentUser, getSupabaseAdmin } from '@/lib/supabase-client'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -15,8 +15,15 @@ export async function GET(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Get flag details
     const { data: flag, error } = await supabase
@@ -81,7 +88,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -93,7 +100,7 @@ export async function PUT(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const body = await request.json()
     const {
       name,
@@ -108,6 +115,13 @@ export async function PUT(
     } = body
 
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if flag exists
     const { data: existingFlag, error: fetchError } = await supabase
@@ -124,7 +138,7 @@ export async function PUT(
     }
 
     // Update flag
-    const updateData: any = {
+    const updateData: Record<string, any> = {
       updated_at: new Date().toISOString()
     }
 
@@ -132,15 +146,15 @@ export async function PUT(
     if (description !== undefined) updateData.description = description
     if (status !== undefined) updateData.status = status
     if (isGlobal !== undefined) {
-      updateData.is_global = isGlobal
-      updateData.tenant_id = isGlobal ? null : (tenantId || existingFlag.tenant_id)
+      (updateData as any).is_global = isGlobal
+      (updateData as any).tenant_id = isGlobal ? null : (tenantId || (existingFlag as any).tenant_id)
     }
-    if (tags !== undefined) updateData.tags = tags
-    if (targetUsers !== undefined) updateData.target_users = targetUsers
-    if (targetSegments !== undefined) updateData.target_segments = targetSegments
-    if (rolloutPercentage !== undefined) updateData.rollout_percentage = rolloutPercentage
+    if (tags !== undefined) (updateData as any).tags = tags
+    if (targetUsers !== undefined) (updateData as any).target_users = targetUsers
+    if (targetSegments !== undefined) (updateData as any).target_segments = targetSegments
+    if (rolloutPercentage !== undefined) (updateData as any).rollout_percentage = rolloutPercentage
 
-    const { data: updatedFlag, error: updateError } = await supabase
+    const { data: updatedFlag, error: updateError } = await (supabase as any)
       .from('feature_flags')
       .update(updateData)
       .eq('id', flagId)
@@ -167,7 +181,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { flagId: string } }
+  { params }: { params: Promise<{ flagId: string }> }
 ) {
   try {
     // Authenticate admin user
@@ -179,8 +193,15 @@ export async function DELETE(
       )
     }
 
-    const { flagId } = params
+    const { flagId } = await params
     const supabase = getSupabaseAdmin()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database connection not available' },
+        { status: 500 }
+      )
+    }
 
     // Check if flag exists
     const { data: existingFlag, error: fetchError } = await supabase
@@ -213,7 +234,7 @@ export async function DELETE(
     }
 
     // Archive flag instead of hard delete to preserve audit trail
-    const { error: archiveError } = await supabase
+    const { error: archiveError } = await (supabase as any)
       .from('feature_flags')
       .update({
         status: 'archived',

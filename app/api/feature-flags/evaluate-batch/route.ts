@@ -49,15 +49,15 @@ export async function POST(request: NextRequest) {
     // Build evaluation context
     const context: FeatureFlagContext = {
       userId: user.id,
-      tenantId: user.tenant_id || undefined,
+      tenantId: (user as any).tenant_id || undefined,
       environment: requestContext?.environment || 'production',
       userProperties: {
         email: user.email,
-        plan: user.subscription_plan,
+        plan: (user as any).subscription_plan,
         role: user.role,
-        company: user.company,
-        createdAt: user.created_at,
-        lastLogin: user.last_login,
+        company: (user as any).company,
+        createdAt: (user as any).created_at,
+        lastLogin: (user as any).last_login,
         ...requestContext?.userProperties
       },
       customProperties: requestContext?.customProperties || {}
@@ -122,15 +122,15 @@ export async function GET(request: NextRequest) {
     // Build evaluation context
     const context: FeatureFlagContext = {
       userId: user.id,
-      tenantId: user.tenant_id || undefined,
+      tenantId: (user as any).tenant_id || undefined,
       environment,
       userProperties: {
         email: user.email,
-        plan: user.subscription_plan,
+        plan: (user as any).subscription_plan,
         role: user.role,
-        company: user.company,
-        createdAt: user.created_at,
-        lastLogin: user.last_login
+        company: (user as any).company,
+        createdAt: (user as any).created_at,
+        lastLogin: (user as any).last_login
       },
       customProperties: {}
     }
