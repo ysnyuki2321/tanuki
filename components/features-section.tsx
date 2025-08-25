@@ -3,40 +3,28 @@ import { Code2, Database, FileText, Share2, Terminal, Zap } from "lucide-react"
 
 const features = [
   {
-    icon: Code2,
-    title: "Advanced Code Editor",
+    icon: FileText,
+    title: "File Management",
     description:
-      "Full-featured code editor with syntax highlighting, auto-completion, and multi-language support. Edit your files directly in the browser.",
+      "Organize and manage your files with intuitive tools. Preview documents, images, and archives without downloading.",
+  },
+  {
+    icon: Code2,
+    title: "Code Editor",
+    description:
+      "Edit code directly in your browser with syntax highlighting and auto-completion for popular languages.",
   },
   {
     icon: Database,
-    title: "Database GUI Editor",
+    title: "Database Tools",
     description:
-      "Visual database management with intuitive GUI. Edit tables, run queries, and manage your data without complex commands.",
-  },
-  {
-    icon: FileText,
-    title: "Smart File Management",
-    description:
-      "Organize, preview, and manage all your files. Support for zip preview without extraction and intelligent file categorization.",
+      "Visual database management with simple GUI. Create tables, run queries, and manage data easily.",
   },
   {
     icon: Share2,
-    title: "Secure File Sharing",
+    title: "Secure Sharing",
     description:
-      "Share files and folders with customizable permissions. Generate secure links and control access with advanced sharing options.",
-  },
-  {
-    icon: Terminal,
-    title: "SSH Integration",
-    description:
-      "Connect to remote servers via SSH. Easily manage files across multiple VPS instances and expand storage dynamically.",
-  },
-  {
-    icon: Zap,
-    title: "High Performance",
-    description:
-      "Optimized for speed and efficiency. Smooth experience on both mobile and desktop with minimal loading times.",
+      "Share files securely with customizable permissions and time-limited access links.",
   },
 ]
 
