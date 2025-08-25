@@ -74,7 +74,10 @@ interface AppConfig {
 
 // Get config với null-safe defaults
 export const getConfig = (): AppConfig => {
-  const env = process.env;
+  // Safe environment access for both client and server
+  const env = typeof window === 'undefined'
+    ? process.env // Server-side
+    : (window as any).__ENV__ || {}; // Client-side fallback
   
   return {
     // Database
