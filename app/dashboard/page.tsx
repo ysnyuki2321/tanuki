@@ -35,6 +35,7 @@ export default function DashboardPage() {
               <TanukiLogo size={32} />
 
               <div className="flex items-center gap-4">
+                <SimpleThemeToggle />
                 <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.name}</span>
 
                 <DropdownMenu>
