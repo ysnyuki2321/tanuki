@@ -313,6 +313,7 @@ export class AuthService {
 
   // Verify email manually (admin function)
   static async verifyEmail(userId: string) {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured')
     }
