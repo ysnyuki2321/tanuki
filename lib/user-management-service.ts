@@ -517,7 +517,7 @@ export class UserManagementService {
     const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length
     const errors = results
       .filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success))
-      .map(r => r.status === 'rejected' ? r.reason : (r.value as any).error)
+      .map(r => r.status === 'rejected' ? r.reason : r.value.error)
 
     return {
       success: successCount > 0,
