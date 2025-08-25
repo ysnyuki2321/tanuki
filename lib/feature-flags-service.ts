@@ -1,368 +1,524 @@
-"use client";
-
-import { createClient } from '@/lib/supabase/client';
-
-export interface FeatureFlag {
-  id: string;
-  key: string;
-  name: string;
-  description: string;
-  is_enabled: boolean;
-  tenant_id?: string;
-  target_percentage: number;
-  dependencies?: string[];
-  metadata?: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-}
-
-export interface CreateFeatureFlagRequest {
-  key: string;
-  name: string;
-  description: string;
-  is_enabled?: boolean;
-  tenant_id?: string;
-  target_percentage?: number;
-  dependencies?: string[];
-  metadata?: Record<string, any>;
-}
-
-export interface UpdateFeatureFlagRequest extends Partial<CreateFeatureFlagRequest> {
-  id: string;
-}
-
-export interface FeatureFlagStats {
-  total_flags: number;
-  enabled_flags: number;
-  disabled_flags: number;
-  tenant_specific_flags: number;
-  global_flags: number;
-}
+import { getSupabaseAdmin } from './supabase-client'
+import type { 
+  FeatureFlagContext, 
+  FeatureFlagEvaluation, 
+  DbFeatureFlag,
+  DbFeatureFlagValue,
+  DbFeatureFlagDependency 
+} from './feature-flags-schema'
 
 export class FeatureFlagsService {
-  private supabase = createClient();
+  private supabase = getSupabaseAdmin()
+  private cache = new Map<string, { value: any; timestamp: number }>()
+  private readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
-  async getFeatureFlags(tenantId?: string): Promise<FeatureFlag[]> {
+  /**
+   * Evaluate a feature flag for a given context
+   */
+  async evaluateFlag(
+    flagKey: string, 
+    context: FeatureFlagContext
+  ): Promise<FeatureFlagEvaluation> {
     try {
-      let query = this.supabase
-        .from('feature_flags')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (tenantId) {
-        query = query.or(`tenant_id.eq.${tenantId},tenant_id.is.null`);
+      // Get flag configuration
+      const flag = await this.getFlag(flagKey, context.tenantId)
+      if (!flag) {
+        return {
+          value: false,
+          enabled: false,
+          reason: 'FLAG_NOT_FOUND',
+          flagKey
+        }
       }
 
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching feature flags:', error);
-        throw new Error(`Failed to fetch feature flags: ${error.message}`);
+      // Check if flag is active
+      if (flag.status !== 'active') {
+        return {
+          value: flag.default_value,
+          enabled: false,
+          reason: 'FLAG_INACTIVE',
+          flagKey
+        }
       }
 
-      return data || [];
+      // Check dependencies
+      const dependencyResult = await this.checkDependencies(flag.id, context)
+      if (!dependencyResult.satisfied) {
+        return {
+          value: flag.default_value,
+          enabled: false,
+          reason: `DEPENDENCY_NOT_MET: ${dependencyResult.reason}`,
+          flagKey
+        }
+      }
+
+      // Get environment-specific value
+      const flagValue = await this.getFlagValue(flag.id, context)
+      if (!flagValue) {
+        return {
+          value: flag.default_value,
+          enabled: true,
+          reason: 'DEFAULT_VALUE',
+          flagKey
+        }
+      }
+
+      // Check if flag is enabled for this environment
+      if (!flagValue.enabled) {
+        return {
+          value: flag.default_value,
+          enabled: false,
+          reason: 'DISABLED_FOR_ENVIRONMENT',
+          flagKey
+        }
+      }
+
+      // Check rollout percentage
+      if (!this.isInRollout(context.userId || '', flagValue.rollout_percentage)) {
+        return {
+          value: flag.default_value,
+          enabled: false,
+          reason: 'NOT_IN_ROLLOUT',
+          flagKey
+        }
+      }
+
+      // Check user targeting
+      if (flag.target_users && flag.target_users.length > 0) {
+        if (!context.userId || !flag.target_users.includes(context.userId)) {
+          return {
+            value: flag.default_value,
+            enabled: false,
+            reason: 'NOT_TARGETED_USER',
+            flagKey
+          }
+        }
+      }
+
+      // Check segment targeting
+      if (flag.target_segments && flag.target_segments.length > 0) {
+        const inSegment = await this.isUserInSegments(
+          context.userId || '', 
+          flag.target_segments, 
+          context
+        )
+        if (!inSegment) {
+          return {
+            value: flag.default_value,
+            enabled: false,
+            reason: 'NOT_IN_TARGET_SEGMENT',
+            flagKey
+          }
+        }
+      }
+
+      // Evaluate conditions
+      if (flagValue.conditions) {
+        const conditionResult = this.evaluateConditions(flagValue.conditions, context)
+        if (!conditionResult) {
+          return {
+            value: flag.default_value,
+            enabled: false,
+            reason: 'CONDITIONS_NOT_MET',
+            flagKey
+          }
+        }
+      }
+
+      // Log evaluation for analytics
+      await this.logEvaluation(flag.id, context, flagValue.value, 'EVALUATED')
+
+      return {
+        value: flagValue.value,
+        enabled: true,
+        reason: 'EVALUATED',
+        flagKey
+      }
+
     } catch (error) {
-      console.error('Error in getFeatureFlags:', error);
-      throw error;
+      console.error('Feature flag evaluation error:', error)
+      return {
+        value: false,
+        enabled: false,
+        reason: 'EVALUATION_ERROR',
+        flagKey
+      }
     }
   }
 
-  async getFeatureFlag(id: string): Promise<FeatureFlag | null> {
-    try {
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .select('*')
-        .eq('id', id)
-        .single();
+  /**
+   * Batch evaluate multiple flags
+   */
+  async evaluateFlags(
+    flagKeys: string[], 
+    context: FeatureFlagContext
+  ): Promise<Record<string, FeatureFlagEvaluation>> {
+    const results: Record<string, FeatureFlagEvaluation> = {}
+    
+    await Promise.all(
+      flagKeys.map(async (flagKey) => {
+        results[flagKey] = await this.evaluateFlag(flagKey, context)
+      })
+    )
 
-      if (error) {
-        console.error('Error fetching feature flag:', error);
-        throw new Error(`Failed to fetch feature flag: ${error.message}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in getFeatureFlag:', error);
-      throw error;
-    }
+    return results
   }
 
-  async createFeatureFlag(request: CreateFeatureFlagRequest): Promise<FeatureFlag> {
-    try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
+  /**
+   * Get all active flags for a tenant
+   */
+  async getTenantFlags(tenantId?: string): Promise<DbFeatureFlag[]> {
+    const { data, error } = await this.supabase
+      .from('feature_flags')
+      .select('*')
+      .or(`tenant_id.eq.${tenantId},is_global.eq.true`)
+      .eq('status', 'active')
+      .order('name')
 
-      const flagData = {
-        key: request.key,
-        name: request.name,
-        description: request.description,
-        is_enabled: request.is_enabled ?? false,
-        tenant_id: request.tenant_id || null,
-        target_percentage: request.target_percentage ?? 100,
-        dependencies: request.dependencies || [],
-        metadata: request.metadata || {},
-        created_by: user.id,
-      };
-
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .insert(flagData)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating feature flag:', error);
-        throw new Error(`Failed to create feature flag: ${error.message}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in createFeatureFlag:', error);
-      throw error;
-    }
+    if (error) throw error
+    return data || []
   }
 
-  async updateFeatureFlag(request: UpdateFeatureFlagRequest): Promise<FeatureFlag> {
-    try {
-      const { id, ...updateData } = request;
+  /**
+   * Create a new feature flag
+   */
+  async createFlag(flag: {
+    key: string
+    name: string
+    description?: string
+    flagType: 'boolean' | 'string' | 'number' | 'json'
+    defaultValue: any
+    tenantId?: string
+    isGlobal?: boolean
+    environments?: string[]
+  }, createdBy: string): Promise<DbFeatureFlag> {
+    const { data, error } = await this.supabase
+      .from('feature_flags')
+      .insert({
+        key: flag.key,
+        name: flag.name,
+        description: flag.description,
+        flag_type: flag.flagType,
+        default_value: flag.defaultValue,
+        tenant_id: flag.tenantId,
+        is_global: flag.isGlobal || false,
+        environments: flag.environments || ['development', 'staging', 'production'],
+        created_by: createdBy
+      })
+      .select()
+      .single()
 
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating feature flag:', error);
-        throw new Error(`Failed to update feature flag: ${error.message}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in updateFeatureFlag:', error);
-      throw error;
-    }
+    if (error) throw error
+    return data
   }
 
-  async deleteFeatureFlag(id: string): Promise<void> {
-    try {
-      const { error } = await this.supabase
-        .from('feature_flags')
-        .delete()
-        .eq('id', id);
+  /**
+   * Update flag value for specific environment
+   */
+  async updateFlagValue(
+    flagId: string,
+    environment: string,
+    value: any,
+    options: {
+      enabled?: boolean
+      rolloutPercentage?: number
+      conditions?: any
+      tenantId?: string
+    },
+    updatedBy: string
+  ): Promise<DbFeatureFlagValue> {
+    const { data, error } = await this.supabase
+      .from('feature_flag_values')
+      .upsert({
+        flag_id: flagId,
+        environment,
+        value,
+        enabled: options.enabled ?? true,
+        rollout_percentage: options.rolloutPercentage ?? 100,
+        conditions: options.conditions,
+        tenant_id: options.tenantId,
+        created_by: updatedBy,
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single()
 
-      if (error) {
-        console.error('Error deleting feature flag:', error);
-        throw new Error(`Failed to delete feature flag: ${error.message}`);
-      }
-    } catch (error) {
-      console.error('Error in deleteFeatureFlag:', error);
-      throw error;
-    }
+    if (error) throw error
+    this.clearCache(flagId)
+    return data
   }
 
-  async toggleFeatureFlag(id: string, enabled: boolean): Promise<FeatureFlag> {
-    try {
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .update({ is_enabled: enabled })
-        .eq('id', id)
-        .select()
-        .single();
+  /**
+   * Add dependency between flags
+   */
+  async addDependency(
+    flagId: string,
+    dependsOnFlagId: string,
+    dependencyType: 'requires' | 'conflicts' | 'implies',
+    conditionValue?: any,
+    createdBy?: string
+  ): Promise<DbFeatureFlagDependency> {
+    const { data, error } = await this.supabase
+      .from('feature_flag_dependencies')
+      .insert({
+        flag_id: flagId,
+        depends_on_flag_id: dependsOnFlagId,
+        dependency_type: dependencyType,
+        condition_value: conditionValue,
+        created_by: createdBy
+      })
+      .select()
+      .single()
 
-      if (error) {
-        console.error('Error toggling feature flag:', error);
-        throw new Error(`Failed to toggle feature flag: ${error.message}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in toggleFeatureFlag:', error);
-      throw error;
-    }
+    if (error) throw error
+    return data
   }
 
-  async bulkUpdateFeatureFlags(flagIds: string[], updates: Partial<FeatureFlag>): Promise<FeatureFlag[]> {
-    try {
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .update(updates)
-        .in('id', flagIds)
-        .select();
-
-      if (error) {
-        console.error('Error bulk updating feature flags:', error);
-        throw new Error(`Failed to bulk update feature flags: ${error.message}`);
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error in bulkUpdateFeatureFlags:', error);
-      throw error;
+  /**
+   * Private methods
+   */
+  private async getFlag(flagKey: string, tenantId?: string): Promise<DbFeatureFlag | null> {
+    const cacheKey = `flag:${flagKey}:${tenantId || 'global'}`
+    
+    // Check cache
+    const cached = this.cache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached.value
     }
+
+    const { data, error } = await this.supabase
+      .from('feature_flags')
+      .select('*')
+      .eq('key', flagKey)
+      .or(`tenant_id.eq.${tenantId},is_global.eq.true`)
+      .eq('status', 'active')
+      .order('is_global', { ascending: true }) // Prefer tenant-specific over global
+      .limit(1)
+      .single()
+
+    if (error && error.code !== 'PGRST116') throw error
+    
+    // Cache result
+    this.cache.set(cacheKey, { value: data, timestamp: Date.now() })
+    return data
   }
 
-  async bulkToggleFeatureFlags(flagIds: string[], enabled: boolean): Promise<FeatureFlag[]> {
-    try {
-      return await this.bulkUpdateFeatureFlags(flagIds, { is_enabled: enabled });
-    } catch (error) {
-      console.error('Error in bulkToggleFeatureFlags:', error);
-      throw error;
-    }
+  private async getFlagValue(
+    flagId: string, 
+    context: FeatureFlagContext
+  ): Promise<DbFeatureFlagValue | null> {
+    const { data, error } = await this.supabase
+      .from('feature_flag_values')
+      .select('*')
+      .eq('flag_id', flagId)
+      .eq('environment', context.environment)
+      .or(`tenant_id.eq.${context.tenantId},tenant_id.is.null`)
+      .order('tenant_id', { ascending: false, nullsLast: true }) // Prefer tenant-specific
+      .limit(1)
+      .single()
+
+    if (error && error.code !== 'PGRST116') throw error
+    return data
   }
 
-  async duplicateFeatureFlag(id: string, newKey: string, newName: string): Promise<FeatureFlag> {
-    try {
-      const original = await this.getFeatureFlag(id);
-      if (!original) {
-        throw new Error('Original feature flag not found');
-      }
+  private async checkDependencies(
+    flagId: string, 
+    context: FeatureFlagContext
+  ): Promise<{ satisfied: boolean; reason?: string }> {
+    const { data: dependencies, error } = await this.supabase
+      .from('feature_flag_dependencies')
+      .select(`
+        *,
+        depends_on_flag:feature_flags!feature_flag_dependencies_depends_on_flag_id_fkey(*)
+      `)
+      .eq('flag_id', flagId)
 
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const duplicateData = {
-        key: newKey,
-        name: newName,
-        description: original.description,
-        is_enabled: false, // Start disabled
-        tenant_id: original.tenant_id,
-        target_percentage: original.target_percentage,
-        dependencies: original.dependencies,
-        metadata: original.metadata,
-        created_by: user.id,
-      };
-
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .insert(duplicateData)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error duplicating feature flag:', error);
-        throw new Error(`Failed to duplicate feature flag: ${error.message}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in duplicateFeatureFlag:', error);
-      throw error;
+    if (error) throw error
+    if (!dependencies || dependencies.length === 0) {
+      return { satisfied: true }
     }
+
+    for (const dep of dependencies) {
+      const dependentFlag = dep.depends_on_flag as any
+      const dependentEvaluation = await this.evaluateFlag(dependentFlag.key, context)
+
+      switch (dep.dependency_type) {
+        case 'requires':
+          if (!dependentEvaluation.enabled || 
+              (dep.condition_value && dependentEvaluation.value !== dep.condition_value)) {
+            return { 
+              satisfied: false, 
+              reason: `requires ${dependentFlag.key} to be enabled` 
+            }
+          }
+          break
+
+        case 'conflicts':
+          if (dependentEvaluation.enabled && 
+              (!dep.condition_value || dependentEvaluation.value === dep.condition_value)) {
+            return { 
+              satisfied: false, 
+              reason: `conflicts with ${dependentFlag.key}` 
+            }
+          }
+          break
+
+        case 'implies':
+          // If this flag is enabled, the dependent flag must also be enabled
+          // This is checked when enabling the flag, not during evaluation
+          break
+      }
+    }
+
+    return { satisfied: true }
   }
 
-  async getFeatureFlagStats(): Promise<FeatureFlagStats> {
-    try {
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .select('is_enabled, tenant_id');
+  private isInRollout(userId: string, percentage: number): boolean {
+    if (percentage >= 100) return true
+    if (percentage <= 0) return false
+    
+    // Use consistent hash of userId to determine rollout
+    const hash = this.hashString(userId)
+    return (hash % 100) < percentage
+  }
 
-      if (error) {
-        console.error('Error fetching feature flag stats:', error);
-        throw new Error(`Failed to fetch feature flag stats: ${error.message}`);
+  private async isUserInSegments(
+    userId: string, 
+    segmentNames: string[], 
+    context: FeatureFlagContext
+  ): Promise<boolean> {
+    const { data: segments, error } = await this.supabase
+      .from('feature_flag_segments')
+      .select('*')
+      .in('name', segmentNames)
+      .eq('is_active', true)
+      .or(`tenant_id.eq.${context.tenantId},tenant_id.is.null`)
+
+    if (error) throw error
+    if (!segments || segments.length === 0) return false
+
+    // Evaluate user against each segment
+    for (const segment of segments) {
+      if (this.evaluateConditions(segment.conditions, context)) {
+        return true
       }
+    }
 
-      const flags = data || [];
+    return false
+  }
+
+  private evaluateConditions(conditions: any, context: FeatureFlagContext): boolean {
+    if (!conditions) return true
+
+    // Simple condition evaluation - can be extended for complex logic
+    try {
+      // Example condition format:
+      // { "user.email": { "endsWith": "@company.com" } }
+      // { "user.plan": { "in": ["premium", "enterprise"] } }
       
-      return {
-        total_flags: flags.length,
-        enabled_flags: flags.filter(f => f.is_enabled).length,
-        disabled_flags: flags.filter(f => !f.is_enabled).length,
-        tenant_specific_flags: flags.filter(f => f.tenant_id).length,
-        global_flags: flags.filter(f => !f.tenant_id).length,
-      };
+      const userProperties = context.userProperties || {}
+      
+      for (const [key, condition] of Object.entries(conditions)) {
+        const value = this.getNestedValue(userProperties, key)
+        
+        if (!this.evaluateCondition(value, condition)) {
+          return false
+        }
+      }
+
+      return true
     } catch (error) {
-      console.error('Error in getFeatureFlagStats:', error);
-      throw error;
+      console.error('Condition evaluation error:', error)
+      return false
     }
   }
 
-  async checkFeatureFlag(key: string, tenantId?: string): Promise<boolean> {
-    try {
-      let query = this.supabase
-        .from('feature_flags')
-        .select('is_enabled, target_percentage, dependencies')
-        .eq('key', key);
-
-      if (tenantId) {
-        query = query.or(`tenant_id.eq.${tenantId},tenant_id.is.null`);
-      } else {
-        query = query.is('tenant_id', null);
-      }
-
-      const { data, error } = await query.single();
-
-      if (error || !data) {
-        return false; // Default to disabled if flag doesn't exist
-      }
-
-      // Check if flag is enabled
-      if (!data.is_enabled) {
-        return false;
-      }
-
-      // Check percentage rollout
-      if (data.target_percentage < 100) {
-        const hash = this.hashString(`${key}${tenantId || 'global'}`);
-        const percentage = (hash % 100) + 1;
-        return percentage <= data.target_percentage;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error checking feature flag:', error);
-      return false; // Default to disabled on error
+  private evaluateCondition(value: any, condition: any): boolean {
+    if (typeof condition !== 'object') {
+      return value === condition
     }
+
+    for (const [operator, operand] of Object.entries(condition)) {
+      switch (operator) {
+        case 'eq':
+          return value === operand
+        case 'ne':
+          return value !== operand
+        case 'in':
+          return Array.isArray(operand) && operand.includes(value)
+        case 'contains':
+          return typeof value === 'string' && value.includes(operand as string)
+        case 'startsWith':
+          return typeof value === 'string' && value.startsWith(operand as string)
+        case 'endsWith':
+          return typeof value === 'string' && value.endsWith(operand as string)
+        case 'gt':
+          return Number(value) > Number(operand)
+        case 'gte':
+          return Number(value) >= Number(operand)
+        case 'lt':
+          return Number(value) < Number(operand)
+        case 'lte':
+          return Number(value) <= Number(operand)
+        default:
+          return false
+      }
+    }
+
+    return false
   }
 
-  async validateDependencies(flagKey: string, dependencies: string[]): Promise<{ valid: boolean; missingDependencies: string[] }> {
-    try {
-      if (!dependencies.length) {
-        return { valid: true, missingDependencies: [] };
-      }
-
-      const { data, error } = await this.supabase
-        .from('feature_flags')
-        .select('key, is_enabled')
-        .in('key', dependencies);
-
-      if (error) {
-        console.error('Error validating dependencies:', error);
-        return { valid: false, missingDependencies: dependencies };
-      }
-
-      const existingFlags = data || [];
-      const existingKeys = existingFlags.map(f => f.key);
-      const enabledKeys = existingFlags.filter(f => f.is_enabled).map(f => f.key);
-
-      const missingDependencies = dependencies.filter(dep => !existingKeys.includes(dep));
-      const disabledDependencies = dependencies.filter(dep => existingKeys.includes(dep) && !enabledKeys.includes(dep));
-
-      return {
-        valid: missingDependencies.length === 0 && disabledDependencies.length === 0,
-        missingDependencies: [...missingDependencies, ...disabledDependencies],
-      };
-    } catch (error) {
-      console.error('Error in validateDependencies:', error);
-      return { valid: false, missingDependencies: dependencies };
-    }
+  private getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
   private hashString(str: string): number {
-    let hash = 0;
+    let hash = 0
     for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      const char = str.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32-bit integer
     }
-    return Math.abs(hash);
+    return Math.abs(hash)
+  }
+
+  private async logEvaluation(
+    flagId: string,
+    context: FeatureFlagContext,
+    evaluatedValue: any,
+    reason: string
+  ): Promise<void> {
+    try {
+      await this.supabase
+        .from('feature_flag_evaluations')
+        .insert({
+          flag_id: flagId,
+          user_id: context.userId,
+          tenant_id: context.tenantId,
+          environment: context.environment,
+          evaluated_value: evaluatedValue,
+          evaluation_reason: reason
+        })
+    } catch (error) {
+      // Don't throw - logging failures shouldn't break flag evaluation
+      console.error('Failed to log feature flag evaluation:', error)
+    }
+  }
+
+  private clearCache(flagId?: string): void {
+    if (flagId) {
+      // Clear specific flag cache entries
+      for (const key of this.cache.keys()) {
+        if (key.includes(flagId)) {
+          this.cache.delete(key)
+        }
+      }
+    } else {
+      // Clear all cache
+      this.cache.clear()
+    }
   }
 }
 
-export const featureFlagsService = new FeatureFlagsService();
+// Singleton instance
+export const featureFlagsService = new FeatureFlagsService()
