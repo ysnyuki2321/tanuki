@@ -10,6 +10,8 @@ export interface FileItem {
   mimeType?: string
   isShared?: boolean
   shareId?: string
+  content?: string // For text files
+  url?: string // For file downloads/previews
 }
 
 // Mock file system service
