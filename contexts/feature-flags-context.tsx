@@ -32,13 +32,13 @@ interface FeatureFlagsProviderProps {
   autoRefreshInterval?: number
 }
 
-export function FeatureFlagsProvider({ 
-  children, 
+export function FeatureFlagsProvider({
+  children,
   environment = 'production',
   preloadedFlags = [],
   autoRefreshInterval = 5 * 60 * 1000 // 5 minutes
 }: FeatureFlagsProviderProps) {
-  const { user, tenant } = useAuth()
+  const { user } = useAuth()
   const [flags, setFlags] = useState<Record<string, FeatureFlagEvaluation>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
