@@ -10,6 +10,7 @@ import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
 import SetupWizard from "./setup-wizard"
 import RealSetupWizard from "./real-setup-wizard"
+import FeatureFlagsManager from "./feature-flags-manager"
 import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 export function AdminDashboard() {
@@ -74,10 +75,11 @@ export function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="setup" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
@@ -92,6 +94,10 @@ export function AdminDashboard() {
 
         <TabsContent value="users">
           <UserManagement users={users} onUsersChange={setUsers} />
+        </TabsContent>
+
+        <TabsContent value="features">
+          <FeatureFlagsManager />
         </TabsContent>
 
         <TabsContent value="servers">
