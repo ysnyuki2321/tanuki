@@ -132,4 +132,9 @@ export class AuthService {
   isAuthenticated(): boolean {
     return this.getCurrentUser() !== null
   }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 }
