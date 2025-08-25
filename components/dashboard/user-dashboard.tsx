@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { FileStorageService } from '@/lib/file-storage';
-import { type DbFile } from '@/lib/supabase';
+import { type DbFile } from '@/lib/database-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
