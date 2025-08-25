@@ -189,9 +189,9 @@ export class FileSharingService {
         .eq('token', token)
         .single()
 
-      if (!share?.password_hash) return true // No password required
+      if (!(share as any)?.password_hash) return true // No password required
 
-      return await this.verifyPassword(password, share.password_hash)
+      return await this.verifyPassword(password, (share as any).password_hash)
     } catch (error) {
       console.error('Error verifying share password:', error)
       return false
