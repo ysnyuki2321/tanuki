@@ -575,6 +575,40 @@ export function ConfigurationManager() {
                         Test Email
                       </Button>
                     )}
+                    {category.key === 'authentication' && (
+                      <div className="flex items-center space-x-2">
+                        {configValues.oauth_google_client_id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => testOAuthConnection('google')}
+                            disabled={testing === 'oauth_google'}
+                          >
+                            {testing === 'oauth_google' ? (
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : (
+                              <TestTube className="w-4 h-4 mr-2" />
+                            )}
+                            Test Google
+                          </Button>
+                        )}
+                        {configValues.oauth_github_client_id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => testOAuthConnection('github')}
+                            disabled={testing === 'oauth_github'}
+                          >
+                            {testing === 'oauth_github' ? (
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : (
+                              <TestTube className="w-4 h-4 mr-2" />
+                            )}
+                            Test GitHub
+                          </Button>
+                        )}
+                      </div>
+                    )}
                     <Button
                       onClick={saveAllConfigs}
                       disabled={saving}
