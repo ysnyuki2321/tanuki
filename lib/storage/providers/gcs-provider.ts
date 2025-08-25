@@ -474,6 +474,16 @@ export class GCSStorageProvider implements StorageProvider {
     }
   }
 
+  private getByteLength(data: Buffer | Uint8Array | string): number {
+    if (typeof data === 'string') {
+      return Buffer.byteLength(data)
+    }
+    if (Buffer.isBuffer(data)) {
+      return data.length
+    }
+    return (data as Uint8Array).byteLength
+  }
+
   private handleError(error: any, key?: string): StorageError {
     console.error('GCS storage error:', error)
 
