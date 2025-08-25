@@ -64,7 +64,7 @@ export class S3StorageProvider implements StorageProvider {
       this.s3Client = new AWS.S3({
         apiVersion: '2006-03-01',
         ...config.options
-      }) as any
+      }) as unknown as S3Client
 
       this.initialized = true
     } catch (error) {
