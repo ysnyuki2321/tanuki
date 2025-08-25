@@ -1,6 +1,6 @@
 import { getSupabase, getSupabaseAdmin, isSupabaseConfigured } from './supabase-client'
 import type { DbUser } from './database-schema'
-import { getConfig } from './config'
+import { getConfig, getEnhancedConfig } from './enhanced-config'
 import { DemoAuthService } from './demo-auth'
 import { RealAdminAuthService } from './real-admin-auth'
 
