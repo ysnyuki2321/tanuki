@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { TanukiLogo } from "./tanuki-logo"
+import { SimpleThemeToggle } from "./theme-toggle"
 import { Menu, X, Shield } from "lucide-react"
 import { useState } from "react"
 import { useAuth } from "@/contexts/auth-context"
