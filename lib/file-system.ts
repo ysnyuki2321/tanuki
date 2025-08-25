@@ -417,4 +417,11 @@ if __name__ == "__main__":
     await new Promise((resolve) => setTimeout(resolve, 200))
     return this.files.filter((file) => file.name.toLowerCase().includes(query.toLowerCase()))
   }
+
+  static getInstance(): FileSystemService {
+    if (!FileSystemService.instance) {
+      FileSystemService.instance = new FileSystemService()
+    }
+    return FileSystemService.instance
+  }
 }
