@@ -222,24 +222,39 @@ export class RateLimiter {
       const now = Date.now()
       const resetTime = now + config.windowMs
 
+      // Check if redis connection is still alive
+      if (typeof this.redis.ping === 'function') {
+        await Promise.race([
+          this.redis.ping(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Redis ping timeout')), 1000))
+        ])
+      }
+
       // Use Redis pipeline for atomic operations
       const pipeline = this.redis.pipeline()
       pipeline.incr(key)
       pipeline.expire(key, windowSeconds)
-      
-      const results = await pipeline.exec()
-      
+
+      const results = await Promise.race([
+        pipeline.exec(),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Redis operation timeout')), 3000))
+      ])
+
       if (!results || results.length < 2) {
-        throw new Error('Redis pipeline failed')
+        throw new Error('Redis pipeline failed - invalid results')
       }
 
       const [incrResult, expireResult] = results
-      
+
       if (incrResult[0]) {
         throw incrResult[0]
       }
 
       const count = incrResult[1] as number
+      if (typeof count !== 'number' || isNaN(count)) {
+        throw new Error('Invalid count returned from Redis')
+      }
+
       const remaining = Math.max(0, config.max - count)
       const allowed = count <= config.max
 
@@ -250,7 +265,9 @@ export class RateLimiter {
         resetTime
       }
     } catch (error) {
-      console.error('Redis rate limit check failed:', error)
+      console.warn('Redis rate limit check failed, falling back to in-memory:', error)
+      // Disable Redis for this instance if it's consistently failing
+      this.redis = null
       return this.checkRateLimitFallback(key, config)
     }
   }
