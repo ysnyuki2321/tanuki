@@ -156,6 +156,12 @@ export function FileList({
                       <Download className="mr-2 h-4 w-4" />
                       {file.type === "folder" ? "Open" : "Download"}
                     </DropdownMenuItem>
+                    {onFilePreview && file.type === "file" && (
+                      <DropdownMenuItem onClick={() => onFilePreview(file)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Preview
+                      </DropdownMenuItem>
+                    )}
                     {isEditableFile(file) && onFileEdit && (
                       <DropdownMenuItem onClick={() => onFileEdit(file)}>
                         <Code className="mr-2 h-4 w-4" />
