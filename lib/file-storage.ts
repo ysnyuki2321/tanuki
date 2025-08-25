@@ -1,4 +1,5 @@
-import { supabase, supabaseAdmin, type DbFile } from './supabase'
+import { getSupabase, getSupabaseAdmin } from './supabase-client'
+import type { DbFile } from './database-schema'
 import { getConfig } from './config'
 import { AuthService } from './auth-service'
 
@@ -23,11 +24,12 @@ export class FileStorageService {
   
   // Check if storage is configured
   static isConfigured(): boolean {
-    return !!supabase
+    return !!getSupabase()
   }
 
   // Initialize storage bucket if not exists
   static async initializeBucket() {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured')
     }
@@ -59,6 +61,7 @@ export class FileStorageService {
 
   // Upload file to storage
   static async uploadFile(options: FileUploadOptions): Promise<FileUploadResult> {
+    const supabase = getSupabase()
     if (!supabase) {
       return { success: false, error: 'Storage not configured. Please setup database connection first.' }
     }

@@ -110,6 +110,7 @@ export class AuthService {
 
   // Reset password
   static async resetPassword(email: string) {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured. Please setup database connection first.')
     }
@@ -134,6 +135,7 @@ export class AuthService {
 
   // Update password
   static async updatePassword(newPassword: string) {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured. Please setup database connection first.')
     }
@@ -156,6 +158,7 @@ export class AuthService {
 
   // Get current session
   static async getSession() {
+    const supabase = getSupabase()
     if (!supabase) return { session: null, user: null }
 
     try {
@@ -169,6 +172,7 @@ export class AuthService {
 
   // Get current user
   static async getCurrentUser(): Promise<DbUser | null> {
+    const supabase = getSupabase()
     if (!supabase) return null
 
     try {
@@ -220,6 +224,7 @@ export class AuthService {
 
   // Update user profile
   static async updateUserProfile(userId: string, updates: Partial<DbUser>) {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured')
     }
@@ -246,6 +251,7 @@ export class AuthService {
 
   // Update last login timestamp
   static async updateLastLogin(userId: string) {
+    const supabase = getSupabase()
     if (!supabase) return
 
     try {
@@ -436,6 +442,7 @@ export class AuthService {
 
   // Handle auth state changes
   static onAuthStateChange(callback: (event: string, session: any) => void) {
+    const supabase = getSupabase()
     if (!supabase) return { data: { subscription: { unsubscribe: () => {} } } }
 
     return supabase.auth.onAuthStateChange(callback)
