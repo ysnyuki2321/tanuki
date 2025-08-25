@@ -10,6 +10,7 @@ import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
 import { SSHManagement } from "./ssh-management"
 import { NotificationManagement } from "./notification-management"
+import { MonitoringDashboard } from "./monitoring-dashboard"
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<SystemStats | null>(null)
@@ -68,11 +69,12 @@ export function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
           <TabsTrigger value="ssh">SSH</TabsTrigger>
+          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
@@ -94,6 +96,10 @@ export function AdminDashboard() {
             nodes={stats.serverNodes}
             onNodesChange={(nodes) => setStats(prev => prev ? { ...prev, serverNodes: nodes } : null)}
           />
+        </TabsContent>
+
+        <TabsContent value="monitoring">
+          <MonitoringDashboard />
         </TabsContent>
 
         <TabsContent value="notifications">
