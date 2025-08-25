@@ -132,7 +132,137 @@ export function FileManager() {
     return currentFolder?.path || "/"
   }
 
-  const filteredFiles = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filterAndSortFiles = (files: FileItem[], filters: SearchFilters): FileItem[] => {
+    let filtered = [...files]
+
+    // Text search
+    if (filters.query) {
+      const query = filters.query.toLowerCase()
+      filtered = filtered.filter(file =>
+        file.name.toLowerCase().includes(query) ||
+        file.path.toLowerCase().includes(query)
+      )
+    }
+
+    // File type filter
+    if (filters.fileTypes.length > 0) {
+      filtered = filtered.filter(file => {
+        if (file.type === "folder") return false
+
+        const extension = file.name.split('.').pop()?.toLowerCase() || ""
+
+        return filters.fileTypes.some(typeFilter => {
+          switch (typeFilter) {
+            case "image":
+              return ["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"].includes(extension)
+            case "document":
+              return ["pdf", "doc", "docx", "txt", "md", "rtf", "odt"].includes(extension)
+            case "video":
+              return ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm"].includes(extension)
+            case "audio":
+              return ["mp3", "wav", "flac", "aac", "ogg", "wma"].includes(extension)
+            case "archive":
+              return ["zip", "rar", "7z", "tar", "gz", "bz2"].includes(extension)
+            case "code":
+              return ["js", "ts", "jsx", "tsx", "py", "java", "cpp", "c", "html", "css", "scss", "php", "rb", "go", "rs"].includes(extension)
+            case "database":
+              return ["sql", "db", "sqlite", "mdb"].includes(extension)
+            default:
+              return false
+          }
+        })
+      })
+    }
+
+    // File size filter
+    if (filters.sizeRange.min !== null || filters.sizeRange.max !== null) {
+      filtered = filtered.filter(file => {
+        if (file.type === "folder") return true
+
+        let sizeInBytes = file.size
+        const { min, max, unit } = filters.sizeRange
+
+        // Convert filter values to bytes
+        const multiplier = unit === "KB" ? 1024 : unit === "MB" ? 1024 * 1024 : 1024 * 1024 * 1024
+        const minBytes = min !== null ? min * multiplier : 0
+        const maxBytes = max !== null ? max * multiplier : Infinity
+
+        return sizeInBytes >= minBytes && sizeInBytes <= maxBytes
+      })
+    }
+
+    // Date range filter
+    if (filters.dateRange.from || filters.dateRange.to) {
+      filtered = filtered.filter(file => {
+        const fileDate = new Date(file.modifiedAt)
+        const fromDate = filters.dateRange.from
+        const toDate = filters.dateRange.to
+
+        if (fromDate && fileDate < fromDate) return false
+        if (toDate && fileDate > toDate) return false
+
+        return true
+      })
+    }
+
+    // Share status filter
+    if (filters.isShared !== null) {
+      filtered = filtered.filter(file => !!file.isShared === filters.isShared)
+    }
+
+    // Sort files
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any
+
+      switch (filters.sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+          break
+        case "size":
+          aValue = a.size
+          bValue = b.size
+          break
+        case "modified":
+          aValue = new Date(a.modifiedAt)
+          bValue = new Date(b.modifiedAt)
+          break
+        case "created":
+          aValue = new Date(a.createdAt)
+          bValue = new Date(b.createdAt)
+          break
+        default:
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+      }
+
+      // Folders first
+      if (a.type === "folder" && b.type !== "folder") return -1
+      if (a.type !== "folder" && b.type === "folder") return 1
+
+      let comparison = 0
+      if (aValue < bValue) comparison = -1
+      if (aValue > bValue) comparison = 1
+
+      return filters.sortOrder === "desc" ? -comparison : comparison
+    })
+
+    return filtered
+  }
+
+  const filteredFiles = filterAndSortFiles(files, searchFilters)
+
+  const resetSearchFilters = () => {
+    setSearchFilters({
+      query: "",
+      fileTypes: [],
+      sizeRange: { min: null, max: null, unit: "MB" },
+      dateRange: { from: null, to: null },
+      isShared: null,
+      sortBy: "name",
+      sortOrder: "asc"
+    })
+  }
 
   if (isLoading) {
     return (
