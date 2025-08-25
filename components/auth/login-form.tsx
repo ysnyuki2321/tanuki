@@ -121,6 +121,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               )}
             </Button>
 
+            <div className="text-center">
+              <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot your password?
+              </Link>
+            </div>
+
             <div className="text-center text-sm text-muted-foreground">
               Admin: admin@tanuki.dev / Yuki@2321<br />
               Demo: user@tanuki.dev / demo123
