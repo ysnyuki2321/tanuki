@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +11,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { TanukiLogo } from "@/components/tanuki-logo"
+import { OAuthButtons } from "@/components/auth/oauth-buttons"
+import { isSupabaseConfigured } from "@/lib/supabase-client"
 import Link from "next/link"
 
 interface RegisterFormProps {
@@ -24,8 +26,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [isDemoMode, setIsDemoMode] = useState(false)
 
   const { signUp, isLoading } = useAuth()
+
+  useEffect(() => {
+    setIsDemoMode(!isSupabaseConfigured())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -142,6 +149,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 "Create Account"
               )}
             </Button>
+
+            {/* OAuth buttons - only show if Supabase is configured */}
+            {!isDemoMode && (
+              <OAuthButtons
+                onLoading={(loading) => {}}
+                disabled={isLoading}
+              />
+            )}
 
             <div className="text-center">
               <span className="text-sm text-muted-foreground">Already have an account? </span>

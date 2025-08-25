@@ -26,6 +26,11 @@ interface AppConfig {
   aws_secret_key: string | null;
   aws_bucket: string | null;
   aws_region: string | null;
+
+  // Google Cloud Storage settings
+  gcs_project_id: string | null;
+  gcs_key_file: string | null;
+  gcs_bucket: string | null;
   
   // Payment gateways - default null
   stripe_public_key: string | null;
@@ -74,7 +79,30 @@ interface AppConfig {
 
 // Get config với null-safe defaults
 export const getConfig = (): AppConfig => {
-  const env = process.env;
+  // Safe environment access for both client and server
+  let env: Record<string, string | undefined>
+
+  if (typeof window === 'undefined') {
+    // Server-side: use process.env
+    env = process.env
+  } else {
+    // Client-side: use injected env vars with fallback
+    env = (window as any).__ENV__ || {}
+
+    // Fallback to any NEXT_PUBLIC_ vars that might be available
+    try {
+      if (typeof process !== 'undefined' && process?.env) {
+        Object.keys(process.env).forEach(key => {
+          if (key.startsWith('NEXT_PUBLIC_') && !env[key]) {
+            env[key] = process.env[key]
+          }
+        })
+      }
+    } catch (error) {
+      // Ignore process access errors on client-side
+      console.debug('Process env access not available on client side')
+    }
+  }
   
   return {
     // Database
@@ -101,6 +129,11 @@ export const getConfig = (): AppConfig => {
     aws_secret_key: env.AWS_SECRET_ACCESS_KEY || null,
     aws_bucket: env.AWS_BUCKET || null,
     aws_region: env.AWS_REGION || null,
+
+    // Google Cloud Storage
+    gcs_project_id: env.GCS_PROJECT_ID || null,
+    gcs_key_file: env.GCS_KEY_FILE || null,
+    gcs_bucket: env.GCS_BUCKET || null,
     
     // Payment
     stripe_public_key: env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || null,

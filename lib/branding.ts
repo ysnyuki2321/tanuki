@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabase } from './supabase-client'
 import { getConfig } from './config'
 
 export interface BrandingConfig {
@@ -81,6 +81,7 @@ export class BrandingService {
     }
     
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return DEFAULT_BRANDING
       }
@@ -123,6 +124,7 @@ export class BrandingService {
   // Update branding configuration
   static async updateBranding(updates: Partial<BrandingConfig>, tenantId?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }
@@ -163,10 +165,16 @@ export class BrandingService {
   
   // Apply branding to current page
   static async applyBranding(tenantId?: string) {
-    const branding = await this.getBranding(tenantId)
-    
-    // Update CSS variables
-    const root = document.documentElement
+    try {
+      // Check if we're in browser environment
+      if (typeof document === 'undefined') {
+        return // Skip on server-side rendering
+      }
+
+      const branding = await this.getBranding(tenantId)
+
+      // Update CSS variables
+      const root = document.documentElement
     root.style.setProperty('--primary-color', branding.primary_color)
     root.style.setProperty('--secondary-color', branding.secondary_color)
     root.style.setProperty('--accent-color', branding.accent_color)
@@ -176,12 +184,12 @@ export class BrandingService {
     root.style.setProperty('--heading-font', branding.heading_font)
     
     // Update document title
-    if (branding.company_name) {
+    if (branding.company_name && typeof document !== 'undefined') {
       document.title = branding.company_name
     }
     
     // Update favicon
-    if (branding.favicon_url) {
+    if (branding.favicon_url && typeof document !== 'undefined') {
       const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement
       if (favicon) {
         favicon.href = branding.favicon_url
@@ -194,7 +202,7 @@ export class BrandingService {
     }
     
     // Apply custom CSS
-    if (branding.custom_css) {
+    if (branding.custom_css && typeof document !== 'undefined') {
       let customStyle = document.getElementById('custom-branding-css')
       if (!customStyle) {
         customStyle = document.createElement('style')
@@ -202,6 +210,10 @@ export class BrandingService {
         document.head.appendChild(customStyle)
       }
       customStyle.textContent = branding.custom_css
+    }
+    } catch (error) {
+      console.warn('Error applying branding:', error)
+      // Gracefully degrade - app continues to work without branding
     }
   }
   
@@ -255,6 +267,7 @@ export class BrandingService {
   // Upload logo file
   static async uploadLogo(file: File, type: 'logo' | 'logo_dark' | 'favicon', tenantId?: string): Promise<{ success: boolean; url?: string; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }
@@ -295,6 +308,7 @@ export class BrandingService {
   // Reset branding to defaults
   static async resetBranding(tenantId?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return { success: false, error: 'Database not configured' }
       }

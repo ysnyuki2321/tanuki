@@ -1,11 +1,14 @@
-import { supabase, supabaseAdmin, isSupabaseConfigured, type DbUser } from './supabase'
-import { getConfig } from './config'
+import { getSupabase, getSupabaseAdmin, isSupabaseConfigured } from './supabase-client'
+import type { DbUser } from './database-schema'
+import { getConfig, getEnhancedConfig } from './enhanced-config'
+import { DemoAuthService } from './demo-auth'
+import { RealAdminAuthService } from './real-admin-auth'
 
 // Authentication service with null-safe operations
 export class AuthService {
   // Check if auth is properly configured
   static isConfigured(): boolean {
-    return isSupabaseConfigured()
+    return isSupabaseConfigured() || DemoAuthService.isDemoMode()
   }
 
   // Sign up with email verification
@@ -14,18 +17,20 @@ export class AuthService {
     company?: string
     phone?: string
   }) {
+    const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      // Fallback to demo mode
+      return await DemoAuthService.signUp(email, password, metadata)
     }
 
     const config = getConfig()
-    
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${config.app_url}/auth/callback`,
+          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`,
           data: {
             full_name: metadata?.full_name || null,
             company: metadata?.company || null,
@@ -44,16 +49,29 @@ export class AuthService {
 
       // Create user profile if signup successful
       if (data.user && !error) {
-        await this.createUserProfile(data.user.id, {
-          email,
-          full_name: metadata?.full_name || null,
-          company: metadata?.company || null,
-          phone: metadata?.phone || null,
-          email_verified: false,
-          role: 'user',
-          storage_quota: config.default_storage_quota,
-          file_count_limit: config.default_file_limit,
-        })
+        try {
+          const response = await fetch('/api/auth/create-profile', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email,
+              metadata: {
+                full_name: metadata?.full_name || null,
+                company: metadata?.company || null,
+                phone: metadata?.phone || null,
+              }
+            })
+          });
+
+          if (!response.ok) {
+            console.error('Failed to create user profile');
+          }
+        } catch (error) {
+          console.error('Error creating user profile:', error);
+        }
       }
 
       return { user: data.user, session: data.session }
@@ -65,8 +83,43 @@ export class AuthService {
 
   // Sign in with email/password
   static async signIn(email: string, password: string) {
+    // Check if this is a real admin login
+    if (RealAdminAuthService.isRealAdmin(email)) {
+      const result = await RealAdminAuthService.authenticateAdmin(email, password)
+      if (result.success && result.session) {
+        // Convert admin session to regular auth format
+        return {
+          success: true,
+          user: {
+            ...result.session.user,
+            role: 'admin',
+            tenant_id: null,
+            storage_quota: null,
+            file_count_limit: null,
+            avatar_url: null,
+            phone: null,
+            company: null,
+            email_verified: true,
+            subscription_plan: null,
+            subscription_status: null,
+            subscription_expires: null,
+            timezone: null,
+            language: null,
+            theme: null,
+            created_at: result.session.user.created_at,
+            updated_at: result.session.user.created_at,
+            last_login: result.session.user.last_login
+          } as DbUser
+        }
+      } else {
+        return result
+      }
+    }
+
+    const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      // Fallback to demo mode for regular users
+      return await DemoAuthService.signIn(email, password)
     }
 
     try {
@@ -93,7 +146,11 @@ export class AuthService {
 
   // Sign out
   static async signOut() {
-    if (!supabase) return { error: null }
+    const supabase = getSupabase()
+    if (!supabase) {
+      await DemoAuthService.signOut()
+      return { error: null }
+    }
 
     try {
       const { error } = await supabase.auth.signOut()
@@ -106,15 +163,14 @@ export class AuthService {
 
   // Reset password
   static async resetPassword(email: string) {
+    const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      return await DemoAuthService.resetPassword(email)
     }
-
-    const config = getConfig()
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${config.app_url}/auth/reset-password`,
+        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/reset-password`,
       })
 
       if (error) {
@@ -130,8 +186,10 @@ export class AuthService {
 
   // Update password
   static async updatePassword(newPassword: string) {
+    const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      // Demo mode doesn't support password update without current password
+      return { success: false, error: 'Password update not available in demo mode' }
     }
 
     try {
@@ -152,7 +210,11 @@ export class AuthService {
 
   // Get current session
   static async getSession() {
-    if (!supabase) return { session: null, user: null }
+    const supabase = getSupabase()
+    if (!supabase) {
+      const demoSession = DemoAuthService.getCurrentSession()
+      return { session: demoSession.user ? { user: demoSession.user } : null, user: demoSession.user }
+    }
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -165,7 +227,10 @@ export class AuthService {
 
   // Get current user
   static async getCurrentUser(): Promise<DbUser | null> {
-    if (!supabase) return null
+    const supabase = getSupabase()
+    if (!supabase) {
+      return await DemoAuthService.getCurrentUser() as DbUser | null
+    }
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -187,6 +252,7 @@ export class AuthService {
 
   // Create user profile in database
   static async createUserProfile(userId: string, profileData: Partial<DbUser>) {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured')
     }
@@ -215,8 +281,9 @@ export class AuthService {
 
   // Update user profile
   static async updateUserProfile(userId: string, updates: Partial<DbUser>) {
+    const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured')
+      return await DemoAuthService.updateProfile(updates)
     }
 
     try {
@@ -241,6 +308,7 @@ export class AuthService {
 
   // Update last login timestamp
   static async updateLastLogin(userId: string) {
+    const supabase = getSupabase()
     if (!supabase) return
 
     try {
@@ -258,6 +326,7 @@ export class AuthService {
 
   // Verify email manually (admin function)
   static async verifyEmail(userId: string) {
+    const supabaseAdmin = getSupabaseAdmin()
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured')
     }
@@ -295,17 +364,16 @@ export class AuthService {
 
   // OAuth sign in (Google, GitHub)
   static async signInWithOAuth(provider: 'google' | 'github') {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured. Please setup database connection first.')
     }
-
-    const config = getConfig()
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${config.app_url}/auth/callback`,
+          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`,
         },
       })
 
@@ -383,7 +451,11 @@ export class AuthService {
 
   // List all users (admin function)
   static async listUsers(limit: number = 50, offset: number = 0): Promise<DbUser[]> {
-    if (!supabaseAdmin) return []
+    const supabaseAdmin = getSupabaseAdmin()
+    if (!supabaseAdmin) {
+      const demoUsers = await DemoAuthService.listUsers()
+      return demoUsers.slice(offset, offset + limit) as DbUser[]
+    }
 
     try {
       const { data } = await supabaseAdmin
@@ -431,7 +503,11 @@ export class AuthService {
 
   // Handle auth state changes
   static onAuthStateChange(callback: (event: string, session: any) => void) {
-    if (!supabase) return { data: { subscription: { unsubscribe: () => {} } } }
+    const supabase = getSupabase()
+    if (!supabase) {
+      // Demo mode: simulate auth state change subscription
+      return { data: { subscription: { unsubscribe: () => {} } } }
+    }
 
     return supabase.auth.onAuthStateChange(callback)
   }

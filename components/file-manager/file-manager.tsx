@@ -12,6 +12,11 @@ import { CodeEditorModal } from "@/components/code-editor/code-editor-modal"
 import { ZipPreviewModal } from "@/components/zip-preview/zip-preview-modal"
 import { FilePreviewModal } from "@/components/file-preview/file-preview-modal"
 import { FileHistoryModal } from "@/components/file-history/file-history-modal"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
 export function FileManager() {
@@ -37,6 +42,9 @@ export function FileManager() {
   const [filePreviewFile, setFilePreviewFile] = useState<FileItem | null>(null)
   const [isFileHistoryOpen, setIsFileHistoryOpen] = useState(false)
   const [fileHistoryFile, setFileHistoryFile] = useState<FileItem | null>(null)
+  const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false)
+  const [newFolderName, setNewFolderName] = useState("")
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false)
 
   const loadFiles = async (parentId?: string) => {
     setIsLoading(true)
@@ -89,6 +97,32 @@ export function FileManager() {
   const handleFileHistory = (file: FileItem) => {
     setFileHistoryFile(file)
     setIsFileHistoryOpen(true)
+  }
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) {
+      toast.error("Please enter a folder name")
+      return
+    }
+
+    setIsCreatingFolder(true)
+    try {
+      await FileSystemService.createFolder(newFolderName.trim(), currentParentId)
+      toast.success(`Folder "${newFolderName.trim()}" created successfully`)
+      setNewFolderName("")
+      setIsNewFolderDialogOpen(false)
+      loadFiles(currentParentId) // Reload files to show the new folder
+    } catch (error) {
+      console.error("Failed to create folder:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to create folder")
+    } finally {
+      setIsCreatingFolder(false)
+    }
+  }
+
+  const handleNewFolderClick = () => {
+    setNewFolderName("")
+    setIsNewFolderDialogOpen(true)
   }
 
   const handleFileUpload = async (uploadedFiles: File[]) => {
@@ -305,10 +339,7 @@ export function FileManager() {
         onDeleteSelected={() => {
           selectedFiles.forEach(handleFileDelete)
         }}
-        onNewFolder={() => {
-          // TODO: Implement new folder creation
-          console.log("Create new folder")
-        }}
+        onNewFolder={handleNewFolderClick}
       />
 
       <FileUploadZone onFilesUploaded={handleFileUpload} />
@@ -379,6 +410,55 @@ export function FileManager() {
           }}
         />
       )}
+
+      <Dialog open={isNewFolderDialogOpen} onOpenChange={setIsNewFolderDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Folder</DialogTitle>
+            <DialogDescription>
+              Enter a name for the new folder.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="folder-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="folder-name"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="Enter folder name"
+                className="col-span-3"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isCreatingFolder) {
+                    handleCreateFolder()
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsNewFolderDialogOpen(false)}
+              disabled={isCreatingFolder}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCreateFolder}
+              disabled={isCreatingFolder || !newFolderName.trim()}
+            >
+              {isCreatingFolder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Folder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

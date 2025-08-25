@@ -1,0 +1,31 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tanuki (Raccoon Dog) Face -->
+  <circle cx="32" cy="32" r="30" fill="#8B5A3C" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Ears -->
+  <circle cx="22" cy="18" r="8" fill="#D2691E"/>
+  <circle cx="42" cy="18" r="8" fill="#D2691E"/>
+  <circle cx="22" cy="18" r="5" fill="#654321"/>
+  <circle cx="42" cy="18" r="5" fill="#654321"/>
+  
+  <!-- Eyes -->
+  <circle cx="24" cy="28" r="4" fill="white"/>
+  <circle cx="40" cy="28" r="4" fill="white"/>
+  <circle cx="24" cy="28" r="2" fill="black"/>
+  <circle cx="40" cy="28" r="2" fill="black"/>
+  
+  <!-- Nose -->
+  <ellipse cx="32" cy="36" rx="3" ry="2" fill="black"/>
+  
+  <!-- Mouth -->
+  <path d="M 32 40 Q 28 44 24 42" stroke="black" stroke-width="2" fill="none"/>
+  <path d="M 32 40 Q 36 44 40 42" stroke="black" stroke-width="2" fill="none"/>
+  
+  <!-- Facial markings -->
+  <path d="M 18 24 Q 24 26 20 32" stroke="#654321" stroke-width="2" fill="none"/>
+  <path d="M 46 24 Q 40 26 44 32" stroke="#654321" stroke-width="2" fill="none"/>
+  
+  <!-- Tech symbol overlay -->
+  <rect x="48" y="12" width="12" height="8" rx="2" fill="#4A90E2" opacity="0.8"/>
+  <text x="54" y="18" font-family="monospace" font-size="6" fill="white" text-anchor="middle">&lt;/&gt;</text>
+</svg>

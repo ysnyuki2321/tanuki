@@ -1,52 +1,18 @@
-import { createClient } from '@supabase/supabase-js'
-import { getConfig } from './config'
+// Legacy file - Use lib/supabase-client.ts for new implementations
+// This file is kept for backward compatibility
 
-const config = getConfig()
+import {
+  getSupabase,
+  getSupabaseAdmin,
+  isSupabaseConfigured as _isSupabaseConfigured,
+  getCurrentUser as _getCurrentUser
+} from './supabase-client'
 
-// Null-safe Supabase client initialization
-const supabaseUrl = config.supabase_url || process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = config.supabase_anon_key || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-
-// Create client only if we have valid credentials
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
-    })
-  : null
-
-// Service role client for admin operations (server-side only)
-const serviceRoleKey = config.supabase_service_key || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-export const supabaseAdmin = supabaseUrl && serviceRoleKey
-  ? createClient(supabaseUrl, serviceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
-  : null
-
-// Utility to check if Supabase is configured
-export const isSupabaseConfigured = () => {
-  return !!(supabaseUrl && supabaseAnonKey)
-}
-
-// Get current user safely
-export const getCurrentUser = async () => {
-  if (!supabase) return null
-  
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
-  } catch (error) {
-    console.error('Error getting current user:', error)
-    return null
-  }
-}
+// Legacy exports
+export const supabase = getSupabase()
+export const supabaseAdmin = getSupabaseAdmin()
+export const isSupabaseConfigured = _isSupabaseConfigured
+export const getCurrentUser = _getCurrentUser
 
 // Database types for type safety
 export interface Database {

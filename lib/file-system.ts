@@ -418,6 +418,54 @@ if __name__ == "__main__":
     return this.files.filter((file) => file.name.toLowerCase().includes(query.toLowerCase()))
   }
 
+  static async createFolder(name: string, parentId?: string): Promise<FileItem> {
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
+    // Validate folder name
+    if (!name || name.trim() === '') {
+      throw new Error('Folder name cannot be empty')
+    }
+
+    const trimmedName = name.trim()
+
+    // Check if folder with same name already exists in the same parent
+    const existingFolder = this.files.find((file) =>
+      file.name.toLowerCase() === trimmedName.toLowerCase() &&
+      file.parentId === parentId &&
+      file.type === 'folder'
+    )
+
+    if (existingFolder) {
+      throw new Error(`Folder "${trimmedName}" already exists`)
+    }
+
+    // Generate path based on parent
+    let path = `/${trimmedName}`
+    if (parentId) {
+      const parent = this.files.find((f) => f.id === parentId && f.type === 'folder')
+      if (parent) {
+        path = `${parent.path}/${trimmedName}`
+      }
+    }
+
+    // Create new folder
+    const newFolder: FileItem = {
+      id: `folder-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: trimmedName,
+      type: 'folder',
+      size: 0,
+      modifiedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      path,
+      parentId,
+    }
+
+    // Add to files array
+    this.files.push(newFolder)
+
+    return newFolder
+  }
+
   static getInstance(): FileSystemService {
     if (!FileSystemService.instance) {
       FileSystemService.instance = new FileSystemService()

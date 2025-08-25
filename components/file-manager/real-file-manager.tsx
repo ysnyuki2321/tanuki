@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { FileStorageService, type FileUploadOptions } from '@/lib/file-storage';
-import { type DbFile } from '@/lib/supabase';
+import { type DbFile } from '@/lib/database-schema';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -243,22 +243,24 @@ export function RealFileManager() {
 
   return (
     <div className="space-y-6">
-      {/* Storage Usage */}
-      <Card>
+      {/* Enhanced Storage Usage */}
+      <Card className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950/50 dark:to-gray-950/50 border-slate-200/50 dark:border-slate-800/50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Folder className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+            <div className="p-2 bg-slate-500/10 rounded-lg">
+              <Folder className="w-5 h-5 text-slate-500" />
+            </div>
             Storage Usage
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{formatFileSize(storageUsage.used)} used</span>
-              <span>{formatFileSize(storageUsage.quota)} total</span>
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm font-medium">
+              <span className="text-slate-700 dark:text-slate-300">{formatFileSize(storageUsage.used)} used</span>
+              <span className="text-slate-500 dark:text-slate-400">{formatFileSize(storageUsage.quota)} total</span>
             </div>
-            <Progress value={getStoragePercentage()} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <Progress value={getStoragePercentage()} className="h-3 bg-slate-200 dark:bg-slate-800" />
+            <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
               <span>{storageUsage.fileCount} files</span>
               <span>{getStoragePercentage()}% used</span>
             </div>

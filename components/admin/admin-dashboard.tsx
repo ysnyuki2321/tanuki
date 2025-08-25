@@ -8,16 +8,24 @@ import { SystemOverview } from "./system-overview"
 import { UserManagement } from "./user-management"
 import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
-import SetupWizard from "./setup-wizard"
+import ConfigurationManager from "./configuration-manager"
+import { FeatureFlagsManager } from "./feature-flags-manager"
+import EmailTemplateManager from "./email-template-manager"
+import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<SystemStats | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [isRealAdmin, setIsRealAdmin] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Check if current user is real admin
+        const realAdmin = RealAdminAuthService.isAuthenticatedAdmin()
+        setIsRealAdmin(realAdmin)
+
         const [statsData, usersData] = await Promise.all([AdminService.getSystemStats(), AdminService.getUsers()])
         setStats(statsData)
         setUsers(usersData)
@@ -66,17 +74,19 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <Tabs defaultValue="setup" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="setup">Setup</TabsTrigger>
+      <Tabs defaultValue="configuration" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="configuration">Configuration</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
           <TabsTrigger value="servers">Servers</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="setup">
-          <SetupWizard />
+        <TabsContent value="configuration">
+          <ConfigurationManager />
         </TabsContent>
 
         <TabsContent value="overview">
@@ -85,6 +95,14 @@ export function AdminDashboard() {
 
         <TabsContent value="users">
           <UserManagement users={users} onUsersChange={setUsers} />
+        </TabsContent>
+
+        <TabsContent value="features">
+          <FeatureFlagsManager />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailTemplateManager />
         </TabsContent>
 
         <TabsContent value="servers">

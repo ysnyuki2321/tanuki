@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import RealFileManager from "@/components/file-manager/real-file-manager"
 import UserDashboard from "@/components/dashboard/user-dashboard"
@@ -8,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TanukiLogo } from "@/components/tanuki-logo"
 import { SimpleThemeToggle } from "@/components/theme-toggle"
-import { LogOut, Settings, User, Database, Code, BarChart3, Files } from "lucide-react"
+import { EnhancedNotificationCenter } from "@/components/notifications/enhanced-notification-center"
+import { LogOut, Settings, User, BarChart3, Files, Bell } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,7 @@ import Link from "next/link"
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth()
+  const [showNotifications, setShowNotifications] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
@@ -29,16 +32,24 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b bg-card">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        {/* Enhanced Header */}
+        <header className="border-b bg-card/80 backdrop-blur-md shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <TanukiLogo size={32} />
+              <TanukiLogo size={36} />
 
               <div className="flex items-center gap-4">
                 <SimpleThemeToggle />
-                <span className="hidden sm:block text-sm text-muted-foreground">Welcome, {user?.full_name || user?.email}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNotifications(true)}
+                  className="relative hover:bg-primary/10 transition-colors"
+                >
+                  <Bell className="w-4 h-4" />
+                </Button>
+                <span className="hidden sm:block text-sm text-muted-foreground font-medium">Welcome, {user?.full_name || user?.email}</span>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -56,19 +67,6 @@ export default function DashboardPage() {
                         <p className="w-[160px] truncate text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/database">
-                        <Database className="mr-2 h-4 w-4" />
-                        Database
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/editor">
-                        <Code className="mr-2 h-4 w-4" />
-                        Code Editor
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/profile">
@@ -91,33 +89,51 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Enhanced Main Content */}
         <main className="container mx-auto px-4 py-8">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="files" className="flex items-center gap-2">
-                <Files className="w-4 h-4" />
-                Files
-              </TabsTrigger>
-            </TabsList>
+          <Tabs defaultValue="overview" className="space-y-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-gradient mb-2">
+                  {user?.full_name ? `Hello, ${user.full_name.split(' ')[0]}!` : 'Welcome!'}
+                </h1>
+                <p className="text-muted-foreground">Manage your workspace with powerful tools</p>
+              </div>
+              <TabsList className="grid grid-cols-2 bg-muted/50 backdrop-blur-sm border shadow-sm">
+                <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Overview</span>
+                </TabsTrigger>
+                <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Files className="w-4 h-4" />
+                  <span className="hidden sm:inline">Files</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="overview" className="space-y-4">
-              <UserDashboard />
+            <TabsContent value="overview" className="space-y-6">
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl border shadow-sm p-1">
+                <UserDashboard />
+              </div>
             </TabsContent>
 
-            <TabsContent value="files" className="space-y-4">
+            <TabsContent value="files" className="space-y-6">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">File Manager</h2>
-                <p className="text-muted-foreground">Manage your files, edit code, and organize your digital workspace</p>
+                <h2 className="text-2xl font-bold mb-2 text-gradient">File Manager</h2>
+                <p className="text-muted-foreground">Edit code, manage files, and query databases - all in one place</p>
               </div>
-              <RealFileManager />
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl border shadow-sm p-6">
+                <RealFileManager />
+              </div>
             </TabsContent>
           </Tabs>
         </main>
+
+        {/* Notification Center */}
+        <EnhancedNotificationCenter
+          isOpen={showNotifications}
+          onClose={() => setShowNotifications(false)}
+        />
       </div>
     </ProtectedRoute>
   )
