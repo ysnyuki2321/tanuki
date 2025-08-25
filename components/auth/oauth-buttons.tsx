@@ -154,5 +154,3 @@ export function OAuthButtons({ onLoading, disabled }: OAuthButtonsProps) {
     </div>
   )
 }
-
-export default OAuthButtons

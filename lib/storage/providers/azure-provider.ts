@@ -141,7 +141,8 @@ export class AzureStorageProvider implements StorageProvider {
       // Handle progress callback
       if (options?.progressCallback) {
         uploadOptions.onProgress = (progress: any) => {
-          const percentage = (progress.loadedBytes / (data as any).length) * 100
+          const dataLength = typeof data === 'string' ? Buffer.byteLength(data) : data.length
+          const percentage = (progress.loadedBytes / dataLength) * 100
           options.progressCallback!(percentage)
         }
       }

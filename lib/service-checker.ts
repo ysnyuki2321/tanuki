@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import { getConfig, getSetupStatus } from './config'
 import { isSupabaseConfigured } from './supabase-client'

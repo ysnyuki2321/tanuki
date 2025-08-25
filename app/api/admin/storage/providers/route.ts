@@ -45,9 +45,9 @@ export async function GET(request: NextRequest) {
 
     // Decrypt sensitive credentials (in production, use proper encryption)
     const providersWithDecryptedCredentials = providers?.map(provider => ({
-      ...(provider as any),
-      credentials: (provider as any).encrypted_credentials ? 
-        JSON.parse((provider as any).encrypted_credentials) : {}
+      ...provider,
+      credentials: provider.encrypted_credentials ?
+        JSON.parse(provider.encrypted_credentials) : {}
     })) || []
 
     return NextResponse.json({
@@ -142,14 +142,14 @@ export async function POST(request: NextRequest) {
 
     // If this is set as default, unset other defaults
     if (isDefault) {
-      await (supabase as any)
+      await supabase!
         .from('storage_providers')
         .update({ is_default: false })
         .eq('tenant_id', tenantId || '')
     }
 
     // Create storage provider
-    const { data: provider, error } = await (supabase as any)
+    const { data: provider, error } = await supabase!
       .from('storage_providers')
       .insert({
         name,
@@ -198,7 +198,7 @@ async function testConnectionAsync(providerId: string, config: StorageConfig) {
     
     const supabase = getSupabaseAdmin()
     if (supabase) {
-      await (supabase as any)
+      await supabase!
         .from('storage_providers')
         .update({
           health_status: isHealthy ? 'healthy' : 'unhealthy',
@@ -211,7 +211,7 @@ async function testConnectionAsync(providerId: string, config: StorageConfig) {
     
     const supabase = getSupabaseAdmin()
     if (supabase) {
-      await (supabase as any)
+      await supabase!
         .from('storage_providers')
         .update({
           health_status: 'unhealthy',

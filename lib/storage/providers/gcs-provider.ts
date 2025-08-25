@@ -80,7 +80,7 @@ export class GCSStorageProvider implements StorageProvider {
         storageOptions.credentials = config.credentials.credentials
       }
 
-      this.storage = new Storage(storageOptions) as any
+      this.storage = new Storage(storageOptions) as unknown as GCSStorage
       this.bucket = this.storage.bucket(this.bucketName)
       this.initialized = true
     } catch (error) {
@@ -121,7 +121,7 @@ export class GCSStorageProvider implements StorageProvider {
           metadata: options?.customMetadata || {}
         },
         public: options?.isPublic || false,
-        resumable: Buffer.byteLength(data as any) > 5 * 1024 * 1024, // Use resumable for files > 5MB
+        resumable: this.getByteLength(data) > 5 * 1024 * 1024, // Use resumable for files > 5MB
         validation: 'crc32c'
       }
 
@@ -131,7 +131,7 @@ export class GCSStorageProvider implements StorageProvider {
         
         return new Promise((resolve, reject) => {
           let uploaded = 0
-          const totalSize = Buffer.byteLength(data as any)
+          const totalSize = this.getByteLength(data)
 
           stream.on('progress', (bytesWritten: number) => {
             uploaded = bytesWritten
@@ -472,6 +472,16 @@ export class GCSStorageProvider implements StorageProvider {
       console.error('GCS storage health check failed:', error)
       return false
     }
+  }
+
+  private getByteLength(data: Buffer | Uint8Array | string): number {
+    if (typeof data === 'string') {
+      return Buffer.byteLength(data)
+    }
+    if (Buffer.isBuffer(data)) {
+      return data.length
+    }
+    return (data as Uint8Array).byteLength
   }
 
   private handleError(error: any, key?: string): StorageError {

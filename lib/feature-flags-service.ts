@@ -169,7 +169,7 @@ export class FeatureFlagsService {
    */
   async getTenantFlags(tenantId?: string): Promise<DbFeatureFlag[]> {
     if (!this.supabase) return []
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flags')
       .select('*')
       .or(`tenant_id.eq.${tenantId},is_global.eq.true`)
@@ -194,7 +194,7 @@ export class FeatureFlagsService {
     environments?: string[]
   }, createdBy: string): Promise<DbFeatureFlag> {
     if (!this.supabase) throw new Error('Supabase client not initialized')
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flags')
       .insert({
         key: flag.key,
@@ -230,7 +230,7 @@ export class FeatureFlagsService {
     updatedBy: string
   ): Promise<DbFeatureFlagValue> {
     if (!this.supabase) throw new Error('Supabase client not initialized')
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flag_values')
       .upsert({
         flag_id: flagId,
@@ -262,7 +262,7 @@ export class FeatureFlagsService {
     createdBy?: string
   ): Promise<DbFeatureFlagDependency> {
     if (!this.supabase) throw new Error('Supabase client not initialized')
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flag_dependencies')
       .insert({
         flag_id: flagId,
@@ -290,7 +290,7 @@ export class FeatureFlagsService {
       return cached.value
     }
 
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flags')
       .select('*')
       .eq('key', flagKey)
@@ -312,7 +312,7 @@ export class FeatureFlagsService {
     context: FeatureFlagContext
   ): Promise<DbFeatureFlagValue | null> {
     if (!this.supabase) return null
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flag_values')
       .select('*')
       .eq('flag_id', flagId)
@@ -331,7 +331,7 @@ export class FeatureFlagsService {
     context: FeatureFlagContext
   ): Promise<{ satisfied: boolean; reason?: string }> {
     if (!this.supabase) return { satisfied: true }
-    const { data: dependencies, error } = await (this.supabase as any)
+    const { data: dependencies, error } = await this.supabase!
       .from('feature_flag_dependencies')
       .select(`
         *,
@@ -345,7 +345,7 @@ export class FeatureFlagsService {
     }
 
     for (const dep of dependencies) {
-      const dependentFlag = dep.depends_on_flag as any
+      const dependentFlag = dep.depends_on_flag as DbFeatureFlag
       const dependentEvaluation = await this.evaluateFlag(dependentFlag.key, context)
 
       switch (dep.dependency_type) {
@@ -394,7 +394,7 @@ export class FeatureFlagsService {
     context: FeatureFlagContext
   ): Promise<boolean> {
     if (!this.supabase) return false
-    const { data: segments, error } = await (this.supabase as any)
+    const { data: segments, error } = await this.supabase!
       .from('feature_flag_segments')
       .select('*')
       .in('name', segmentNames)
@@ -497,7 +497,7 @@ export class FeatureFlagsService {
   ): Promise<void> {
     if (!this.supabase) return
     try {
-      await (this.supabase as any)
+      await this.supabase!
         .from('feature_flag_evaluations')
         .insert({
           flag_id: flagId,
