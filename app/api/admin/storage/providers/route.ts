@@ -45,9 +45,9 @@ export async function GET(request: NextRequest) {
 
     // Decrypt sensitive credentials (in production, use proper encryption)
     const providersWithDecryptedCredentials = providers?.map(provider => ({
-      ...(provider as any),
-      credentials: (provider as any).encrypted_credentials ? 
-        JSON.parse((provider as any).encrypted_credentials) : {}
+      ...provider,
+      credentials: provider.encrypted_credentials ?
+        JSON.parse(provider.encrypted_credentials) : {}
     })) || []
 
     return NextResponse.json({
