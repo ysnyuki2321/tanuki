@@ -1,25 +1,22 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Grid3X3, List, Search, Trash2, FolderPlus } from "lucide-react"
+import { Grid3X3, List, Trash2, FolderPlus, Upload } from "lucide-react"
 
 interface FileManagerToolbarProps {
   selectedCount: number
   viewMode: "grid" | "list"
   onViewModeChange: (mode: "grid" | "list") => void
-  searchQuery: string
-  onSearchChange: (query: string) => void
   onDeleteSelected: () => void
+  onNewFolder?: () => void
 }
 
 export function FileManagerToolbar({
   selectedCount,
   viewMode,
   onViewModeChange,
-  searchQuery,
-  onSearchChange,
   onDeleteSelected,
+  onNewFolder,
 }: FileManagerToolbarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
