@@ -367,6 +367,18 @@ export function FileManager() {
           }}
         />
       )}
+
+      {fileHistoryFile && (
+        <FileHistoryModal
+          isOpen={isFileHistoryOpen}
+          onClose={() => setIsFileHistoryOpen(false)}
+          file={fileHistoryFile}
+          onRestoreVersion={(versionId) => {
+            // Reload file list after version restore
+            loadFiles(currentParentId)
+          }}
+        />
+      )}
     </div>
   )
 }
