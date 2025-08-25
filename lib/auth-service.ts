@@ -24,13 +24,13 @@ export class AuthService {
     }
 
     const config = getConfig()
-    
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${config.app_url}/auth/callback`,
+          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`,
           data: {
             full_name: metadata?.full_name || null,
             company: metadata?.company || null,
