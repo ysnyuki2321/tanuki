@@ -413,7 +413,7 @@ export function AdvancedFilePreview({
             variant="outline" 
             size="sm" 
             onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={previewData.metadata?.pages && currentPage >= previewData.metadata.pages}
+            disabled={!!previewData.metadata?.pages && currentPage >= previewData.metadata.pages}
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
@@ -526,7 +526,7 @@ export function AdvancedFilePreview({
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="secondary">{previewData?.type || file.file_type || 'unknown'}</Badge>
                   <span className="text-sm text-muted-foreground">
-                    {formatBytes(file.size)}
+                    {file.size ? formatBytes(file.size) : 'Unknown size'}
                   </span>
                   {file.is_public && (
                     <Badge variant="outline">Public</Badge>
@@ -567,7 +567,7 @@ export function AdvancedFilePreview({
                   </div>
                   <div>
                     <span className="text-muted-foreground">Size:</span>
-                    <p>{formatBytes(file.size)}</p>
+                    <p>{file.size ? formatBytes(file.size) : 'Unknown size'}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Type:</span>

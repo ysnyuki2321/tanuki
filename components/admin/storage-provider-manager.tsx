@@ -57,7 +57,8 @@ interface StorageConfig {
 }
 
 export function StorageProviderManager() {
-  const { user, tenant } = useAuth()
+  const { user } = useAuth()
+  const tenant = (user as any)?.tenant_id ? { id: (user as any).tenant_id } : null
   const [providers, setProviders] = useState<StorageProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)

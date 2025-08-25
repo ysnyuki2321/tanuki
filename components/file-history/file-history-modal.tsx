@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
   FileVersioningService, 
-  type FileHistory, 
   type FileVersion,
   type VersionComparison 
 } from "@/lib/file-versioning"
@@ -44,14 +43,14 @@ interface FileHistoryModalProps {
 }
 
 export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: FileHistoryModalProps) {
-  const [fileHistory, setFileHistory] = useState<FileHistory | null>(null)
+  const [fileHistory, setFileHistory] = useState<FileVersion[] | null>(null)
   const [selectedVersions, setSelectedVersions] = useState<string[]>([])
   const [comparison, setComparison] = useState<VersionComparison | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  const versioningService = FileVersioningService.getInstance()
+  const versioningService = FileVersioningService
 
   useEffect(() => {
     if (isOpen && file) {
@@ -62,7 +61,7 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
   const loadFileHistory = async () => {
     setIsLoading(true)
     try {
-      const history = await versioningService.getFileHistory(file.id)
+      const history = await versioningService.getFileVersions(file.id)
       setFileHistory(history)
     } catch (error) {
       setMessage({ type: "error", text: "Failed to load file history" })
@@ -86,7 +85,7 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
 
     setIsLoading(true)
     try {
-      const comp = await versioningService.compareVersions(selectedVersions[0], selectedVersions[1])
+      const comp = await versioningService.compareVersions(file.id, parseInt(selectedVersions[0]), parseInt(selectedVersions[1]))
       setComparison(comp)
     } catch (error) {
       setMessage({ type: "error", text: "Failed to compare versions" })
@@ -102,7 +101,7 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
 
     setIsLoading(true)
     try {
-      const success = await versioningService.restoreVersion(file.id, versionId)
+      const success = await versioningService.restoreToVersion(file.id, parseInt(versionId))
       if (success) {
         setMessage({ type: "success", text: "Version restored successfully" })
         await loadFileHistory()
@@ -124,7 +123,7 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
 
     setIsLoading(true)
     try {
-      const success = await versioningService.deleteVersion(versionId)
+      const success = await versioningService.deleteVersion(file.id, parseInt(versionId))
       if (success) {
         setMessage({ type: "success", text: "Version deleted successfully" })
         await loadFileHistory()
@@ -138,14 +137,13 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
     }
   }
 
-  const filteredVersions = fileHistory?.versions.filter(version =>
+  const filteredVersions = fileHistory?.filter(version =>
     !searchQuery || 
-    version.changeDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    version.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    version.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
+    version.changes_description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    version.created_by?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || []
 
-  const versionStats = fileHistory ? versioningService.getVersionStats(fileHistory.versions) : null
+  const versionStats = null
 
   if (!fileHistory && !isLoading) {
     return (
@@ -233,21 +231,21 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Badge variant={index === 0 ? "default" : "secondary"}>
-                            v{version.versionNumber}
+                            v{version.version_number}
                             {index === 0 && " (Current)"}
                           </Badge>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="w-4 h-4" />
-                            {new Date(version.createdAt).toLocaleString()}
+                            {new Date(version.created_at).toLocaleString()}
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Users className="w-4 h-4" />
-                            {version.createdBy}
+                            {version.created_by}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">
-                            {versioningService.formatFileSize(version.size)}
+                            {version.size ? `${(version.size / 1024).toFixed(1)} KB` : 'Unknown'}
                           </Badge>
                           {selectedVersions.includes(version.id) && (
                             <CheckCircle className="w-5 h-5 text-primary" />
@@ -257,19 +255,11 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="space-y-3">
-                        {version.changeDescription && (
-                          <p className="text-sm">{version.changeDescription}</p>
+                        {version.changes_description && (
+                          <p className="text-sm">{version.changes_description}</p>
                         )}
                         
-                        {version.tags && version.tags.length > 0 && (
-                          <div className="flex gap-1 flex-wrap">
-                            {version.tags.map(tag => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+
 
                         <div className="flex gap-2">
                           <Button variant="ghost" size="sm">
@@ -293,7 +283,7 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
                               Restore
                             </Button>
                           )}
-                          {fileHistory && fileHistory.versions.length > 1 && index !== 0 && (
+                          {fileHistory && fileHistory.length > 1 && index !== 0 && (
                             <Button 
                               variant="ghost" 
                               size="sm"
@@ -342,83 +332,44 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
                   <h3 className="text-lg font-semibold">Version Comparison</h3>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">
-                      v{comparison.oldVersion.versionNumber}
+                      v{comparison.oldVersion.version_number}
                     </Badge>
                     <ArrowRight className="w-4 h-4" />
                     <Badge variant="outline">
-                      v{comparison.newVersion.versionNumber}
+                      v{comparison.newVersion.version_number}
                     </Badge>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-green-600">
-                        <Plus className="w-4 h-4 inline mr-2" />
-                        Added Lines
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-green-600">
-                        {comparison.changes.linesAdded}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-red-600">
-                        <Minus className="w-4 h-4 inline mr-2" />
-                        Removed Lines
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-red-600">
-                        {comparison.changes.linesRemoved}
-                      </div>
-                    </CardContent>
-                  </Card>
-
+                <div className="grid grid-cols-2 gap-4">
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm text-blue-600">
                         <FileText className="w-4 h-4 inline mr-2" />
-                        Modified Lines
+                        Size Difference
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-blue-600">
-                        {comparison.changes.linesModified}
+                        {comparison.sizeDifference > 0 ? '+' : ''}{comparison.sizeDifference} bytes
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-gray-600">
+                        <Clock className="w-4 h-4 inline mr-2" />
+                        Time Difference
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-gray-600">
+                        {Math.round(comparison.timeDifference / (1000 * 60 * 60 * 24))} days
                       </div>
                     </CardContent>
                   </Card>
                 </div>
-
-                <ScrollArea className="h-64 border rounded-lg p-4">
-                  <div className="space-y-2 font-mono text-sm">
-                    {comparison.changes.additions.map((line, index) => (
-                      <div key={`add-${index}`} className="text-green-600 bg-green-50 px-2 py-1 rounded">
-                        + {line}
-                      </div>
-                    ))}
-                    {comparison.changes.deletions.map((line, index) => (
-                      <div key={`del-${index}`} className="text-red-600 bg-red-50 px-2 py-1 rounded">
-                        - {line}
-                      </div>
-                    ))}
-                    {comparison.changes.modifications.map((mod, index) => (
-                      <div key={`mod-${index}`} className="space-y-1">
-                        <div className="text-red-600 bg-red-50 px-2 py-1 rounded">
-                          - {mod.old}
-                        </div>
-                        <div className="text-green-600 bg-green-50 px-2 py-1 rounded">
-                          + {mod.new}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
               </div>
             ) : (
               <div className="text-center py-8">
@@ -429,80 +380,9 @@ export function FileHistoryModal({ isOpen, onClose, file, onRestoreVersion }: Fi
           </TabsContent>
 
           <TabsContent value="stats" className="space-y-4">
-            {versionStats && fileHistory && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Versions</CardTitle>
-                      <GitBranch className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{versionStats.totalVersions}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Size</CardTitle>
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{versionStats.totalSize}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Average Size</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{versionStats.averageSize}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Size Growth</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {versionStats.sizeGrowth > 0 ? '+' : ''}
-                        {versionStats.sizeGrowth}%
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Version Timeline</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {fileHistory.versions.slice(0, 5).map((version, index) => (
-                        <div key={version.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                          <div className="flex items-center gap-3">
-                            <Badge variant={index === 0 ? "default" : "secondary"}>
-                              v{version.versionNumber}
-                            </Badge>
-                            <span className="text-sm">{version.changeDescription || "No description"}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>{new Date(version.createdAt).toLocaleDateString()}</span>
-                            <Badge variant="outline">
-                              {versioningService.formatFileSize(version.size)}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Statistics not available</p>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>

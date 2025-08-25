@@ -472,4 +472,93 @@ if __name__ == "__main__":
     }
     return FileSystemService.instance
   }
+
+  static getFileIcon(file: FileItem): string {
+    if (file.type === "folder") return "📁"
+    
+    const ext = file.name.split(".").pop()?.toLowerCase()
+    if (!ext) return "📄"
+    
+    const iconMap: { [key: string]: string } = {
+      // Documents
+      pdf: "📄",
+      doc: "📝",
+      docx: "📝",
+      txt: "📄",
+      md: "📝",
+      rtf: "📝",
+      
+      // Images
+      jpg: "🖼️",
+      jpeg: "🖼️",
+      png: "🖼️",
+      gif: "🖼️",
+      bmp: "🖼️",
+      svg: "🖼️",
+      webp: "🖼️",
+      
+      // Videos
+      mp4: "🎥",
+      avi: "🎥",
+      mov: "🎥",
+      wmv: "🎥",
+      flv: "🎥",
+      webm: "🎥",
+      
+      // Audio
+      mp3: "🎵",
+      wav: "🎵",
+      flac: "🎵",
+      aac: "🎵",
+      ogg: "🎵",
+      
+      // Archives
+      zip: "📦",
+      rar: "📦",
+      "7z": "📦",
+      tar: "📦",
+      gz: "📦",
+      
+      // Code
+      js: "📜",
+      jsx: "📜",
+      ts: "📜",
+      tsx: "📜",
+      py: "🐍",
+      java: "☕",
+      cpp: "⚙️",
+      c: "⚙️",
+      cs: "⚙️",
+      php: "🐘",
+      rb: "💎",
+      go: "🐹",
+      rs: "🦀",
+      html: "🌐",
+      css: "🎨",
+      scss: "🎨",
+      json: "📋",
+      xml: "📋",
+      yaml: "📋",
+      yml: "📋",
+      sql: "🗄️",
+      sh: "💻",
+      
+      // Other
+      exe: "⚙️",
+      dmg: "💿",
+      iso: "💿",
+    }
+    
+    return iconMap[ext] || "📄"
+  }
+
+  static formatFileSize(bytes: number): string {
+    if (bytes === 0) return "0 Bytes"
+    
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  }
 }

@@ -117,7 +117,7 @@ export function FileList({
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => onFileOpen(file)}>
-                  <span className="text-lg">{fileService.getFileIcon(file)}</span>
+                  <span className="text-lg">{FileSystemService.getFileIcon(file)}</span>
                   {editingFile === file.id ? (
                     <input
                       type="text"
@@ -139,8 +139,8 @@ export function FileList({
                   )}
                 </div>
               </TableCell>
-              <TableCell>{file.size ? fileService.formatFileSize(file.size) : "-"}</TableCell>
-              <TableCell>{file.modifiedAt.toLocaleDateString()}</TableCell>
+              <TableCell>{file.size ? FileSystemService.formatFileSize(file.size) : "-"}</TableCell>
+              <TableCell>{new Date(file.modifiedAt).toLocaleDateString()}</TableCell>
               <TableCell>{file.isShared ? <span className="text-primary text-sm">Shared</span> : "-"}</TableCell>
               <TableCell>
                 <DropdownMenu>

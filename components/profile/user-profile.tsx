@@ -61,7 +61,7 @@ export function UserProfile() {
   
   // Profile form state
   const [formData, setFormData] = useState({
-    name: user?.name || "",
+    name: user?.full_name || "",
     email: user?.email || "",
     bio: "",
     company: "",
@@ -92,7 +92,7 @@ export function UserProfile() {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
+        name: user.full_name || "",
         email: user.email,
         bio: "",
         company: "",
