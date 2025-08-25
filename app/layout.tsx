@@ -4,8 +4,12 @@ import { DM_Sans } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { FeatureFlagsProvider } from "@/contexts/feature-flags-context"
+import { NotificationProvider } from "@/contexts/notification-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import ErrorBoundary from "@/components/error-boundary"
+import EnvInjector from "@/components/env-injector"
+import { getClientSafeEnvVars } from "@/lib/env-utils"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -24,9 +28,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const clientEnvVars = getClientSafeEnvVars()
+
   return (
     <html lang="en" className={dmSans.variable}>
       <body className="antialiased">
+        <EnvInjector envVars={clientEnvVars} />
         <ErrorBoundary>
           <ThemeProvider
             attribute="class"
@@ -46,7 +53,10 @@ export default function RootLayout({
                   'beta_features'
                 ]}
               >
-                {children}
+                <NotificationProvider>
+                  {children}
+                  <Toaster />
+                </NotificationProvider>
               </FeatureFlagsProvider>
             </AuthProvider>
           </ThemeProvider>
