@@ -150,6 +150,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               )}
             </Button>
 
+            {/* OAuth buttons - only show if Supabase is configured */}
+            {!isDemoMode && (
+              <OAuthButtons
+                onLoading={(loading) => {}}
+                disabled={isLoading}
+              />
+            )}
+
             <div className="text-center">
               <span className="text-sm text-muted-foreground">Already have an account? </span>
               <Link href="/login" className="text-sm text-primary hover:underline">
