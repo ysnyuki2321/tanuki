@@ -12,6 +12,7 @@ import { Loader2, Eye, EyeOff, Info } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { TanukiLogo } from "@/components/tanuki-logo"
 import { isSupabaseConfigured } from "@/lib/supabase-client"
+import { OAuthButtons } from "@/components/auth/oauth-buttons"
 import Link from "next/link"
 
 interface LoginFormProps {
