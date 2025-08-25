@@ -38,7 +38,7 @@ export function FeatureFlagsProvider({
   preloadedFlags = [],
   autoRefreshInterval = 5 * 60 * 1000 // 5 minutes
 }: FeatureFlagsProviderProps) {
-  const { user, tenant } = useAuth()
+  const { user } = useAuth()
   const [flags, setFlags] = useState<Record<string, FeatureFlagEvaluation>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,7 +48,7 @@ export function FeatureFlagsProvider({
   const buildContext = useCallback((): FeatureFlagContext => {
     return {
       userId: user?.id,
-      tenantId: tenant?.id,
+      tenantId: user?.tenant_id,
       environment,
       userProperties: {
         email: user?.email,
@@ -211,7 +211,7 @@ export function FeatureFlagsProvider({
     if (user && preloadedFlags.length > 0) {
       preloadFlags(preloadedFlags)
     }
-  }, [user, tenant, preloadFlags, preloadedFlags])
+  }, [user, preloadFlags, preloadedFlags])
 
   // Cleanup on unmount
   useEffect(() => {
