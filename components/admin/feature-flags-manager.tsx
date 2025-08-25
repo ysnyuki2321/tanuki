@@ -24,10 +24,12 @@ import {
   Toggle, 
   Target, 
   Settings, 
-  Activity, 
+  Activity,
   AlertCircle,
   CheckCircle,
   XCircle,
+  TrendingUp,
+  BarChart3,
   Percent,
   Users,
   Globe
