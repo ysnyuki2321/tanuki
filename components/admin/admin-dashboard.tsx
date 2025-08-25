@@ -10,6 +10,7 @@ import { ServerNodes } from "./server-nodes"
 import { StorageManagement } from "./storage-management"
 import ConfigurationManager from "./configuration-manager"
 import FeatureFlagsManager from "./feature-flags-manager"
+import EmailTemplateManager from "./email-template-manager"
 import { RealAdminAuthService } from "@/lib/real-admin-auth"
 
 export function AdminDashboard() {
