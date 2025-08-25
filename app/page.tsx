@@ -1,50 +1,29 @@
+"use client"
+
+import { Header } from "@/components/header"
+import { HeroSection } from "@/components/hero-section"
+import { FeaturesSection } from "@/components/features-section"
+import { DemoSection } from "@/components/demo-section"
+import { SetupStatus } from "@/components/setup-status"
+
 export default function HomePage() {
-  // Completely minimal test - no React hooks, no client-side JS
   return (
-    <div style={{
-      backgroundColor: '#ff0000',
-      color: '#ffffff',
-      fontSize: '24px',
-      padding: '50px',
-      textAlign: 'center',
-      minHeight: '100vh',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <h1 style={{ fontSize: '48px', margin: '0 0 20px 0' }}>
-        🚨 EMERGENCY TEST PAGE 🚨
-      </h1>
+    <main className="min-h-screen pt-16">
+      <Header />
+      <HeroSection />
 
-      <p style={{ fontSize: '20px', margin: '20px 0' }}>
-        If you can see this red page, then:
-      </p>
+      {/* Setup Status Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-8">Platform Status</h2>
+            <SetupStatus />
+          </div>
+        </div>
+      </section>
 
-      <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        fontSize: '18px',
-        textAlign: 'left',
-        maxWidth: '400px',
-        margin: '0 auto'
-      }}>
-        <li>✅ Next.js is serving pages</li>
-        <li>✅ HTML is rendering</li>
-        <li>✅ CSS styles work</li>
-        <li>✅ The route is accessible</li>
-      </ul>
-
-      <div style={{
-        marginTop: '40px',
-        padding: '20px',
-        backgroundColor: '#ffffff',
-        color: '#000000',
-        borderRadius: '10px'
-      }}>
-        <strong>INSTRUCTIONS:</strong>
-        <br />
-        If you can see this, the problem was with React components.
-        <br />
-        If you still see white screen, there's a deeper infrastructure issue.
-      </div>
-    </div>
+      <FeaturesSection />
+      <DemoSection />
+    </main>
   )
 }
