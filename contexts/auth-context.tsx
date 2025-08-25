@@ -3,7 +3,8 @@
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { AuthService } from "@/lib/auth-service"
-import { type DbUser } from "@/lib/supabase"
+import { type DbUser } from "@/lib/database-schema"
+import { DemoAuthService } from "@/lib/demo-auth"
 
 interface AuthState {
   user: DbUser | null
@@ -29,6 +30,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   })
 
   useEffect(() => {
+    // Initialize demo users if needed
+    if (typeof window !== 'undefined') {
+      DemoAuthService.initializeDemoUsers()
+    }
+
     // Check for existing session on mount
     loadUser()
 
