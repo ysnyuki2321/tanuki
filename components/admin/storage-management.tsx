@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StorageProviderManager } from "./storage-provider-manager"
 import type { SystemStats } from "@/lib/admin"
-import { HardDrive, Database, Archive, Trash2, RefreshCw, AlertTriangle, TrendingUp, BarChart3 } from "lucide-react"
+import { HardDrive, Database, Archive, Trash2, RefreshCw, AlertTriangle, TrendingUp, BarChart3, Cloud, Settings } from "lucide-react"
 
 interface StorageManagementProps {
   stats: SystemStats
