@@ -48,7 +48,7 @@ export function FeatureFlagsProvider({
   const buildContext = useCallback((): FeatureFlagContext => {
     return {
       userId: user?.id,
-      tenantId: tenant?.id,
+      tenantId: user?.tenant_id,
       environment,
       userProperties: {
         email: user?.email,
@@ -60,7 +60,7 @@ export function FeatureFlagsProvider({
       },
       customProperties: {}
     }
-  }, [user, tenant, environment])
+  }, [user, environment])
 
   // Evaluate a single flag
   const evaluateFlag = useCallback(async (flagKey: string): Promise<FeatureFlagEvaluation> => {
