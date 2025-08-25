@@ -168,6 +168,7 @@ export function FileManager() {
           onFileShare={handleFileShare}
           onFileEdit={handleFileEdit}
           onZipPreview={handleZipPreview}
+          onFilePreview={handleFilePreview}
         />
       ) : (
         <FileList
@@ -180,6 +181,7 @@ export function FileManager() {
           onFileShare={handleFileShare}
           onFileEdit={handleFileEdit}
           onZipPreview={handleZipPreview}
+          onFilePreview={handleFilePreview}
         />
       )}
 
