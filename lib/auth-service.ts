@@ -1,12 +1,13 @@
 import { getSupabase, getSupabaseAdmin, isSupabaseConfigured } from './supabase-client'
 import type { DbUser } from './database-schema'
 import { getConfig } from './config'
+import { DemoAuthService } from './demo-auth'
 
 // Authentication service with null-safe operations
 export class AuthService {
   // Check if auth is properly configured
   static isConfigured(): boolean {
-    return isSupabaseConfigured()
+    return isSupabaseConfigured() || DemoAuthService.isDemoMode()
   }
 
   // Sign up with email verification
@@ -17,7 +18,8 @@ export class AuthService {
   }) {
     const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      // Fallback to demo mode
+      return await DemoAuthService.signUp(email, password, metadata)
     }
 
     const config = getConfig()
@@ -69,7 +71,8 @@ export class AuthService {
   static async signIn(email: string, password: string) {
     const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      // Fallback to demo mode
+      return await DemoAuthService.signIn(email, password)
     }
 
     try {
@@ -97,7 +100,10 @@ export class AuthService {
   // Sign out
   static async signOut() {
     const supabase = getSupabase()
-    if (!supabase) return { error: null }
+    if (!supabase) {
+      await DemoAuthService.signOut()
+      return { error: null }
+    }
 
     try {
       const { error } = await supabase.auth.signOut()
@@ -173,7 +179,9 @@ export class AuthService {
   // Get current user
   static async getCurrentUser(): Promise<DbUser | null> {
     const supabase = getSupabase()
-    if (!supabase) return null
+    if (!supabase) {
+      return await DemoAuthService.getCurrentUser() as DbUser | null
+    }
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
