@@ -351,17 +351,16 @@ export class AuthService {
 
   // OAuth sign in (Google, GitHub)
   static async signInWithOAuth(provider: 'google' | 'github') {
+    const supabase = getSupabase()
     if (!supabase) {
       throw new Error('Supabase not configured. Please setup database connection first.')
     }
-
-    const config = getConfig()
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${config.app_url}/auth/callback`,
+          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`,
         },
       })
 
