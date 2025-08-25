@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabase } from './supabase-client'
 import { getConfig } from './config'
 
 export interface BrandingConfig {
@@ -81,6 +81,7 @@ export class BrandingService {
     }
     
     try {
+      const supabase = getSupabase()
       if (!supabase) {
         return DEFAULT_BRANDING
       }

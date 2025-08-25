@@ -176,6 +176,7 @@ export class FileStorageService {
 
   // Download file
   static async downloadFile(fileId: string): Promise<{ success: boolean; url?: string; error?: string }> {
+    const supabase = getSupabase()
     if (!supabase) {
       return { success: false, error: 'Supabase not configured' }
     }
@@ -241,6 +242,7 @@ export class FileStorageService {
 
   // Delete file
   static async deleteFile(fileId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = getSupabase()
     if (!supabase) {
       return { success: false, error: 'Supabase not configured' }
     }
@@ -296,6 +298,7 @@ export class FileStorageService {
 
   // Delete file from storage
   private static async deleteFileFromStorage(path: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = getSupabase()
     if (!supabase) {
       return { success: false, error: 'Supabase not configured' }
     }
@@ -325,6 +328,7 @@ export class FileStorageService {
     offset?: number
     search?: string
   } = {}): Promise<DbFile[]> {
+    const supabase = getSupabase()
     if (!supabase) return []
 
     const { userId, folderId, projectId, limit = 50, offset = 0, search } = options
@@ -376,6 +380,7 @@ export class FileStorageService {
     expiresAt?: Date
     password?: string
   }): Promise<{ success: boolean; shareToken?: string; error?: string }> {
+    const supabase = getSupabase()
     if (!supabase) {
       return { success: false, error: 'Supabase not configured' }
     }
@@ -458,6 +463,7 @@ export class FileStorageService {
 
   // Log activity
   private static async logActivity(userId: string, action: string, resourceId: string, details: any) {
+    const supabase = getSupabase()
     if (!supabase) {
       console.debug('Activity logging skipped - database not configured')
       return
@@ -486,6 +492,7 @@ export class FileStorageService {
 
   // Get storage usage for user
   static async getStorageUsage(userId: string): Promise<{ used: number; quota: number; fileCount: number }> {
+    const supabase = getSupabase()
     if (!supabase) {
       console.warn('Storage usage check skipped - database not configured')
       return { used: 0, quota: 0, fileCount: 0 }
