@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Code2, Database, FileText, Share2, Terminal, Zap } from "lucide-react"
+import { Code2, Database, FileText, Share2 } from "lucide-react"
 
 const features = [
   {
