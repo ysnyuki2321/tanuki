@@ -39,6 +39,7 @@ export function FileList({
   onFileEdit,
   onZipPreview,
   onFilePreview,
+  onFileHistory,
 }: FileListProps) {
   const [editingFile, setEditingFile] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
