@@ -118,7 +118,7 @@ export class AuthService {
   static async resetPassword(email: string) {
     const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      return await DemoAuthService.resetPassword(email)
     }
 
     const config = getConfig()
@@ -143,7 +143,8 @@ export class AuthService {
   static async updatePassword(newPassword: string) {
     const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured. Please setup database connection first.')
+      // Demo mode doesn't support password update without current password
+      return { success: false, error: 'Password update not available in demo mode' }
     }
 
     try {
@@ -165,7 +166,10 @@ export class AuthService {
   // Get current session
   static async getSession() {
     const supabase = getSupabase()
-    if (!supabase) return { session: null, user: null }
+    if (!supabase) {
+      const demoSession = DemoAuthService.getCurrentSession()
+      return { session: demoSession.user ? { user: demoSession.user } : null, user: demoSession.user }
+    }
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -234,7 +238,7 @@ export class AuthService {
   static async updateUserProfile(userId: string, updates: Partial<DbUser>) {
     const supabase = getSupabase()
     if (!supabase) {
-      throw new Error('Supabase not configured')
+      return await DemoAuthService.updateProfile(updates)
     }
 
     try {
@@ -402,7 +406,11 @@ export class AuthService {
 
   // List all users (admin function)
   static async listUsers(limit: number = 50, offset: number = 0): Promise<DbUser[]> {
-    if (!supabaseAdmin) return []
+    const supabaseAdmin = getSupabaseAdmin()
+    if (!supabaseAdmin) {
+      const demoUsers = await DemoAuthService.listUsers()
+      return demoUsers.slice(offset, offset + limit) as DbUser[]
+    }
 
     try {
       const { data } = await supabaseAdmin
@@ -451,7 +459,10 @@ export class AuthService {
   // Handle auth state changes
   static onAuthStateChange(callback: (event: string, session: any) => void) {
     const supabase = getSupabase()
-    if (!supabase) return { data: { subscription: { unsubscribe: () => {} } } }
+    if (!supabase) {
+      // Demo mode: simulate auth state change subscription
+      return { data: { subscription: { unsubscribe: () => {} } } }
+    }
 
     return supabase.auth.onAuthStateChange(callback)
   }
