@@ -169,7 +169,7 @@ export class FeatureFlagsService {
    */
   async getTenantFlags(tenantId?: string): Promise<DbFeatureFlag[]> {
     if (!this.supabase) return []
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flags')
       .select('*')
       .or(`tenant_id.eq.${tenantId},is_global.eq.true`)
@@ -194,7 +194,7 @@ export class FeatureFlagsService {
     environments?: string[]
   }, createdBy: string): Promise<DbFeatureFlag> {
     if (!this.supabase) throw new Error('Supabase client not initialized')
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flags')
       .insert({
         key: flag.key,
@@ -290,7 +290,7 @@ export class FeatureFlagsService {
       return cached.value
     }
 
-    const { data, error } = await (this.supabase as any)
+    const { data, error } = await this.supabase!
       .from('feature_flags')
       .select('*')
       .eq('key', flagKey)
