@@ -206,12 +206,12 @@ export function FeatureFlagsProvider({
     }
   }, [refresh, autoRefreshInterval])
 
-  // Preload flags when user or tenant changes
+  // Preload flags when user changes
   useEffect(() => {
     if (user && preloadedFlags.length > 0) {
       preloadFlags(preloadedFlags)
     }
-  }, [user, tenant, preloadFlags, preloadedFlags])
+  }, [user, preloadFlags, preloadedFlags])
 
   // Cleanup on unmount
   useEffect(() => {
