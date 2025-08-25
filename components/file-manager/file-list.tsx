@@ -25,6 +25,7 @@ interface FileListProps {
   onFileEdit?: (file: FileItem) => void
   onZipPreview?: (file: FileItem) => void
   onFilePreview?: (file: FileItem) => void
+  onFileHistory?: (file: FileItem) => void
 }
 
 export function FileList({
