@@ -294,10 +294,12 @@ export function FileManager() {
         selectedCount={selectedFiles.length}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        searchQuery={searchFilters.query}
-        onSearchChange={(query) => setSearchFilters(prev => ({ ...prev, query }))}
         onDeleteSelected={() => {
           selectedFiles.forEach(handleFileDelete)
+        }}
+        onNewFolder={() => {
+          // TODO: Implement new folder creation
+          console.log("Create new folder")
         }}
       />
 
