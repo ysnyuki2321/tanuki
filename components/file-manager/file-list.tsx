@@ -178,6 +178,12 @@ export function FileList({
                       <Share className="mr-2 h-4 w-4" />
                       Share
                     </DropdownMenuItem>
+                    {onFileHistory && file.type === "file" && (
+                      <DropdownMenuItem onClick={() => onFileHistory(file)}>
+                        <Clock className="mr-2 h-4 w-4" />
+                        History
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onFileDelete(file.id)} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
