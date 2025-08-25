@@ -275,22 +275,24 @@ export function UserDashboard() {
         </Card>
       </div>
 
-      {/* Storage Usage */}
-      <Card>
+      {/* Enhanced Storage Usage */}
+      <Card className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950/50 dark:to-gray-950/50 border-slate-200/50 dark:border-slate-800/50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HardDrive className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+            <div className="p-2 bg-slate-500/10 rounded-lg">
+              <HardDrive className="w-5 h-5 text-slate-500" />
+            </div>
             Storage Usage
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{formatFileSize(stats.storageUsed)} used</span>
-              <span>{formatFileSize(stats.storageQuota)} total</span>
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm font-medium">
+              <span className="text-slate-700 dark:text-slate-300">{formatFileSize(stats.storageUsed)} used</span>
+              <span className="text-slate-500 dark:text-slate-400">{formatFileSize(stats.storageQuota)} total</span>
             </div>
-            <Progress value={getStoragePercentage()} className="h-3" />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <Progress value={getStoragePercentage()} className="h-3 bg-slate-200 dark:bg-slate-800" />
+            <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
               <span>{stats.totalFiles} files</span>
               <span>{getStoragePercentage()}% used</span>
             </div>

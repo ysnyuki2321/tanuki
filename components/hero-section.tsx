@@ -14,14 +14,16 @@ export function HeroSection() {
             <TanukiLogo size={64} />
           </div>
 
-          {/* Main Heading */}
+          {/* Enhanced Main Heading */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            <span className="text-gradient">Smart</span> Web Storage
+            <span className="text-gradient bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Smart</span> Web Storage
+            <br />
+            <span className="text-foreground/90">Made Simple</span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-xl mx-auto leading-relaxed">
-            Store, code, and share files with powerful tools in one simple platform.
+          {/* Enhanced Subtitle */}
+          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
+            Code, store, and collaborate seamlessly. Your complete digital workspace with built-in editor, database tools, and intelligent file management.
           </p>
 
           {/* CTA Buttons */}
