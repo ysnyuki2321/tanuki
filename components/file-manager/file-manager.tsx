@@ -190,6 +190,25 @@ export function FileManager() {
       {zipPreviewFile && (
         <ZipPreviewModal isOpen={isZipPreviewOpen} onClose={() => setIsZipPreviewOpen(false)} file={zipPreviewFile} />
       )}
+
+      {filePreviewFile && (
+        <FilePreviewModal
+          isOpen={isFilePreviewOpen}
+          onClose={() => setIsFilePreviewOpen(false)}
+          file={filePreviewFile}
+          onEdit={handleFileEdit}
+          onShare={(file) => handleFileShare(file.id)}
+          onDownload={(file) => {
+            const blob = new Blob([file.content || ''], { type: file.mimeType || 'text/plain' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = file.name
+            a.click()
+            URL.revokeObjectURL(url)
+          }}
+        />
+      )}
     </div>
   )
 }
