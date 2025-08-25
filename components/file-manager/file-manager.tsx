@@ -19,7 +19,15 @@ export function FileManager() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
+    query: "",
+    fileTypes: [],
+    sizeRange: { min: null, max: null, unit: "MB" },
+    dateRange: { from: null, to: null },
+    isShared: null,
+    sortBy: "name",
+    sortOrder: "asc"
+  })
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [editorFiles, setEditorFiles] = useState<FileItem[]>([])
   const [isZipPreviewOpen, setIsZipPreviewOpen] = useState(false)
